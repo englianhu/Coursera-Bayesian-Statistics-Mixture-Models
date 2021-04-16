@@ -1,2 +1,9 @@
+![](figure/ucsc.png)
+
+---
+
 # Coursera-Bayesian-Statistics-Mixture-Models
-https://www.coursera.org/learn/mixture-models?
+
+[Bayesian Statistics Mixture Models](https://www.coursera.org/learn/mixture-models?)
+
+
