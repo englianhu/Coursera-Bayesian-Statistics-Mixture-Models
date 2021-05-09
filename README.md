@@ -95,19 +95,19 @@
     
     3.1) Markov chain Monte Carlo algorithms for Mixture Models
         
-      3.1.1) 動画: 講座 [Markov Chain Monte Carlo algorithms part 1. Duration: 12分](   )
+      3.1.1) 動画: 講座 [Markov Chain Monte Carlo algorithms part 1. Duration: 12分](https://www.youtube.com/watch?v=r_hCnKFskbg)
       
-      3.1.2) 動画: 講座 [Markov Chain Monte Carlo algorithms, part 2. Duration: 13分](   )
+      3.1.2) 動画: 講座 [Markov Chain Monte Carlo algorithms, part 2. Duration: 13分](https://www.youtube.com/watch?v=_8ZUWryaDbs)
       
-      3.1.3) 動画: 講座 [MCMC for location mixtures of normals Part 1. Duration: 19分](   )
+      3.1.3) 動画: 講座 [MCMC for location mixtures of normals Part 1. Duration: 19分](https://www.youtube.com/watch?v=BWTFNPpvf54)
       
-      3.1.4) 動画: 講座 [MCMC for location mixtures of normals Part 2. Duration: 14分](   )
+      3.1.4) 動画: 講座 [MCMC for location mixtures of normals Part 2. Duration: 14分](https://www.youtube.com/watch?v=tW6HZRHSBlQ)
       
-      3.1.5) 動画: 講座 [MCMC Example 1. Duration: 11分](   )
+      3.1.5) 動画: 講座 [MCMC Example 1. Duration: 11分](https://www.youtube.com/watch?v=PC2HLuG9EnY)
       
       3.1.6) 学習用教材: Sample code for MCMC example 1. Duration: 10分
       
-      3.1.7) 動画: 講座MCMC Example 2. Duration: 11分
+      3.1.7) 動画: 講座 MCMC Example 2. Duration: 11分
       
       3.1.8) 学習用教材: Sample code for MCMC example 2. Duration: 10分
       
@@ -119,31 +119,41 @@
       
 4) Week 4 : Other Applications of Reinforcement Learning: P-2-P Lending, Cryptocurrency, etc.
     
-    4.1) Lesson 1
+    4.1) Applications of Mixture Models
+    
+      1.1) Density estimation
         
-      4.1.1) 動画: 講座 [Welcome!! Duration: 1分](https://www.youtube.com/watch?v=zbp08yMmRk4)
-      
-      4.1.2) 動画: 講座 [Electronic Markets and LOB. Duration: 9分](https://www.youtube.com/watch?v=2WxcrvOUTBE)
-      
-      4.1.3) 動画: 講座 [Trades, Quotes and Order Flow. Duration: 7分](https://www.youtube.com/watch?v=iW3V4vOhUqI)
-      
-      4.1.4) 動画: 講座 [Limit Order Book. Duration: 8分](https://www.youtube.com/watch?v=0eppGDNpMss)
-      
-      4.1.5) 動画: 講座 [LOB Modeling. Duration: 8分](https://www.youtube.com/watch?v=RrHdUMRxe1Y)
-      
-      4.1.6) 動画: 講座 [LOB Statistical Modeling. Duration: 10分](https://www.youtube.com/watch?v=mmiwk9eSM4g)
-      
-      4.1.7) 動画: 講座 [LOB Modeling with ML and RL. Duration: 9分](https://www.youtube.com/watch?v=LgpMzCqGffE)
-      
-      4.1.8) 動画: 講座 [Other Applications of RL. Duration: 7分](https://www.youtube.com/watch?v=burUoeip2F4)
-      
-      4.1.9) 動画: 講座 [The Value of Universatility. Duration: 15分](https://www.youtube.com/watch?v=qw36ZxpVQ7s)
-      
-    4.2) Week 4 Assessment
-
-      4.2.1) ラボ: [Final Project: Exploration of non-linear market model dynamics. Duration: 1時間]()
-      
-      4.2.2) 受講生によるテスト: [Final Project. Duration: 1時間]()
-      
-      4.2.3) 他の受講生の課題を確認: Final Project
+        1.1.1) 動画: 講座 [Density estimation using Mixture Models. Duration: 12分](https://www.youtube.com/watch?v=7ZV1IhuhSnI)
+        
+        1.1.2) 動画: 講座 [Density Estimation Example. Duration: 10分](https://www.youtube.com/watch?v=oLRZJUTM83U)
+        
+        1.1.3) 学習用教材: Sample code for density estimation problems. Duration: 10分
+        
+        1.1.4) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+        
+        1.1.5) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+        
+        1.1.6) 他の受講生の課題を確認: MCMC algorithms and density estimation 期限 6月3日 15:59 JST
+        
+      1.2) Clustering
+        
+        1.2.1) 動画: 講座 [Mixture Models for Clustering. Duration: 23分](https://www.youtube.com/watch?v=sfROQ-SGQPc)
+        
+        1.2.2) 動画: 講座 [Clustering example. Duration: 11分](https://www.youtube.com/watch?v=NPBHVeqhVZg)
+        
+        1.2.3) 学習用教材: Sample EM algorithm for clustering problems. Duration: 10分
+        
+      1.3) Classification
+        
+        1.3.1) 動画: 講座 [Mixture Models and naive Bayes classifiers. Duration: 21分](https://www.youtube.com/watch?v=cV5X6Ygw46U)
+        
+        1.3.2) 動画: 講座 [Linear and quadratic discriminant analysis in the context of Mixture Models. Duration: 18分](https://www.youtube.com/watch?v=BGheWkWvpKs)
+        
+        1.3.3) 動画: 講座 [Classification example. Duration: 10分](https://www.youtube.com/watch?v=RLUK4v12q6E)
+        
+        1.3.4) 学習用教材: Sample EM algorithm for classification problems. Duration: 10 分10 分
+        
+        1.3.5) 受講生によるテスト: Classification. Duration: 45分 期限 5月31日 15:59 JST
+        
+        1.3.6) 他の受講生の課題を確認: Classification 期限 6月3日 15:59 JST
 
