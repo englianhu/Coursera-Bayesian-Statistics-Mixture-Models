@@ -1,0 +1,195 @@
+---
+title: "<img src='figure/coursera.jpg' width='37'> <img src='figure/ucsc.png' width='240'>"
+subtitle: "<span style='color:white; background-color:#4E79A7;'>Bayesian Statistics: Mixture Models</span> (Assessment 1)"
+author: "[®γσ, Lian Hu](https://englianhu.github.io/) <img src='figure/quantitative trader 1.jpg' width='12'> <img src='figure/ENG.jpg' width='24'> ®"
+date: "`r lubridate::today('Asia/Tokyo')`"
+output:
+  html_document: 
+    mathjax: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    code_folding: hide
+    css: CSSBackgrounds.css
+---
+
+<br>
+<span style='color:green'>**Theme Song**</span>
+<br>
+
+<audio src="music/California-Dreaming-Chorus.mp3" controls></audio>
+<br>
+
+------
+
+<br>
+
+# テスト 1 (Assessment 1)
+
+# Introduction
+
+合計点数 <span style='color:#3C5C; background-color:#011A27;'>5点</span>
+
+<br>
+
+## 1. Definition of Mixture Models
+
+合計点数 5
+
+## 1. 質問 1
+
+Which one of the following is not the density of a well defined mixture distribution with support on the positive integers (1点)
+
+- ${\color{Green}f(x) = 0.5 \times \frac{e^{-1}}{x!} + 0.5 \times \frac{e^{-1}}{x!}}$
+
+<span style='color:Green;'>**正解** : 
+This is not a well defined mixture since the first component does not correspond to a well defined probability mass function.</span>
+
+- $f(x) = 0.5 \times \frac{2^x e^{-2}}{x!} + 0.5 \times \frac{3^x  e^{-3}}{x!}$
+ 
+- $f(x) = 0.45 \times 2^x \frac{ e^{-1}}{x!} + 0.55 \times \frac{3^x  e^{-3}}{x!}$
+
+<br><br>
+
+## 2. 質問 2
+
+Consider a zero-inflated mixture that involves a point mass at 0 with weight 0.2,  a Gamma distribution with mean 1, variance 2 and weight 0.5, and another Gamma distribution with mean 2, variance 4 and weight 0.3.  What is the mean of this mixture? (1点)
+
+- 2.2
+
+- <span style='color:Green;'>1.1</span>
+
+<span style='color:Green;'>**正解** : $E(X)=0.2×0+0.5×1+0.3×2=1.1$</span>
+
+- 1.8
+
+<br><br>
+
+## 3. 質問 3
+
+Consider a zero-inflated mixture that involves a point mass at 0 with weight 0.2,  a Gamma distribution with mean 1, variance 2 and weight 0.5, and another Gamma distribution with mean 2, variance 4 and weight 0.3.  What is the variance of this mixture? (1点)
+
+こちらに回答を入力 <span style='color:Red;'>*`1.060159`, `0.07962572`</span>
+
+<span style='color:Red;'>**不正解** : 
+Recall that
+$$Var(X) = E(X^2) - [E(X)]^2$$
+and that expectations are linear functionals. In the videos, we showed that
+$$E(X^2) = \sum_{k=1}^K w_k \left[Var_{g_k}(X) + [E_{g_k}(X)]^2 \right]$$
+where $g_k$ is the $k$th component of the mixture
+</span>
+
+<br><br>
+
+## 4. 質問 4
+
+True or False:  A mixture of Gaussians of the form
+
+$$f(x) = 0.3 \frac{1}{\sqrt{2\pi}} \exp\left\{ - \frac{x^2}{2} \right\} + 0.7 \frac{1}{\sqrt{2\pi}} \exp\left\{ - \frac{(x-4)^2}{2} \right\}$$
+
+has a bimodal density. (1点)
+
+- <span style='color:Green;'>True</span>
+
+<span style='color:Green;'>**正解** : 
+A hint is that the means of the two components are quite well separated, which often leads to multimodal densities.  The easiest way to verify this intuition is by plotting the density:</span>
+```r
+x = seq(-3, 7, length=100)
+y = 0.3*dnorm(x, 0, 1) + 0.7*dnorm(x, 4, 1)
+par(mar=c(4,4,1,1)+0.1)
+plot(x, y, type="l", ylab="Density", las=1, lwd=2)
+```
+
+- False
+
+<br><br>
+
+## 5. 質問 5
+
+True or False: Consider a location mixture of normals
+
+$$f(x) = \sum_{k=1}^{K} \omega_k \frac{1}{\sqrt{2\pi} \sigma}  \exp \left\{  - \frac{ \left(x - \mu_k\right)^2}{2\sigma^2} \right\}$$
+
+The following 3 constraints make all parameters fully identifiable:
+
+1. The means $\mu_1, \ldots, \mu_K$ should all be different.
+2. No weight $\omega_k$ is allowed to be zero.
+3. The component are ordered based on the values of their means, i.e., the component with the smallest $\mu_k$ is labeled component 1, the one with the second smallest $\mu_k$ is labeled component 2, etc. (1点)
+
+- <span style='color:Green;'>True</span>
+
+<span style='color:Green;'>**正解** : 
+The three constraints are enough to ensure identifiability.  The last one addresses label switching, while the first two address identifiability of the number of components in the mixture.
+</span>
+
+- False
+
+<br><br>
+
+# Appendix
+
+## Blooper
+
+## Documenting File Creation 
+
+It's useful to record some information about how your file was created.
+
+- File creation date: 2021-05-09
+- File latest updated date: `r today('Asia/Tokyo')`
+- `r R.version.string`
+- [**rmarkdown** package](https://github.com/rstudio/rmarkdown) version: `r packageVersion('rmarkdown')`
+- File version: 1.0.0
+- Author Profile: [®γσ, Eng Lian Hu](https://github.com/scibrokes/owner)
+- GitHub: [Source Code](https://github.com/englianhu/Coursera-Overview-of-Advanced-Methods-of-Reinforcement-Learning-in-Finance)
+- Additional session information:
+
+```{r info, warning = FALSE, results = 'asis'}
+suppressMessages(require('dplyr', quietly = TRUE))
+suppressMessages(require('magrittr', quietly = TRUE))
+suppressMessages(require('formattable', quietly = TRUE))
+suppressMessages(require('knitr', quietly = TRUE))
+suppressMessages(require('kableExtra', quietly = TRUE))
+
+sys1 <- devtools::session_info()$platform %>% 
+  unlist %>% data.frame(Category = names(.), session_info = .)
+rownames(sys1) <- NULL
+
+sys2 <- data.frame(Sys.info()) %>% 
+  dplyr::mutate(Category = rownames(.)) %>% .[2:1]
+names(sys2)[2] <- c('Sys.info')
+rownames(sys2) <- NULL
+
+if (nrow(sys1) == 9 & nrow(sys2) == 8) {
+  sys2 %<>% rbind(., data.frame(
+  Category = 'Current time', 
+  Sys.info = paste(as.character(lubridate::now('Asia/Tokyo')), 'JST🗾')))
+} else {
+  sys1 %<>% rbind(., data.frame(
+  Category = 'Current time', 
+  session_info = paste(as.character(lubridate::now('Asia/Tokyo')), 'JST🗾')))
+}
+
+sys <- cbind(sys1, sys2) %>% 
+  kbl(caption = 'Additional session information:') %>% 
+  kable_styling(bootstrap_options = c('striped', 'hover', 'condensed', 'responsive')) %>% 
+  row_spec(0, background = 'DimGrey', color = 'yellow') %>% 
+  column_spec(1, background = 'CornflowerBlue', color = 'red') %>% 
+  column_spec(2, background = 'grey', color = 'black') %>% 
+  column_spec(3, background = 'CornflowerBlue', color = 'blue') %>% 
+  column_spec(4, background = 'grey', color = 'white') %>% 
+  row_spec(9, bold = T, color = 'yellow', background = '#D7261E')
+
+rm(sys1, sys2)
+sys
+```
+
+## Reference
+
+<br>
+
+---
+
+<br>
