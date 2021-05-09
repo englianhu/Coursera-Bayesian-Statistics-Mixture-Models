@@ -1,4 +1,4 @@
-<img src='figure/coursera.jpg' width='74'> <img src='figure/ucsc.png' width='240'>
+<img src='figure/coursera.jpg' width='80'> <img src='figure/ucsc.png' width='240'>
 
 ---
 
