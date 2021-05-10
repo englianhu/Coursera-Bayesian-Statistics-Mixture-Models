@@ -117,43 +117,77 @@
       
       3.1.11) 他の受講生の課題を確認: Markov chain Monte Carlo algorithms for Mixture Models (期限 5月27日 15:59 JST)
       
-4) Week 4 : Other Applications of Reinforcement Learning: P-2-P Lending, Cryptocurrency, etc.
+4) Week 4 : Applications of Mixture Models
     
     4.1) Applications of Mixture Models
     
-      1.1) Density estimation
+      4.1.1) 動画: 講座 [Density estimation using Mixture Models. Duration: 12分](https://www.youtube.com/watch?v=7ZV1IhuhSnI)
+      
+      4.1.2) 動画: 講座 [Density Estimation Example. Duration: 10分](https://www.youtube.com/watch?v=oLRZJUTM83U)
+      
+      4.1.3) 学習用教材: Sample code for density estimation problems. Duration: 10分
+      
+      4.1.4) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+      
+      4.1.5) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+      
+      4.1.6) 他の受講生の課題を確認: MCMC algorithms and density estimation 期限 6月3日 15:59 JST
         
-        1.1.1) 動画: 講座 [Density estimation using Mixture Models. Duration: 12分](https://www.youtube.com/watch?v=7ZV1IhuhSnI)
+    4.2) Clustering
+      
+      4.2.1) 動画: 講座 [Mixture Models for Clustering. Duration: 23分](https://www.youtube.com/watch?v=sfROQ-SGQPc)
+      
+      4.2.2) 動画: 講座 [Clustering example. Duration: 11分](https://www.youtube.com/watch?v=NPBHVeqhVZg)
+      
+      4.2.3) 学習用教材: Sample EM algorithm for clustering problems. Duration: 10分
+      
+    4.3) Classification
+      
+      4.3.1) 動画: 講座 [Mixture Models and naive Bayes classifiers. Duration: 21分](https://www.youtube.com/watch?v=cV5X6Ygw46U)
+      
+      4.3.2) 動画: 講座 [Linear and quadratic discriminant analysis in the context of Mixture Models. Duration: 18分](https://www.youtube.com/watch?v=BGheWkWvpKs)
+      
+      4.3.3) 動画: 講座 [Classification example. Duration: 10分](https://www.youtube.com/watch?v=RLUK4v12q6E)
+      
+      4.3.4) 学習用教材: Sample EM algorithm for classification problems. Duration: 10 分10 分
         
-        1.1.2) 動画: 講座 [Density Estimation Example. Duration: 10分](https://www.youtube.com/watch?v=oLRZJUTM83U)
-        
-        1.1.3) 学習用教材: Sample code for density estimation problems. Duration: 10分
-        
-        1.1.4) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
-        
-        1.1.5) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
-        
-        1.1.6) 他の受講生の課題を確認: MCMC algorithms and density estimation 期限 6月3日 15:59 JST
-        
-      1.2) Clustering
-        
-        1.2.1) 動画: 講座 [Mixture Models for Clustering. Duration: 23分](https://www.youtube.com/watch?v=sfROQ-SGQPc)
-        
-        1.2.2) 動画: 講座 [Clustering example. Duration: 11分](https://www.youtube.com/watch?v=NPBHVeqhVZg)
-        
-        1.2.3) 学習用教材: Sample EM algorithm for clustering problems. Duration: 10分
-        
-      1.3) Classification
-        
-        1.3.1) 動画: 講座 [Mixture Models and naive Bayes classifiers. Duration: 21分](https://www.youtube.com/watch?v=cV5X6Ygw46U)
-        
-        1.3.2) 動画: 講座 [Linear and quadratic discriminant analysis in the context of Mixture Models. Duration: 18分](https://www.youtube.com/watch?v=BGheWkWvpKs)
-        
-        1.3.3) 動画: 講座 [Classification example. Duration: 10分](https://www.youtube.com/watch?v=RLUK4v12q6E)
-        
-        1.3.4) 学習用教材: Sample EM algorithm for classification problems. Duration: 10 分10 分
-        
-        1.3.5) 受講生によるテスト: Classification. Duration: 45分 期限 5月31日 15:59 JST
-        
-        1.3.6) 他の受講生の課題を確認: Classification 期限 6月3日 15:59 JST
+      4.3.5) 受講生によるテスト: Classification. Duration: 45分 期限 5月31日 15:59 JST
+      
+      4.3.6) 他の受講生の課題を確認: Classification 期限 6月3日 15:59 JST
 
+5) Week 5 : Practical considerations
+    
+    5.1) Computational considerations for Mixture Models
+    
+      5.1.1) 動画: 講座 [Numerical stability. Duration: 14分](   )
+      
+      5.1.2) 学習用教材: [Sample code to illustrate numerical stability issues. Duration: 10分](  )
+      
+      5.1.3) 動画: 講座 [Computational issues associated with multimodality. Duration: 11分](   )
+      4.1.4) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+      
+      4.1.5) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+      
+      4.1.6) 他の受講生の課題を確認: MCMC algorithms and density estimation 期限 6月3日 15:59 JST
+        
+    4.2) Clustering
+      
+      4.2.1) 動画: 講座 [Mixture Models for Clustering. Duration: 23分](https://www.youtube.com/watch?v=sfROQ-SGQPc)
+      
+      4.2.2) 動画: 講座 [Clustering example. Duration: 11分](https://www.youtube.com/watch?v=NPBHVeqhVZg)
+      
+      4.2.3) 学習用教材: Sample EM algorithm for clustering problems. Duration: 10分
+      
+    4.3) Classification
+      
+      4.3.1) 動画: 講座 [Mixture Models and naive Bayes classifiers. Duration: 21分](https://www.youtube.com/watch?v=cV5X6Ygw46U)
+      
+      4.3.2) 動画: 講座 [Linear and quadratic discriminant analysis in the context of Mixture Models. Duration: 18分](https://www.youtube.com/watch?v=BGheWkWvpKs)
+      
+      4.3.3) 動画: 講座 [Classification example. Duration: 10分](https://www.youtube.com/watch?v=RLUK4v12q6E)
+      
+      4.3.4) 学習用教材: Sample EM algorithm for classification problems. Duration: 10 分10 分
+        
+      4.3.5) 受講生によるテスト: Classification. Duration: 45分 期限 5月31日 15:59 JST
+      
+      4.3.6) 他の受講生の課題を確認: Classification 期限 6月3日 15:59 JST
