@@ -79,7 +79,7 @@
       
       2.1.3) 動画: 講座 [EM example 1. Duration: 12 分12 分](https://www.youtube.com/watch?v=59cmpfeg46E)
       
-      2.1.4) 学習用教材: [Sample code for EM example 1. Duration: 10分]()
+      2.1.4) 学習用教材: [Sample code for EM example 1. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Sample-Code-for%20EM-EX1.R)
       
       2.1.5) 動画: 講座 [EM example 2. Duration: 13分](https://www.youtube.com/watch?v=sBhIZ6O9cts)
       
