@@ -143,7 +143,7 @@ It's useful to record some information about how your file was created.
 - [**rmarkdown** package](https://github.com/rstudio/rmarkdown) version: `r packageVersion('rmarkdown')`
 - File version: 1.0.0
 - Author Profile: [®γσ, Eng Lian Hu](https://github.com/scibrokes/owner)
-- GitHub: [Source Code](https://github.com/englianhu/Coursera-Overview-of-Advanced-Methods-of-Reinforcement-Learning-in-Finance)
+- GitHub: [Source Code](https://github.com/englianhu/coursera-bayesian-statistics-mixture-models)
 - Additional session information:
 
 ```{r info, warning = FALSE, results = 'asis'}

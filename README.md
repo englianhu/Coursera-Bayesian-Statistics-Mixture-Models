@@ -159,35 +159,43 @@
     
     5.1) Computational considerations for Mixture Models
     
-      5.1.1) 動画: 講座 [Numerical stability. Duration: 14分](   )
+      5.1.1) 動画: 講座 [Numerical stability. Duration: 14分](https://www.youtube.com/watch?v=roWRK-3X2ZQ)
       
-      5.1.2) 学習用教材: [Sample code to illustrate numerical stability issues. Duration: 10分](  )
+      5.1.2) 学習用教材: Sample code to illustrate numerical stability issues. Duration: 10分
       
-      5.1.3) 動画: 講座 [Computational issues associated with multimodality. Duration: 11分](   )
-      4.1.4) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+      5.1.3) 動画: 講座 [Computational issues associated with multimodality. Duration: 11分](https://www.youtube.com/watch?v=SwVc8c8SDmk)
       
-      4.1.5) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+      5.1.4) 学習用教材: Sample code to illustrate multimodality issues 1. Duration: 10分
       
-      4.1.6) 他の受講生の課題を確認: MCMC algorithms and density estimation 期限 6月3日 15:59 JST
+      5.1.5) 学習用教材: Sample code to illustrate multimodality issues 2. Duration: 10分
+      
+      5.1.6) テスト: Computational considerations for Mixture Models 3 個の問題 期限 6月7日 15:59 JST
         
-    4.2) Clustering
+    5.2) Determining the number of components in a Mixture Model
       
-      4.2.1) 動画: 講座 [Mixture Models for Clustering. Duration: 23分](https://www.youtube.com/watch?v=sfROQ-SGQPc)
+      5.2.1) 動画: 講座 [Bayesian Information Criteria (BIC). Duration: 10分]()
       
-      4.2.2) 動画: 講座 [Clustering example. Duration: 11分](https://www.youtube.com/watch?v=NPBHVeqhVZg)
+      5.2.2) 練習問題: Bayesian Information Criteria (BIC) 1 個の問題
       
-      4.2.3) 学習用教材: Sample EM algorithm for clustering problems. Duration: 10分
+      5.2.3) 動画: 講座 [Bayesian Information Criteria Example. Duration: 10分]()
       
-    4.3) Classification
+      5.2.4) 学習用教材: Sample code: Bayesian Information Criteria. Duration: 10分
       
-      4.3.1) 動画: 講座 [Mixture Models and naive Bayes classifiers. Duration: 21分](https://www.youtube.com/watch?v=cV5X6Ygw46U)
+      5.2.5) 受講生によるテスト: BIC for zero-inflated mixtures. Duration: 1 時間 期限 6月7日 15:59 JST
       
-      4.3.2) 動画: 講座 [Linear and quadratic discriminant analysis in the context of Mixture Models. Duration: 18分](https://www.youtube.com/watch?v=BGheWkWvpKs)
+      5.2.6) 他の受講生の課題を確認: BIC for zero-inflated mixtures 期限 6月10日 15:59 JST
       
-      4.3.3) 動画: 講座 [Classification example. Duration: 10分](https://www.youtube.com/watch?v=RLUK4v12q6E)
+      5.2.7) 動画: 講座 [Estimating the number of components in Bayesian settings. Duration: 9 分]()
       
-      4.3.4) 学習用教材: Sample EM algorithm for classification problems. Duration: 10 分10 分
-        
-      4.3.5) 受講生によるテスト: Classification. Duration: 45分 期限 5月31日 15:59 JST
+      5.2.8) テスト: Estimating the number of components in Bayesian settings 4 個の問題 期限 6月7日 15:59 JST
       
-      4.3.6) 他の受講生の課題を確認: Classification 期限 6月3日 15:59 JST
+      5.2.9) 動画: 講座 [Estimating the full partition structure in Bayesian settings. Duration: 18分]()
+      
+      5.2.10) ディスカッションのプロンプト: Simplifying Binder's expected loss function. Duration: 30分
+      
+      5.2.11) 動画: 講座 [Example: Bayesian inference for the partition structure. Duration: 15分]()
+      
+      5.2.12) 学習用教材: Sample code for estimating the number of components and the partition structure in Bayesian models. Duration: 10分
+      
+      5.2.13) 練習問題: Estimating the partition structure in Bayesian models 4 個の問題
+      
