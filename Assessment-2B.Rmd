@@ -1,0 +1,312 @@
+---
+title: "<img src='figure/coursera.jpg' width='37'> <img src='figure/ucsc.png' width='240'>"
+subtitle: "<span style='color:white; background-color:#4E79A7;'>Bayesian Statistics: Mixture Models</span> (Assessment 2 Codes)"
+author: "[®γσ, Lian Hu](https://englianhu.github.io/) <img src='figure/quantitative trader 1.jpg' width='12'> <img src='figure/ENG.jpg' width='24'> ®"
+date: "`r lubridate::today('Asia/Tokyo')`"
+output:
+  html_document: 
+    mathjax: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    code_folding: hide
+    css: CSSBackgrounds.css
+    pandoc_args: ['--lua-filter=color-text.lua']
+---
+
+<br>
+<span style='color:green'>**Theme Song**</span>
+<br>
+
+<audio src="music/California-Dreaming-Chorus.mp3" controls></audio>
+<br>
+
+------
+
+<br>
+
+```{r class.source = 'bg-success', class.output = 'bg-primary'}
+colorize <- function(x, color) {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{%s}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'>%s</span>", color, 
+      x)
+  } else x
+}
+```
+
+```{cat, engine.opts = list(file = "color-text.lua")}
+Span = function(el)
+  color = el.attributes['color']
+  -- if no color attribute, return unchange
+  if color == nil then return el end
+  
+  -- tranform to <span style="color: red;"></span>
+  if FORMAT:match 'html' then
+    -- remove color attributes
+    el.attributes['color'] = nil
+    -- use style attribute instead
+    el.attributes['style'] = 'color: ' .. color .. ';'
+    -- return full span element
+    return el
+  elseif FORMAT:match 'latex' then
+    -- remove color attributes
+    el.attributes['color'] = nil
+    -- encapsulate in latex code
+    table.insert(
+      el.content, 1,
+      pandoc.RawInline('latex', '\\textcolor{'..color..'}{')
+    )
+    table.insert(
+      el.content,
+      pandoc.RawInline('latex', '}')
+    )
+    -- returns only span content
+    return el.content
+  else
+    -- for other format return unchanged
+    return el
+  end
+end
+```
+
+```{css}
+/* https://bookdown.org/yihui/rmarkdown-cookbook/chunk-styling.html */
+.bg-primary {
+  color: #FFD64D;
+  background: linear-gradient(to bottom, #002C54 0%, #4CB5F5 100%);
+  /*background-image: linear-gradient(to right,golden,golden, yellow, yellow);*/
+  /*-webkit-background-clip: text;*/
+  /*display: inline-block;*/
+  /*padding: 14px;*/
+  /*-webkit-text-fill-color: transparent;*/
+  /*font-family: 'Stay Out Regular';*/
+}
+
+.shine {
+	background: #FFD64D -webkit-gradient(linear, left top, right top, from(#222), to(#222), color-stop(0.5, yellow)) 0 0 no-repeat;
+	-webkit-background-size: 150px;
+	color: $text-color;
+	-webkit-background-clip: text;
+	-webkit-animation-name: shine;
+	-webkit-animation-duration: $duration;
+	-webkit-animation-iteration-count: infinite;
+	text-shadow: 0 0px 0px golden-rod;
+}
+```
+
+```{r}
+knitr::opts_chunk$set(class.source = 'bg-success', class.output = 'bg-primary')
+```
+
+<br><br>
+
+# 受講生によるテスト：Likelihood function for mixture models
+
+これは初めての受講生による相互テストのようです。  詳細
+
+**課題を受ける準備はできていますか？**
+以下に提出のための指示が表示されます。
+
+---
+
+## 説明
+
+Consider the code provided in the lesson "Sample code for simulating from a Mixture Model":
+
+```{r, warning = FALSE}
+# Generate n observations from a mixture of two Gaussian 
+# distributions
+n     = 50           # Size of the sample to be generated
+w     = c(0.6, 0.4)  # Weights
+mu    = c(0, 5)      # Means
+sigma = c(1, 2)      # Standard deviations
+cc    = sample(1:2, n, replace=TRUE, prob=w)
+x     = rnorm(n, mu[cc], sigma[cc])
+x
+```
+
+Modify the code above to sample 200 random numbers from a mixture of 3 Poisson distributions with means 1, 2 and 6 and weights 0.7, 0.2 and 0.1, respectively, and generate a barplot with the empirical frequencies of all the integers included in the sample. 
+
+<br><br>
+
+### Review criteria
+
+The response should follow the same template as the sample code provided above. Peer reviewers will be asked to check whether the different pieces of code have been adequately modified to reflect the fact that (1) you are working now with 3 components rather than 2, (2) that the components of the mixture are Poisson distributions rather than Gaussians, (3) that the empirical frequencies associated with the sample generated are correctly computed, (4) that a barplot is used to represent the empirical frequencies.
+
+<br><br>
+
+## 自分の提出物
+
+**プロジェクト名** <span style='color:Green;'> Likelihood function for mixture models</span>
+
+**プロジェクトにわかりやすいタイトルを付けてください**
+
+Enter code to sample 100 random numbers from a mixture of 4 exponential distributions with means 1, 4, 7 and 10 and weights 0.3, 0.25, 0.25 and 0.2, respectively.
+
+```{r, warning = FALSE}
+# Generate n observations from a mixture of two Gaussian 
+# distributions
+n     = 100                      # Size of the sample to be generated
+w     = c(0.3, 0.25, 0.25, 0.2)  # Weights
+mu    = c(1, 4, 7, 10)           # Means
+cc    = sample(1:4, n, replace=TRUE, prob=w)
+x     = rnorm(n, mu[cc])
+
+paste('mean =', mean(x))
+```
+
+**あなたの答えはもう少し長くする必要があります。課題を完了するために、いくつかの文章を書いてください。**
+
+Use these sample to approximate the mean and variance of the mixture.
+
+```{r}
+paste('var =', var(x))
+```
+
+あなたの答えはもう少し長くする必要があります。課題を完了するために、いくつかの文章を書いてください。
+
+## ピアレビューディスカッション
+
+### ルーブリック
+
+**Have the parameters of the mixture (both weights and component-specific parameters) been correctly specified?**
+
+```{r}
+n = 50
+w = c(0.6, 0.4)  # Weights
+mu = c(0, 5)     # Means
+sigma = c(1, 2)  # Standard deviations
+```
+
+in the original code should have been replaced by something like
+
+```{r}
+n = 100
+w = c(0.3, 0.25, 0.25, 0.2)  # Weights
+lambda = c(1, 4, 7, 10)      # Means
+```
+
+- 0点 No
+
+- 1点 Yes
+
+**Is the sampling of the indicator variables done correctly?**
+
+```{r, error = TRUE}
+cc = sample(1:2, n, replace=TRUE, prob=w)
+```
+
+in the original code should now be something like
+
+```{r}
+cc = sample(1:4, n, replace=TRUE, prob=w)
+```
+
+to reflect the fact that we now have 4 components in the mixture.
+
+-  0点 No
+
+- 1点 Yes
+
+**Assuming that the indicator variables have been correctly sampled, are the observations being sampled correctly?**
+
+```{r}
+x = rnorm(n, mu[cc], sigma[cc])
+```
+
+should now be something like
+
+```{r}
+x = rexp(n, 1/lambda[cc])
+```
+
+to reflect the fact that the components of the mixture are all exponential distributions.  Note that `rexp()` takes the rate of the distribution (the inverse of the main) as an input.  Make sure that this part has been coded correctly!
+
+- 0点 No
+
+- 1点 Yes
+
+### ルーブリック
+
+**Is the procedure to approximate the mean and variance correct?**
+
+The mean and variance of the mixture can be approximated by the empirical mean and variance of the observations
+
+```{r}
+mean(x)
+var(x)
+```
+	
+- 0点 No
+
+- 1点 Yes
+
+# Appendix
+
+## Blooper
+
+## Documenting File Creation 
+
+It's useful to record some information about how your file was created.
+
+- File creation date: 2021-05-10
+- File latest updated date: `r today('Asia/Tokyo')`
+- `r R.version.string`
+- [**rmarkdown** package](https://github.com/rstudio/rmarkdown) version: `r packageVersion('rmarkdown')`
+- File version: 1.0.0
+- Author Profile: [®γσ, Eng Lian Hu](https://github.com/scibrokes/owner)
+- GitHub: [Source Code](https://github.com/englianhu/Coursera-Overview-of-Advanced-Methods-of-Reinforcement-Learning-in-Finance)
+- Additional session information:
+
+```{r info, warning = FALSE, results = 'asis'}
+suppressMessages(require('dplyr', quietly = TRUE))
+suppressMessages(require('magrittr', quietly = TRUE))
+suppressMessages(require('formattable', quietly = TRUE))
+suppressMessages(require('knitr', quietly = TRUE))
+suppressMessages(require('kableExtra', quietly = TRUE))
+
+sys1 <- devtools::session_info()$platform %>% 
+  unlist %>% data.frame(Category = names(.), session_info = .)
+rownames(sys1) <- NULL
+
+sys2 <- data.frame(Sys.info()) %>% 
+  dplyr::mutate(Category = rownames(.)) %>% .[2:1]
+names(sys2)[2] <- c('Sys.info')
+rownames(sys2) <- NULL
+
+if (nrow(sys1) == 9 & nrow(sys2) == 8) {
+  sys2 %<>% rbind(., data.frame(
+  Category = 'Current time', 
+  Sys.info = paste(as.character(lubridate::now('Asia/Tokyo')), 'JST🗾')))
+} else {
+  sys1 %<>% rbind(., data.frame(
+  Category = 'Current time', 
+  session_info = paste(as.character(lubridate::now('Asia/Tokyo')), 'JST🗾')))
+}
+
+sys <- cbind(sys1, sys2) %>% 
+  kbl(caption = 'Additional session information:') %>% 
+  kable_styling(bootstrap_options = c('striped', 'hover', 'condensed', 'responsive')) %>% 
+  row_spec(0, background = 'DimGrey', color = 'yellow') %>% 
+  column_spec(1, background = 'CornflowerBlue', color = 'red') %>% 
+  column_spec(2, background = 'grey', color = 'black') %>% 
+  column_spec(3, background = 'CornflowerBlue', color = 'blue') %>% 
+  column_spec(4, background = 'grey', color = 'white') %>% 
+  row_spec(9, bold = T, color = 'yellow', background = '#D7261E')
+
+rm(sys1, sys2)
+sys
+```
+
+## Reference
+
+<br>
+
+---
+
+<br>

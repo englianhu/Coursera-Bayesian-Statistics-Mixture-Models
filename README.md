@@ -43,7 +43,7 @@
       1.3.11) 学習用教材: Example of a zero-inflated log Gaussian distribution. Duration: 3分
       1.3.12) 練習問題: Zero-inflated distributions 2 個の問題
       
-      1.3.13) テスト: Definition of Mixture Models 5 個の問題
+      1.3.13) テスト: [Definition of Mixture Models 5 個の問題](https://rpubs.com/englianhu/Bayesian-Statistics-Mixture-Models-Assessment1)
       
     1.4) Likelihood function for mixture models
       
@@ -63,9 +63,9 @@
       
       1.4.8) 練習問題: Identifiability 2 個の問題
       
-      1.4.9) テスト: Likelihood function for mixture models 2 個の問題 (期限 5月10日 15:59 JST)
+      1.4.9) テスト: [Likelihood function for mixture models 2 個の問題 (期限 5月10日 15:59 JST)](https://rpubs.com/englianhu/767576)
       
-      1.4.10) 受講生によるテスト: Likelihood function for mixture models. Duration: 20分 期限 (5月10日 15:59 JST)
+      1.4.10) 受講生によるテスト: [Likelihood function for mixture models. Duration: 20分 期限 (5月10日 15:59 JST)](https://rpubs.com/englianhu/767588)
       
       1.4.11) 他の受講生の課題を確認: Likelihood function for mixture models (期限 5月13日 15:59 JST)
       
