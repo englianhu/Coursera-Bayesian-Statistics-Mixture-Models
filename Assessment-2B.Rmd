@@ -91,7 +91,7 @@ knitr::opts_chunk$set(class.source = 'gradient1', class.output = 'gradient2', cl
 
 ## 説明
 
-A biologist is interest in characterizing the number of eggs laid by a particular bird species.  To do this, they sample  n=300n=300 nests on a site in Southern California.  The observations are contained in the attached file `nestsize.csv`:
+A biologist is interest in characterizing the number of eggs laid by a particular bird species.  To do this, they sample  n=300n=300 nests on a site in Southern California.  The observations are contained in the attached file [`nestsize.csv`](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/data/nestsize.csv):
 
 <br><br>
 
