@@ -1,0 +1,147 @@
+
+## 受講生によるテスト：Markov chain Monte Carlo algorithms for Mixture Models
+
+
+
+```{r}
+## Load package
+if(!suppressPackageStartupMessages(require('rinvgamma'))) {
+  ##install.packages('rinvgamma', dependencies = TRUE, INSTALL_opts = '--no-lock')
+  devtools::install_github("dkahle/invgamma")
+}
+suppressPackageStartupMessages(require('rinvgamma'))
+
+dat = fread('data/fuses.csv') 
+fuses = dat$V1
+logfuses = log(fuses)
+
+## Initialize the parameters
+KK         = 2                               # number of components
+n = length(fuses)                         # number of samples
+v = array(0, dim=c(n,KK))
+v[,1] = 0.5                    #Assign half weight to first component
+v[,2] = 1-v[,1]                #Assign all of the remaining weights to the second component
+mean1 = sum(v[,1]*fuses)/sum(v[, 1]) #mean of the first component
+lambda = 1.0/mean1            #parameter for the first component
+mu = sum(v[,2]*logfuses)/sum(v[,2])    #parameter (mean) of the second component
+sigmasquared = sum(v[,2]*((logfuses-mu)**2))/sum(v[,2]) #parameter (variance) for the second component
+sigma = sqrt(sigmasquared)
+w = mean(v[,1])
+#print(paste(lambda, mu, tausquared, tau, w))
+print(paste(lambda, mu, sigmasquared, sigma, w))
+
+# Priors
+aa  = rep(1,KK)  # Uniform prior on 
+# conjugate prior for exponential:
+alpha = 2 #For Gamma distribution prior number of obs = alpha-1
+beta = 1 #Sum of observations = beta
+# conjugate prior for the normal
+eta = mu          # Mean for the prior on mu
+tau = 5          # Standard deviation 5 on the prior for mu_l
+dd  = 2          # variance prior
+qq  = 1
+
+# Number of iterations of the sampler
+rrr   = 6000
+burn  = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = rep(0, rrr)
+lambda.out = rep(0,rrr)
+mu.out    = array(0, rrr)
+sigma.out = rep(0, rrr)
+logpost   = rep(0, rrr)
+
+# MCMC iterations
+for(s in 1:rrr){
+  # Sample the indicators
+  cc = rep(0,n)
+  for(i in 1:n){
+    v = rep(0,KK)
+    v[1] = log(w) + dexp(fuses[i], lambda, log=TRUE)  #Compute the log of the weights
+    v[2] = log(1-w) + dnorm(logfuses[i], mu, sigma, log=TRUE)  #Compute the log of the weights
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  
+  # Sample the lambda
+  nk    = sum(cc==1)
+  xsumk = sum(fuses[cc==1])
+  alpha.hat = alpha + nk
+  beta.hat = beta + xsumk
+  lambda = rgamma(1, shape = alpha.hat, rate = beta.hat)
+  
+  # Sample mu, the mean for norm
+  nk    = sum(cc==2)
+  xsumk = sum(logfuses[cc==2])
+  tau2.hat = 1/(nk/sigma^2 + 1/tau^2)
+  mu.hat  = tau2.hat*(xsumk/sigma^2 + eta/tau^2)
+  mu   = rnorm(1, mu.hat, sqrt(tau2.hat))
+  
+  # Sample the variances
+  dd.star = dd + nk/2
+  qq.star = qq
+  for(i in 1:n) {
+    if (cc[i]==2) {
+      qq.star = qq.star + ((logfuses[i] - mu)^2)/2
+    }
+  }
+  sigma = sqrt(invgamma::rinvgamma(1, dd.star, qq.star))
+  
+  # Store samples
+  cc.out[s,]    = cc
+  w.out[s]     = w
+  lambda.out[s] = lambda
+  mu.out[s]    = mu
+  sigma.out[s] = sigma
+  
+  
+  for(i in 1:n){
+    if(cc[i]==1){
+      logpost[s] = logpost[s] + log(w) + dexp(fuses[i], lambda, log=TRUE)
+    }else{
+      logpost[s] = logpost[s] + log(1-w) + dnorm(logfuses[i], mu, sigma, log=TRUE)
+    }
+  }
+  logpost[s] = logpost[s] + dbeta(w, aa[1], aa[2],log = T)
+  logpost[s] = logpost[s] + dgamma(lambda, shape = alpha, rate = beta, log = T)
+  logpost[s] = logpost[s] + dnorm(mu, eta, tau, log = T)
+  logpost[s] = logpost[s] + log(invgamma::dinvgamma(sigma^2, dd, 1/qq))
+  
+  if(s/500==floor(s/500)){
+    print(paste("s =",s, w, lambda, mu, sigma, logpost[s]))
+  }
+}
+
+## Plot the logposterior distribution for various samples
+par(mfrow=c(1,1))
+par(mar=c(4,4,1,1)+0.1)
+plot(logpost, type="l", xlab="Iterations", ylab="Log posterior")
+
+w_avg = sum(w.out[(burn+1):rrr])/(rrr-burn)
+lambda_avg = sum(lambda.out[(burn+1):rrr])/(rrr-burn)
+mu_avg = sum(mu.out[(burn+1):rrr])/(rrr-burn)
+sigma_avg = sum(sigma.out[(burn+1):rrr])/(rrr-burn)
+
+print(paste(w_avg, lambda_avg, mu_avg, sigma_avg))
+
+
+w_sum = 0
+lambda_sum = 0
+mu_sum = 0
+sigma_sum = 0
+counter = 0
+for(s in 1:(rrr-burn)){
+  w_sum = w_sum + w.out[s+burn]
+  lambda_sum = lambda_sum + lambda.out[s+burn]
+  mu_sum = mu_sum +mu.out[s+burn]
+  sigma_sum = sigma_sum + sigma.out[s+burn]
+  counter = counter + 1
+}
+print(paste(counter, w_sum/counter, lambda_sum/counter, mu_sum/counter, sigma_sum/counter))
+```
+

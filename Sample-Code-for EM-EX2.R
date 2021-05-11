@@ -1,3 +1,5 @@
+# Sample code for EM example 2
+#----------------------------------------
 #### Example of an EM algorithm for fitting a mixtures of K p-variate Gaussian components
 #### The algorithm is tested using simulated data
 
