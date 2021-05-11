@@ -252,6 +252,8 @@ Qplot %>%
     right = 80)
 ```
 
+Reference from tutorial : [Sample Code for EM Example 1](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Sample-Code-for%20EM-EX1.R)
+
 <br><br>
 
 ### ルーブリック
@@ -622,6 +624,7 @@ sys
 - [rmarkdown-book/03-documents.Rmd : MathJax equations](https://github.com/rstudio/rmarkdown-book/blob/master/03-documents.Rmd)
 - [Plot in R with `echarts4r`](https://www.infoworld.com/article/3607068/plot-in-r-with-echarts4r.html)
 - [`echarts` : Theme Builder](https://echarts.apache.org/en/theme-builder.html)
+- [Sample Code for EM Example 1](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Sample-Code-for%20EM-EX1.R)
 
 <br>
 
