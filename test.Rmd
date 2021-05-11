@@ -1,0 +1,78 @@
+---
+title: "Test"
+author: "®γσ, Lian Hu"
+date: "5/11/2021"
+output: html_document
+---
+
+## Styling Setting
+
+```{css}
+/* https://stackoverflow.com/a/66029010/3806250 */
+h1 { color: #002C54; }
+h2 { color: #2F496E; }
+h3 { color: #375E97; }
+
+/* https://bookdown.org/yihui/rmarkdown-cookbook/chunk-styling.html */
+.gradient1 {
+  background: linear-gradient(155deg, #F9BA32 0%, #FFEB94 100%);
+}
+
+
+.gradient2 {
+  color: #FFD64D;
+  background: linear-gradient(155deg, #002C54 0%, #4CB5F5 100%);
+  /*background-image: linear-gradient(to right,golden,golden, yellow, yellow);*/
+  /*-webkit-background-clip: text;*/
+  /*display: inline-block;*/
+  /*padding: 14px;*/
+  /*-webkit-text-fill-color: transparent;*/
+  /*font-family: 'Stay Out Regular';*/
+}
+
+/* refer from https://codepen.io/fazlurr/pen/qbWMRv */
+$duration: 5s;
+$text-color: rgba(255, 255, 255, 0.3);
+$bgr-color: #333;
+html {
+	background-color: $bgr-color;
+	text-align: center
+}
+
+body {
+	padding-top: 3em;
+}
+
+.shine {
+	background: #222 -webkit-gradient(linear, left top, right top, from(#222), to(#222), color-stop(0.5, #fff)) 0 0 no-repeat;
+	-webkit-background-size: 150px;
+	color: $text-color;
+	-webkit-background-clip: text;
+	-webkit-animation-name: shine;
+	-webkit-animation-duration: $duration;
+	-webkit-animation-iteration-count: infinite;
+	text-shadow: 0 0px 0px rgba(255, 255, 255, 0.5);
+}
+```
+
+```{r}
+knitr::opts_chunk$set(class.source = 'gradient1', class.output = c('shine', 'gradient2'))
+```
+
+## Pretty Output
+
+```{r, warning = FALSE}
+# Generate n observations from a mixture of two Gaussian 
+# distributions
+n     = 50           # Size of the sample to be generated
+w     = c(0.6, 0.4)  # Weights
+mu    = c(0, 5)      # Means
+sigma = c(1, 2)      # Standard deviations
+cc    = sample(1:2, n, replace=TRUE, prob=w)
+x     = rnorm(n, mu[cc], sigma[cc])
+x
+```
+
+
+
+

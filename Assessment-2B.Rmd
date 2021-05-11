@@ -84,7 +84,7 @@ h3 { color: #375E97; }
 .gradient1 {
   background: linear-gradient(155deg, #F9BA32 0%, #FFEB94 100%);
 }
-    
+
 .gradient2 {
   color: #FFD64D;
   background: linear-gradient(155deg, #002C54 0%, #4CB5F5 100%);
@@ -109,7 +109,7 @@ h3 { color: #375E97; }
 ```
 
 ```{r}
-knitr::opts_chunk$set(class.source = 'gradient1', class.output = 'gradient2')
+knitr::opts_chunk$set(class.source = 'gradient1', class.output = c('gradient2', 'shine'))
 ```
 
 <br><br>
