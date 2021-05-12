@@ -1,0 +1,388 @@
+---
+title: "<img src='figure/coursera.jpg' width='37'> <img src='figure/ucsc.png' width='240'>"
+subtitle: "<span style='color:white; background-color:#4E79A7;'>Bayesian Statistics: Mixture Models</span> (Stylist Chunks)"
+author: "[®γσ, Lian Hu](https://englianhu.github.io/) <img src='figure/quantitative trader 1.jpg' width='12'> <img src='figure/ENG.jpg' width='24'> ®"
+date: "`r lubridate::today('Asia/Tokyo')`"
+output:
+  html_document: 
+    mathjax: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    code_folding: hide
+    css: CSSBackgrounds.css
+---
+
+<br>
+<span style='color:green'>**Theme Song**</span>
+<br>
+
+<audio src="music/California-Dreaming-Chorus.mp3" controls></audio>
+<br>
+
+------
+
+------
+
+<br>
+
+<style>
+pre {
+  overflow-x: auto;
+}
+pre code {
+  word-wrap: normal;
+  white-space: pre;
+}
+</style>
+
+*Source : [Width of R code chunk output in RMarkdown files knitr-ed to html](https://stackoverflow.com/a/36846864/3806250)*
+
+```{css class.source = 'bg-success', class.output = 'bg-primary'}
+/* https://stackoverflow.com/a/66029010/3806250 */
+h1 { color: #002C54; }
+h2 { color: #2F496E; }
+h3 { color: #375E97; }
+
+/* https://bookdown.org/yihui/rmarkdown-cookbook/chunk-styling.html */
+.gradient1 {
+  background: linear-gradient(155deg, #F9BA32 0%, #FFEB94 100%);
+}
+
+.gradient2 {
+  color: #FFD64D;
+  background: linear-gradient(155deg, #002C54 0%, #4CB5F5 100%);
+  /*background-image: linear-gradient(to right,golden,golden, yellow, yellow);*/
+  /*-webkit-background-clip: text;*/
+  /*display: inline-block;*/
+  /*padding: 14px;*/
+  /*-webkit-text-fill-color: transparent;*/
+  /*font-family: 'Stay Out Regular';*/
+}
+
+.shine {
+	background: #FFD64D -webkit-gradient(linear, left top, right top, from(#222), to(#222), color-stop(0.5, yellow)) 0 0 no-repeat;
+	-webkit-background-size: 150px;
+	color: $text-color;
+	-webkit-background-clip: text;
+	-webkit-animation-name: shine;
+	-webkit-animation-duration: $duration;
+	-webkit-animation-iteration-count: infinite;
+	text-shadow: 0 0px 0px golden-rod;
+}
+```
+
+```{r global_options, class.source = 'bg-success', class.output = 'bg-primary'}
+## https://stackoverflow.com/a/36846793/3806250
+options(width = 999)
+knitr::opts_chunk$set(class.source = 'gradient1', class.output = 'gradient2', class.error = 'bg-danger')
+```
+
+# Styling Setting
+
+```{r message = FALSE, warning = FALSE}
+# install.packages("remotes")
+require('BBmisc')
+#remotes::install_github("rstudio/sass")
+lib('sass')
+```
+
+```{css}
+/* https://stackoverflow.com/a/66029010/3806250 */
+h1 { color: #002C54; }
+h2 { color: #2F496E; }
+h3 { color: #375E97; }
+
+/* https://bookdown.org/yihui/rmarkdown-cookbook/chunk-styling.html */
+.gradient1 {
+  background: linear-gradient(155deg, #EDAE01 0%, #FFEB94 100%);
+}
+
+.gradient2 {
+  color: #FFD64D;
+  background: linear-gradient(155deg, #002C54 0%, #4CB5F5 100%);
+  /* background-image: linear-gradient(to right,golden,golden, yellow, yellow); */
+  /*-webkit-background-clip: text;*/
+  /*display: inline-block;*/
+  /*padding: 14px;*/
+  /*-webkit-text-fill-color: transparent;*/
+  /*font-family: 'Stay Out Regular';*/
+}
+```
+
+Above css shows <span style='color:green;'>Gradient effect</span>
+
+- [CSS3 : Shining Gradient Text Effect with Shining Gradient Effect Background#1994](https://github.com/yihui/knitr/issues/1994#issuecomment-838022121)
+- [`sass` R Package](https://rstudio.github.io/sass/)
+- [CSS with superpowers](https://sass-lang.com/)
+
+```{scss}
+/* ----------------------------------------------------------------- */
+/* https://gist.github.com/himynameisdave/c7a7ed14500d29e58149#file-broken-gradient-animation-less */
+.hover-animate-background1 {
+  /* color: #FFD64D; */
+  background: linear-gradient(155deg, #EDAE01 0%, #FFEB94 100%);
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #EDAE01 20%, #FFEB94 80%);
+    }
+  }
+
+
+/* //  For brevity, vendor prefixes have been removed. */
+/* //  This does not work as expected; instead of a smooth transition */
+/* //  what you get is a hard swap from one gradient to the next */
+.hover-animate-background2 {
+  color: #FFD64D;
+  background: linear-gradient(155deg, #002C54 0%, #4CB5F5 100%);
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #002C54 20%, #4CB5F5 80%);
+    }
+  }
+```
+
+Above code shows <span style='color:green;'>Hovered gradient effect</span>.
+
+```{scss}
+/* refer from https://codepen.io/fazlurr/pen/qbWMRv */
+/* $duration: 5s; */
+/* $text-color: rgba(255, 255, 255, 0.3); */
+/* $bgr-color: #333; */
+/* html { */
+/* 	background-color: $bgr-color; */
+/* 	text-align: center */
+/* } */
+
+/* body { */
+/* 	padding-top: 3em; */
+/* } */
+```
+
+```{css}
+.shine {
+	background: #222 
+  -webkit-gradient(linear, left top, right top, from(#222), to(#222), color-stop(0.5, #fff)) 0 0 no-repeat;
+  -webkit-background-size: 150px;
+	color: $text-color;
+	-webkit-background-clip: text;
+	-webkit-animation-name: shine;
+	-webkit-animation-duration: $duration;
+	-webkit-animation-iteration-count: infinite;
+	text-shadow: 0 0px 0px rgba(255, 255, 255, 0.5);
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #002C54 20%, #4CB5F5 80%);
+      }
+  }
+```
+
+```{scss}
+/* .gradient-animation( @start, @end, @transTime ){ */
+/*   background-size: 100%; */
+/*   background-image: linear-gradient(@start, @end); */
+/*   position: relative; */
+/*   z-index: 100; */
+/*   &:before { */
+/*     background-image: linear-gradient(@end, @start); */
+/*     content: ''; */
+/*     display: block; */
+/*     height: 100%; */
+/*     position: absolute; */
+/*     top: 0; left: 0; */
+/*     opacity: 0; */
+/*     width: 100%; */
+/*     z-index: -100; */
+/*     transition: opacity @transTime; */
+/*     } */
+/*   &:hover { */
+/*     &:before { */
+/*       opacity: 1; */
+/*     } */
+/*   } */
+/* } */
+```
+
+```{js}
+<script type="text/javascript" src="jquery.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+  //prepend span tag to H1
+  $("h1").prepend("<span></span>");
+	
+});
+</script>
+```
+
+```{r}
+knitr::opts_chunk$set(class.source = 'hover-animate-background1', class.output = 'hover-animate-background2')
+```
+
+# Pretty Output (hover)
+
+Below input and output chunk will be hovered.
+
+```{r, warning = FALSE}
+# Generate n observations from a mixture of two Gaussian 
+# distributions
+n     = 50           # Size of the sample to be generated
+w     = c(0.6, 0.4)  # Weights
+mu    = c(0, 5)      # Means
+sigma = c(1, 2)      # Standard deviations
+cc    = sample(1:2, n, replace=TRUE, prob=w)
+x     = rnorm(n, mu[cc], sigma[cc])
+x
+```
+
+```{r, warning = FALSE}
+data.frame(matrix(x, ncol = 5))
+```
+
+# Other Effects
+
+There has more effects : 
+
+- [Animate.css](https://animate.style/)
+- Shining text as below :
+
+<div class="codepen" data-height="372" data-theme-id="dark" data-default-tab="result" data-user="fazlurr" data-slug-hash="qbWMRv" data-prefill='{"title":"Shining Text Effect CSS3","description":"From :\n- http://www.zachstronaut.com/lab/shine-css3.html\n- http://stackoverflow.com/a/16552763/5627904\n","tags":["css3","shine"],"scripts":[],"stylesheets":[]}'>
+  <pre data-lang="html">&lt;div class="shine">Shine Bright Like a Diamond&lt;/div>
+&lt;div class="chrome">Shine Bright Like a Diamond&lt;/div></pre>
+  <pre data-lang="scss" data-option-autoprefixer="true">$duration: 5s;
+$text-color: rgba(255, 255, 255, 0.3);
+$bgr-color: #333;
+html {
+	background-color: $bgr-color;
+	text-align: center
+}
+
+body {
+	padding-top: 3em;
+}
+
+.shine, .chrome {
+	font-size: 3em;
+	margin: 0 auto;
+	margin-bottom: 1em;
+	font-weight: bold;
+}
+
+.shine {
+	background: #222 -webkit-gradient(linear, left top, right top, from(#222), to(#222), color-stop(0.5, #fff)) 0 0 no-repeat;
+	-webkit-background-size: 150px;
+	color: $text-color;
+	-webkit-background-clip: text;
+	-webkit-animation-name: shine;
+	-webkit-animation-duration: $duration;
+	-webkit-animation-iteration-count: infinite;
+	text-shadow: 0 0px 0px rgba(255, 255, 255, 0.5);
+}
+
+.chrome {
+	background: #222 -webkit-gradient(linear, left top, right top, from(#222), to(#222), color-stop(0.5, #fff)) 0 0 no-repeat;
+	background-image: -webkit-linear-gradient(-40deg, transparent 0%, transparent 40%, #fff 50%, transparent 60%, transparent 100%);
+	-webkit-background-size: 200px;
+	color: $text-color;
+	-webkit-background-clip: text;
+	-webkit-animation-name: shine;
+	-webkit-animation-duration: $duration;
+	-webkit-animation-iteration-count: infinite;
+	text-shadow: 0 0px 0px rgba(255, 255, 255, 0.5);
+}
+
+@-webkit-keyframes shine {
+	0%, 10% {
+		background-position: -1000px;
+	}
+	20% {
+		background-position: top left;
+	}
+	90% {
+		background-position: top right;
+	}
+	100% {
+		background-position: 1000px;
+	}
+}</pre></div>
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+
+
+# Appendix
+
+## Blooper
+
+## Documenting File Creation 
+
+It's useful to record some information about how your file was created.
+
+- File creation date: 2021-05-12
+- File latest updated date: `r today('Asia/Tokyo')`
+- `r R.version.string`
+- [**rmarkdown** package](https://github.com/rstudio/rmarkdown) version: `r packageVersion('rmarkdown')`
+- File version: 1.0.0
+- Author Profile: [®γσ, Eng Lian Hu](https://github.com/scibrokes/owner)
+- GitHub: [Source Code](https://github.com/englianhu/coursera-bayesian-statistics-mixture-models)
+- Additional session information:
+
+```{r info, warning = FALSE, results = 'asis'}
+suppressMessages(require('dplyr', quietly = TRUE))
+suppressMessages(require('magrittr', quietly = TRUE))
+suppressMessages(require('formattable', quietly = TRUE))
+suppressMessages(require('knitr', quietly = TRUE))
+suppressMessages(require('kableExtra', quietly = TRUE))
+
+sys1 <- devtools::session_info()$platform %>% 
+  unlist %>% data.frame(Category = names(.), session_info = .)
+rownames(sys1) <- NULL
+
+sys2 <- data.frame(Sys.info()) %>% 
+  dplyr::mutate(Category = rownames(.)) %>% .[2:1]
+names(sys2)[2] <- c('Sys.info')
+rownames(sys2) <- NULL
+
+if (nrow(sys1) == 9 & nrow(sys2) == 8) {
+  sys2 %<>% rbind(., data.frame(
+  Category = 'Current time', 
+  Sys.info = paste(as.character(lubridate::now('Asia/Tokyo')), 'JST🗾')))
+} else {
+  sys1 %<>% rbind(., data.frame(
+  Category = 'Current time', 
+  session_info = paste(as.character(lubridate::now('Asia/Tokyo')), 'JST🗾')))
+}
+
+sys <- cbind(sys1, sys2) %>% 
+  kbl(caption = 'Additional session information:') %>% 
+  kable_styling(bootstrap_options = c('striped', 'hover', 'condensed', 'responsive')) %>% 
+  row_spec(0, background = 'DimGrey', color = 'yellow') %>% 
+  column_spec(1, background = 'CornflowerBlue', color = 'red') %>% 
+  column_spec(2, background = 'grey', color = 'black') %>% 
+  column_spec(3, background = 'CornflowerBlue', color = 'blue') %>% 
+  column_spec(4, background = 'grey', color = 'white') %>% 
+  row_spec(9, bold = T, color = 'yellow', background = '#D7261E')
+
+rm(sys1, sys2)
+sys
+```
+
+## Reference
+
+## Reference : 
+
+- [CSS3 : Shining Gradient Text Effect with Shining Gradient Effect Background
+#1994](https://github.com/yihui/knitr/issues/1994#issuecomment-838022121)
+- [`sass` R Package](https://rstudio.github.io/sass/)
+- [CSS with superpowers](https://sass-lang.com/)
+- [Shining Text Effect CSS3](https://codepen.io/fazlurr/pen/qbWMRv)
+- [Bayesian Statistics: Mixture Models (Assessment Week2 A Codes)](https://rpubs.com/englianhu/768289)
+- [**tableau** : 100 color palettes](https://public.tableau.com/en-us/gallery/100-color-palettes)
+- [15.10 Style HTML pages with Sass/SCSS](https://bookdown.org/yihui/rmarkdown-cookbook/eng-sass.html)
+- [Gradient text with animation](https://forums.tumult.com/t/gradient-text-with-animation/8626/3)
+- [Animating CSS Gradients, using only CSS](https://medium.com/@dave_lunny/animating-css-gradients-using-only-css-d2fd7671e759)
+- [himynameisdave/broken-gradient-animation.less](https://gist.github.com/himynameisdave/c7a7ed14500d29e58149#file-broken-gradient-animation-less)
+- [Hello JS in R Markdown](https://www.aliciaschep.com/blog/js-rmarkdown/)
+- [CSS GRADIENT ANIMATOR](https://www.gradient-animator.com/)

@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/768767/87c6a3c2cdb845679495f0091336b3aa
+bundleId: https://api.rpubs.com/api/v1/document/768767/87c6a3c2cdb845679495f0091336b3aa
+url: http://rpubs.com/englianhu/768767
+when: 1620853958.49672
+lastSyncTime: 1620853958.49674
