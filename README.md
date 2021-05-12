@@ -67,7 +67,7 @@
       
       1.4.10) 受講生によるテスト: [Likelihood function for mixture models. Duration: 20分 期限 (5月10日 15:59 JST)](https://rpubs.com/englianhu/767588)
       
-      1.4.11) 他の受講生の課題を確認: Likelihood function for mixture models (期限 5月13日 15:59 JST)
+      1.4.11) 他の受講生の課題を確認: [Likelihood function for mixture models (期限 5月13日 15:59 JST)](https://rpubs.com/englianhu/767588)
       
 2) Week 2 : Maximum likelihood estimation for Mixture Models
     
@@ -85,11 +85,11 @@
       
       2.1.6) ディスカッションのプロンプト: Mixtures of log-Gaussians. Duration: 10分
       
-      2.1.7) 受講生によるテストの実施: The EM algorithm for zero-inflated mixtures. Duration: 1時間
+      2.1.7) 受講生によるテストの実施: [The EM algorithm for zero-inflated mixtures. Duration: 1時間](https://rpubs.com/englianhu/768524)
       
-      2.1.8) 受講生によるテスト: The EM algorithm for Mixture Models. Duration: 1 時間1 時間 (期限 5月17日 15:59 JST)
+      2.1.8) 受講生によるテスト: [The EM algorithm for Mixture Models. Duration: 1 時間1 時間 (期限 5月17日 15:59 JST)](https://rpubs.com/englianhu/768289)
       
-      2.1.9) 他の受講生の課題を確認: The EM algorithm for Mixture Models (期限 5月20日 15:59 JST)
+      2.1.9) 他の受講生の課題を確認: [The EM algorithm for Mixture Models (期限 5月20日 15:59 JST)](https://rpubs.com/englianhu/768289)
       
 3) Week 3 : Bayesian estimation for Mixture Models
     
