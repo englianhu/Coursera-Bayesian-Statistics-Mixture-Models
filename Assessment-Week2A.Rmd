@@ -386,8 +386,6 @@ The point estimates, rounded to two decimal places, are $\hat{w}=0.09$, $\hat{\l
 
 ### 1st Peer
 
-**プロンプト**
-
 Provide the EM algorithm to fit the mixture model
 
 \begin{align}
@@ -454,8 +452,6 @@ The point estimates, rounded to two decimal places, are $w = 0.09$, $lambda = 3.
 <br><br>
 
 ### 2nd Peer
-
-**プロンプト**
 
 Provide the EM algorithm to fit the mixture model
 
@@ -552,8 +548,6 @@ The point estimates, rounded to two decimal places, are $w = 0.09$, $lambda = 3.
 <br><br>
 
 ### 3rd Peer
-
-**プロンプト**
 
 Provide the EM algorithm to fit the mixture model
 
