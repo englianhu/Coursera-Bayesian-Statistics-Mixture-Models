@@ -157,9 +157,11 @@ Reference from tutorial : [Sample Code for EM Example 2](https://github.com/engl
 
 ### ルーブリック
 
+<br><br>
 
 ### ルーブリック
 
+<br><br>
 
 ## レビュー
 
@@ -167,15 +169,27 @@ Reference from tutorial : [Sample Code for EM Example 2](https://github.com/engl
 
 **プロンプト**
 
+#### ルーブリック
+
 <br><br>
 
 ### 2nd Peer
 
 **プロンプト**
 
+<br><br>
 
 #### ルーブリック
 
+
+<br><br>
+
+### 3rd Peer
+
+**プロンプト**
+
+
+#### ルーブリック
 
 <br><br>
 
