@@ -300,22 +300,285 @@ for(s in 1:(rrr-burn)){
 paste(counter, w_sum/counter, lambda_sum/counter, mu_sum/counter, sigma_sum/counter)
 ```
 
+#### Marking
+
 <br><br>
 
 ## レビュー
 
 ### 1st Peer
 
+#### Assignment
+
+#### Marking
+
+Are the initial values appropriate?
+
+The starting values of four parameters, ww, \lambdaλ, \muμ and \tauτ, need to be specified, and the context of the problem provides some useful clues.
+
+Because the lognormal component corresponds to the "normal" components, and we expect the majority of the observations to be in this class, it makes sense to bias the weights so that w \le 1/2w≤1/2.  For example, we could use w = 0.1w=0.1, or simply sample a random starting from something like a Beta(1,9) distribution (which has expectation 0.1).
+
+For the same reason, a reasonable starting values for \muμ and \tauτ correspond to their maximum likelihood estimators under the simpler log-Gaussian model.  Since a random variable follows a log-Gaussian distribution if and only if its logarithm follows a Gaussian distribution, we can use \mu = mean(log(x))μ=mean(log(x)) and \tau = sd(log(x))τ=sd(log(x)) as our starting values.  Alternatively, the values could be sampled from distributions centered around these values in order to make the starting values random.
+
+Because the defective components should have shorter lifespan than normal components, it makes sense to take 1/\lambda1/λ (which is the mean of the first component) to be a small fraction of the overall mean of the data (we use 5% of the overall mean, but other similar values would all be reasonable).
+
+Finally, in this case the indicators c_1, \ldots, c_nc 
+1
+​	
+ ,…,c 
+n
+​	
+  could be randomly initialized to either component of the mixture.
+
+In summary, you should expect an initialization such as this one:
+
+12345
+w      = 0.1
+mu     = mean(log(x))
+tau    = sd(log(x))
+lambda = 20/mean(x)
+cc     = sample(1:2, n, TRUE, c(1/2, 1/2))
+
+0点
+No
+
+
+1点
+Some are, but not all
+
+
+2点
+Yes
+
+ Is the full conditional for the indicators c_1, \ldots, c_nc 
+1
+​	
+ ,…,c 
+n
+​	
+  correct?
+
+The indicators c_1, \ldots, c_nc 
+1
+​	
+ ,…,c 
+n
+​	
+  are conditionally independent from each other, and we have
+
+\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}  Pr(c 
+i
+​	
+ =1∣⋯)∝wλexp{−λx 
+i
+​	
+ }
+
+while
+
+\Pr(c_i = 2 \mid \cdots) \propto  (1-w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x_i) - \mu \right)^2\right\}Pr(c 
+i
+​	
+ =2∣⋯)∝(1−w) 
+2π
+​	
+ τx
+1
+​	
+ exp{− 
+2τ 
+2
+ 
+1
+​	
+ (log(x 
+i
+​	
+ )−μ) 
+2
+ }
+
+Hence, the code to sample the indicators might look something like this:
+
+12345678
+  # Full conditional for cc
+  v = rep(0,2)
+  for(i in 1:n){
+    v[1]  = log(w) + dexp(x[i], lambda, log=TRUE)
+    v[2]  = log(1-w) + dlnorm(x[i], mu, tau, log=TRUE)
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  }
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.  For example, the calculation could be vectorized to increase efficiency.
+
+
+0点
+No
+
+
+1点
+Yes
+
+Is the full conditional for the weight ww correct?
+
+This is a simple one, as its structure is common to all mixture models.  Recalling that the prior on ww is a uniform distribution on [0,1][0,1], we have
+
+w \mid \cdots \sim \text{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)w∣⋯∼Beta(m(c)+1,n−m(c)+1)
+
+where m(\mathbf{c})m(c) is the number of observations that \mathbf{c}c assigns to component 1.  The associated code might look something like this
+
+12
+  # Full conditional for w
+  w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+or, alternatively,
+
+12
+  # Full conditional for w
+  w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+
+0点
+No
+
+
+1点
+Some are correct, but not all of them
+
+
+2点
+Yes
+
+Is the full conditional for the weight \lambdaλ correct?
+
+Since the prior is conditionally conjugate, it is easy to see that
+
+\lambda \mid \cdots \sim \text{Gam} \left( 1 + m(\mathbf{c}) , 1 + \sum_{i:c_i = 1} x_i\right) λ∣⋯∼Gam(1+m(c),1+∑ 
+i:c 
+i
+​	
+ =1
+​	
+ x 
+i
+​	
+ )
+
+Hence, the code might look something like
+
+12
+  # Full conditional for lambda
+  lambda = rgamma(1, 1 + sum(cc==1), 1 + sum(x[cc==1])
+
+0点
+No
+
+
+1点
+Yes
+
+Is the full conditional for the weight \muμ correct?
+
+The full-conditional for \muμ is a Gaussian distribution,
+
+\mu \mid \cdots \sim \text{N} \left( \frac{\frac{\sum_{i:c_i=1}x_i}{\tau^2} + 0}{\frac{m(\mathbf{c})}{\tau^2} + 1} , \frac{1}{\frac{m(\mathbf{c})}{\tau^2} + 1} \right)μ∣⋯∼N( 
+τ 
+2
+ 
+m(c)
+​	
+ +1
+τ 
+2
+ 
+∑ 
+i:c 
+i
+​	
+ =1
+​	
+ x 
+i
+​	
+ 
+​	
+ +0
+​	
+ , 
+τ 
+2
+ 
+m(c)
+​	
+ +1
+1
+​	
+ )
+
+The corresponding R code might look like:
+
+1234
+  # Full conditional for mu
+  mean.post = (sum(log(x[cc==2]))/tau^2 + 0)/(sum(cc==2)/tau^2 + 1)
+  std.post = sqrt(1/(sum(cc==2)/tau^2 + 1))
+  mu = rnorm(1, mean.post, std.post)
+
+0点
+No
+
+
+1点
+Yes
+
+Is the full conditional for the weight \tauτ correct?
+
+The full conditional for \tau^2τ 
+2
+  is an inverse Gamma distribution,
+
+\tau^2 \mid \cdots \sim \text{IGam}\left( 2 + n - m\left(\mathbf{c}\right), 1+ \frac{1}{2}\sum_{i:c_i = 2} \left\{ \log x_i - \mu \right\}^2 \right)τ 
+2
+ ∣⋯∼IGam(2+n−m(c),1+ 
+2
+1
+​	
+ ∑ 
+i:c 
+i
+​	
+ =2
+​	
+ {logx 
+i
+​	
+ −μ} 
+2
+ )
+
+The corresponding R code might look like:
+
+12
+# Full conditional for tau
+tau = sqrt(1/rgamma(1, 2 + sum(cc==2), 1 + 0.5*sum((log(x[cc==2]) - mu)^2)))
+
+- 0点 No
+- 1点 Yes
 
 <br><br>
 
 ### 2nd Peer
 
+#### Asignment
+
+#### Marking
 
 <br><br>
 
 ### 3rd Peer
 
+#### Asignment
+
+#### Marking
 
 <br><br>
 
