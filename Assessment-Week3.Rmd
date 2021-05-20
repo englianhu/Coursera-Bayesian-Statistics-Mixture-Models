@@ -35,6 +35,9 @@ pre code {
   word-wrap: normal;
   white-space: pre;
 }
+.table-hover > tbody > tr:hover { 
+  background-color: #8D918D;
+}
 </style>
 
 ```{r class.source = 'bg-success', class.output = 'bg-primary', message = FALSE, warning = FALSE}
@@ -72,12 +75,21 @@ h3 { color: #375E97; }
     background: linear-gradient(155deg, #002C54 20%, #4CB5F5 80%);
     }
   }
+
+.hover-animate-background3 {
+  color: #FFD64D;
+  background: linear-gradient(155deg, #A10115 0%, #FF3C5C 100%);
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #A10115 20%, #FF3C5C 80%);
+    }
+  }
 ```
 
 ```{r global_options, class.source = 'hover-animate-background1', class.output = 'hover-animate-background2'}
 ## https://stackoverflow.com/a/36846793/3806250
 options(width = 999)
-knitr::opts_chunk$set(class.source = 'hover-animate-background1', class.output = 'hover-animate-background2', class.error = 'bg-danger')
+knitr::opts_chunk$set(class.source = 'hover-animate-background1', class.output = 'hover-animate-background2', class.error = 'hover-animate-background3')
 ```
 
 <br><br>
@@ -314,252 +326,134 @@ paste(counter, w_sum/counter, lambda_sum/counter, mu_sum/counter, sigma_sum/coun
 
 Are the initial values appropriate?
 
-The starting values of four parameters, ww, \lambdaλ, \muμ and \tauτ, need to be specified, and the context of the problem provides some useful clues.
+The starting values of four parameters, $\omega$, $\lambda$, $\mu$ and $\tau$, need to be specified, and the context of the problem provides some useful clues.
 
-Because the lognormal component corresponds to the "normal" components, and we expect the majority of the observations to be in this class, it makes sense to bias the weights so that w \le 1/2w≤1/2.  For example, we could use w = 0.1w=0.1, or simply sample a random starting from something like a Beta(1,9) distribution (which has expectation 0.1).
+Because the lognormal component corresponds to the "normal" components, and we expect the majority of the observations to be in this class, it makes sense to bias the weights so that $\omega \le 1/2$.  For example, we could use $\omega = 0.1$, or simply sample a random starting from something like a Beta(1,9) distribution (which has expectation 0.1).
 
-For the same reason, a reasonable starting values for \muμ and \tauτ correspond to their maximum likelihood estimators under the simpler log-Gaussian model.  Since a random variable follows a log-Gaussian distribution if and only if its logarithm follows a Gaussian distribution, we can use \mu = mean(log(x))μ=mean(log(x)) and \tau = sd(log(x))τ=sd(log(x)) as our starting values.  Alternatively, the values could be sampled from distributions centered around these values in order to make the starting values random.
+For the same reason, a reasonable starting values for $\mu$ and $\tau$ correspond to their maximum likelihood estimators under the simpler log-Gaussian model. Since a random variable follows a log-Gaussian distribution if and only if its logarithm follows a Gaussian distribution, we can use $\mu = mean(log(x))$ and $\tau = sd(log(x))$ as our starting values. Alternatively, the values could be sampled from distributions centered around these values in order to make the starting values random.
 
-Because the defective components should have shorter lifespan than normal components, it makes sense to take 1/\lambda1/λ (which is the mean of the first component) to be a small fraction of the overall mean of the data (we use 5% of the overall mean, but other similar values would all be reasonable).
+Because the defective components should have shorter lifespan than normal components, it makes sense to take $\frac{1}{\lambda}$ (which is the mean of the first component) to be a small fraction of the overall mean of the data (we use $5%$ of the overall mean, but other similar values would all be reasonable).
 
-Finally, in this case the indicators c_1, \ldots, c_nc 
-1
-​	
- ,…,c 
-n
-​	
-  could be randomly initialized to either component of the mixture.
+Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initialized to either component of the mixture.
 
 In summary, you should expect an initialization such as this one:
 
-12345
+```{r error = TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
 lambda = 20/mean(x)
 cc     = sample(1:2, n, TRUE, c(1/2, 1/2))
+```
 
-0点
-No
+- 0点 No
+- 1点 Some are, but not all
+- 2点 Yes
 
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
 
-1点
-Some are, but not all
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
 
-
-2点
-Yes
-
- Is the full conditional for the indicators c_1, \ldots, c_nc 
-1
-​	
- ,…,c 
-n
-​	
-  correct?
-
-The indicators c_1, \ldots, c_nc 
-1
-​	
- ,…,c 
-n
-​	
-  are conditionally independent from each other, and we have
-
-\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}  Pr(c 
-i
-​	
- =1∣⋯)∝wλexp{−λx 
-i
-​	
- }
-
-while
-
-\Pr(c_i = 2 \mid \cdots) \propto  (1-w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x_i) - \mu \right)^2\right\}Pr(c 
-i
-​	
- =2∣⋯)∝(1−w) 
-2π
-​	
- τx
-1
-​	
- exp{− 
-2τ 
-2
- 
-1
-​	
- (log(x 
-i
-​	
- )−μ) 
-2
- }
+$\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ while $\Pr(c_i = 2 \mid \cdots) \propto  (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x_i) - \mu \right)^2\right\}$
 
 Hence, the code to sample the indicators might look something like this:
 
-12345678
-  # Full conditional for cc
-  v = rep(0,2)
-  for(i in 1:n){
-    v[1]  = log(w) + dexp(x[i], lambda, log=TRUE)
-    v[2]  = log(1-w) + dlnorm(x[i], mu, tau, log=TRUE)
-    v     = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
-  }
+```{r error = TRUE}
+# Full conditional for cc
+v = rep(0,2)
+for(i in 1:n){
+  v[1]  = log(w) + dexp(x[i], lambda, log=TRUE)
+  v[2]  = log(1-w) + dlnorm(x[i], mu, tau, log=TRUE)
+  v     = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
 Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.  For example, the calculation could be vectorized to increase efficiency.
 
+- 0点 No
+- 1点 Yes
 
-0点
-No
+**Is the full conditional for the weight $\omega$ correct?**
 
+This is a simple one, as its structure is common to all mixture models. Recalling that the prior on $\omega$ is a uniform distribution on [0,1][0,1], we have
 
-1点
-Yes
+$$
+\omega \mid \cdots \sim \text{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)
+$$
 
-Is the full conditional for the weight ww correct?
+where $m(\mathbf{c})$ is the number of observations that \mathbf{c}c assigns to component 1. The associated code might look something like this
 
-This is a simple one, as its structure is common to all mixture models.  Recalling that the prior on ww is a uniform distribution on [0,1][0,1], we have
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
 
-w \mid \cdots \sim \text{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)w∣⋯∼Beta(m(c)+1,n−m(c)+1)
-
-where m(\mathbf{c})m(c) is the number of observations that \mathbf{c}c assigns to component 1.  The associated code might look something like this
-
-12
-  # Full conditional for w
-  w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
 or, alternatively,
 
-12
-  # Full conditional for w
-  w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
 Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
 
+- 0点 No
+- 1点 Some are correct, but not all of them
+- 2点 Yes
 
-0点
-No
-
-
-1点
-Some are correct, but not all of them
-
-
-2点
-Yes
-
-Is the full conditional for the weight \lambdaλ correct?
+**Is the full conditional for the weight $\lambda$ correct?**
 
 Since the prior is conditionally conjugate, it is easy to see that
 
-\lambda \mid \cdots \sim \text{Gam} \left( 1 + m(\mathbf{c}) , 1 + \sum_{i:c_i = 1} x_i\right) λ∣⋯∼Gam(1+m(c),1+∑ 
-i:c 
-i
-​	
- =1
-​	
- x 
-i
-​	
- )
+$$
+\lambda \mid \cdots \sim \text{Gam} \left( 1 + m(\mathbf{c}) , 1 + \sum_{i:c_i = 1} x_i\right)
+$$
 
 Hence, the code might look something like
 
-12
-  # Full conditional for lambda
-  lambda = rgamma(1, 1 + sum(cc==1), 1 + sum(x[cc==1])
+```{r error=TRUE}
+# Full conditional for lambda
+lambda = rgamma(1, 1 + sum(cc==1), 1 + sum(x[cc==1])
+```
 
-0点
-No
+- 0点 No
+- 1点 Yes
 
+**Is the full conditional for the weight $\mu$ correct?**
 
-1点
-Yes
+The full-conditional for $\mu$ is a Gaussian distribution,
 
-Is the full conditional for the weight \muμ correct?
-
-The full-conditional for \muμ is a Gaussian distribution,
-
-\mu \mid \cdots \sim \text{N} \left( \frac{\frac{\sum_{i:c_i=1}x_i}{\tau^2} + 0}{\frac{m(\mathbf{c})}{\tau^2} + 1} , \frac{1}{\frac{m(\mathbf{c})}{\tau^2} + 1} \right)μ∣⋯∼N( 
-τ 
-2
- 
-m(c)
-​	
- +1
-τ 
-2
- 
-∑ 
-i:c 
-i
-​	
- =1
-​	
- x 
-i
-​	
- 
-​	
- +0
-​	
- , 
-τ 
-2
- 
-m(c)
-​	
- +1
-1
-​	
- )
+$$
+\mu \mid \cdots \sim \text{N} \left( \frac{\frac{\sum_{i:c_i=1}x_i}{\tau^2} + 0}{\frac{m(\mathbf{c})}{\tau^2} + 1} , \frac{1}{\frac{m(\mathbf{c})}{\tau^2} + 1} \right)
+$$
 
 The corresponding R code might look like:
 
-1234
-  # Full conditional for mu
-  mean.post = (sum(log(x[cc==2]))/tau^2 + 0)/(sum(cc==2)/tau^2 + 1)
-  std.post = sqrt(1/(sum(cc==2)/tau^2 + 1))
-  mu = rnorm(1, mean.post, std.post)
+```{r error=TRUE}
+# Full conditional for mu
+mean.post = (sum(log(x[cc==2]))/tau^2 + 0)/(sum(cc==2)/tau^2 + 1)
+std.post = sqrt(1/(sum(cc==2)/tau^2 + 1))
+mu = rnorm(1, mean.post, std.post)
+```
 
-0点
-No
+- 0点 No
+- 1点 Yes
 
+**Is the full conditional for the weight $\tau$ correct?**
 
-1点
-Yes
+The full conditional for $\tau^2$ is an inverse Gamma distribution,
 
-Is the full conditional for the weight \tauτ correct?
-
-The full conditional for \tau^2τ 
-2
-  is an inverse Gamma distribution,
-
-\tau^2 \mid \cdots \sim \text{IGam}\left( 2 + n - m\left(\mathbf{c}\right), 1+ \frac{1}{2}\sum_{i:c_i = 2} \left\{ \log x_i - \mu \right\}^2 \right)τ 
-2
- ∣⋯∼IGam(2+n−m(c),1+ 
-2
-1
-​	
- ∑ 
-i:c 
-i
-​	
- =2
-​	
- {logx 
-i
-​	
- −μ} 
-2
- )
+$$
+\tau^2 \mid \cdots \sim \\\text{IGam}\left( 2 + n - m\left(\mathbf{c}\right), 1+ \frac{1}{2}\sum_{i:c_i = 2} \left\{ \log x_i - \mu \right\}^2 \right)
+$$
 
 The corresponding R code might look like:
 
-12
+```{r error=TRUE}
 # Full conditional for tau
 tau = sqrt(1/rgamma(1, 2 + sum(cc==2), 1 + 0.5*sum((log(x[cc==2]) - mu)^2)))
+```
 
 - 0点 No
 - 1点 Yes
@@ -645,16 +539,7 @@ sys
 
 ## Reference
 
-- [Bayesian Statistics: Mixture Models (Assessment 2 Codes)](https://rpubs.com/englianhu/767588)
-- [Global CSS settings, fundamental HTML elements styled and enhanced with extensible classes, and an advanced grid system](https://getbootstrap.com/docs/3.3/css/#helper-classes-backgrounds)
-- [Chunk option class.output is not working on Error Message](https://stackoverflow.com/a/55006240/3806250)
-- [Width of R code chunk output in RMarkdown files knitr-ed to html](https://stackoverflow.com/a/36846864/3806250)
-- [CodePen Home MathJax scale to fit container](https://codepen.io/mathjax/pen/qEdqPg)
-- [align, aligned and R Markdown](https://tex.stackexchange.com/questions/284538/align-aligned-and-r-markdown)
-- [**FR***: MathJax scale to fit container #2135](https://github.com/rstudio/rmarkdown/issues/2135)
-- [rmarkdown-book/03-documents.Rmd : MathJax equations](https://github.com/rstudio/rmarkdown-book/blob/master/03-documents.Rmd)
-- [Plot in R with `echarts4r`](https://www.infoworld.com/article/3607068/plot-in-r-with-echarts4r.html)
-- [`echarts` : Theme Builder](https://echarts.apache.org/en/theme-builder.html)
-- [Sample Code for EM Example 1](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Sample-Code-for%20EM-EX1.R)
+- [Is it possible to change the hover colour in kableExtra?](https://stackoverflow.com/a/49429306/3806250)
+- []()
 
 <br><br>
