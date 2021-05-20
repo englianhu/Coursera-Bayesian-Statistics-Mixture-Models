@@ -735,7 +735,7 @@ f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi
 $$
 
 ```{r}
-x  = as.matrix(read.csv("/data/fuses.csv",header=FALSE))
+x  = as.matrix(read.csv("data/fuses.csv",header=FALSE))
 
 ## Initialize the parameters
 n  = length(x)
@@ -749,9 +749,309 @@ w      = 0.5
 #prior parameters
 eta = 0          # Mean 0 for the prior on mu
 tau = 1          # Standard deviation 1 on the prior for mu
+dd  = 2          #ig pror parameter for sigma 
+qq  = 1
 
+## The actual MCMC algorithm starts here
+# Number of iterations of the sampler
+rrr   = 10000
+burn  = 1000
 
+# Storing the samples
+cc.out     = array(0, dim=c(rrr, n))
+w.out      = rep(0, rrr)
+lambda.out = array(0, dim=c(rrr))
+mu.out     = array(0,dim = rrr)
+sigma.out  = array(0,dim = rrr)
+logpost    = rep(0, rrr)
 
+# MCMC iterations
+for(s in 1:rrr){
+  
+  # Sample the indicators
+  for(i in 1:n){
+    v     = rep(0,2)
+    v[1]  = log(w) +dexp(x[i], lambda,log = TRUE)
+    v[2]  = log(1-w) + dlnorm(x[i], mu,sigma, log = TRUE)
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:2, 1, replace = TRUE, prob = v)
+    }
+  # Sample the weights
+  w = rbeta(1, 1+ sum(cc==1), 1 + sum(cc==2))
+  
+  # Sample lambda
+  lambda = rgamma(1,1+sum(cc==1), 1+sum(x[cc==1]))
+  
+  #sample log mean
+  n2       = sum(cc==2)
+  xsum2    = sum(log(x[cc==2]))
+  tau2.hat = 1/(n2/sigma^2 + 1/tau^2)
+  mu.hat   = tau2.hat*(xsum2/sigma^2 + eta/tau^2)
+  mu       = rnorm(1, mu.hat, sqrt(tau2.hat))
+  
+  #sample sd d
+  dd.star  = dd + n2/2
+  qq.star = qq + sum((log(x[cc==2]) - mu)^2)/2
+  sigma   = sqrt(rinvgamma(1, dd.star, qq.star))
+  
+  # Store samples
+  cc.out[s,]    = cc
+  w.out[s]      = w
+  lambda.out[s] = lambda
+  mu.out[s]     = mu
+  sigma.out[s]  = sigma
+  
+  for(i in 1:n){
+    if(cc[i]==1){
+      
+      logpost[s] = logpost[s] + log(w) + dexp(x[i], lambda, log = T)
+      
+    } else {
+      logpost[s] = logpost[s] + log(1-w) + dlnorm(x[i], mu, sigma, log = TRUE)
+    }
+  }
+  
+  logpost[s] = logpost[s] + dbeta(w, 1, 1, log = T) + dgamma(lambda, 1, 1, log = T) + dnorm(mu, 0, 1, log = T) + dinvgamma(sigma^2, dd, qq)
+  
+  if(s/500==floor(s/500)){
+    print(paste("s =", s))
+  }
+}
+```
+
+Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
+
+```
+round(mean(w.out),2): 0.1
+round(mean(lambda.out),2): 2.31
+round(mean(mu.out),2) : 0.79
+round(mean(sigma.out),2) : 0.38
+```
+
+#### Marking
+
+**Are the initial values appropriate?**
+
+The starting values of four parameters, $\omega$, $\lambda$, $\mu$ and $\tau$, need to be specified, and the context of the problem provides some useful clues.
+
+Because the lognormal component corresponds to the "normal" components, and we expect the majority of the observations to be in this class, it makes sense to bias the weights so that $\omega \le 1/2$.  For example, we could use $\omega = 0.1$, or simply sample a random starting from something like a Beta(1,9) distribution (which has expectation 0.1).
+
+For the same reason, a reasonable starting values for $\mu$ and $\tau$ correspond to their maximum likelihood estimators under the simpler log-Gaussian model. Since a random variable follows a log-Gaussian distribution if and only if its logarithm follows a Gaussian distribution, we can use $\mu = mean(log(x))$ and $\tau = sd(log(x))$ as our starting values. Alternatively, the values could be sampled from distributions centered around these values in order to make the starting values random.
+
+Because the defective components should have shorter lifespan than normal components, it makes sense to take $\frac{1}{\lambda}$ (which is the mean of the first component) to be a small fraction of the overall mean of the data (we use $5%$ of the overall mean, but other similar values would all be reasonable).
+
+Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initialized to either component of the mixture.
+
+In summary, you should expect an initialization such as this one:
+
+```{r error = TRUE}
+w      = 0.1
+mu     = mean(log(x))
+tau    = sd(log(x))
+lambda = 20/mean(x)
+cc     = sample(1:2, n, TRUE, c(1/2, 1/2))
+```
+
+- 0点 No
+- 1点 Some are, but not all
+- <span style='color:red'>2点 Yes</span>
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ while $\Pr(c_i = 2 \mid \cdots) \propto  (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x_i) - \mu \right)^2\right\}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error = TRUE}
+# Full conditional for cc
+v = rep(0,2)
+for(i in 1:n){
+  v[1]  = log(w) + dexp(x[i], lambda, log=TRUE)
+  v[2]  = log(1-w) + dlnorm(x[i], mu, tau, log=TRUE)
+  v     = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.  For example, the calculation could be vectorized to increase efficiency.
+
+- 0点 No
+- <span style='color:red'>1点 Yes</span>
+
+**Is the full conditional for the weight $\omega$ correct?**
+
+This is a simple one, as its structure is common to all mixture models. Recalling that the prior on $\omega$ is a uniform distribution on [0,1][0,1], we have
+
+$$
+\omega \mid \cdots \sim \text{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)
+$$
+
+where $m(\mathbf{c})$ is the number of observations that \mathbf{c}c assigns to component 1. The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- 1点 Some are correct, but not all of them
+- <span style='color:red'>2点 Yes</span>
+
+**Is the full conditional for the weight $\lambda$ correct?**
+
+Since the prior is conditionally conjugate, it is easy to see that
+
+$$
+\lambda \mid \cdots \sim \text{Gam} \left( 1 + m(\mathbf{c}) , 1 + \sum_{i:c_i = 1} x_i\right)
+$$
+
+Hence, the code might look something like
+
+```{r error=TRUE}
+# Full conditional for lambda
+lambda = rgamma(1, 1 + sum(cc==1), 1 + sum(x[cc==1]))
+```
+
+- 0点 No
+- <span style='color:red'>1点 Yes</span>
+
+**Is the full conditional for the weight $\mu$ correct?**
+
+The full-conditional for $\mu$ is a Gaussian distribution,
+
+$$
+\mu \mid \cdots \sim \text{N} \left( \frac{\frac{\sum_{i:c_i=1}x_i}{\tau^2} + 0}{\frac{m(\mathbf{c})}{\tau^2} + 1} , \frac{1}{\frac{m(\mathbf{c})}{\tau^2} + 1} \right)
+$$
+
+The corresponding R code might look like:
+
+```{r error=TRUE}
+# Full conditional for mu
+mean.post = (sum(log(x[cc==2]))/tau^2 + 0)/(sum(cc==2)/tau^2 + 1)
+std.post = sqrt(1/(sum(cc==2)/tau^2 + 1))
+mu = rnorm(1, mean.post, std.post)
+```
+
+- 0点 No
+- <span style='color:red'>1点 Yes</span>
+
+**Is the full conditional for the weight $\tau$ correct?**
+
+The full conditional for $\tau^2$ is an inverse Gamma distribution,
+
+$$
+\tau^2 \mid \cdots \sim \\\text{IGam}\left( 2 + n - m\left(\mathbf{c}\right), 1+ \frac{1}{2}\sum_{i:c_i = 2} \left\{ \log x_i - \mu \right\}^2 \right)
+$$
+
+The corresponding R code might look like:
+
+```{r error=TRUE}
+# Full conditional for tau
+tau = sqrt(1/rgamma(1, 2 + sum(cc==2), 1 + 0.5*sum((log(x[cc==2]) - mu)^2)))
+```
+
+- 0点 No
+- <span style='color:red'>1点 Yes</span>
+
+**Are the posterior means of the parameters generated by the algorithm correct?**
+
+The posterior means, rounded to two decimal places, are $\text{E} \left\{ w \right\} \approx 0.10$, $\text{E} \left\{ \lambda \right\} \approx 2.29$, $\text{E} \left\{ \mu \right\} \approx 0.79$ and $\text{E} \left\{ \tau \right\} \approx 0.38$
+
+- 0点 No
+- <span style='color:red'>2点 Yes</span>
+
+<br><br>
+
+### 3rd Peer
+
+#### Asignment
+
+**Provide an MCMC algorithm to fit the mixture model**
+
+$$
+\begin{align}
+f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
+\end{align}
+$$
+
+```{r}
+# MCMC iterations
+set.seed(1024)
+
+data = read.csv("data/fuses.csv", header = FALSE)
+x    = data$V1
+rm(data)
+
+## Initialize the parameters
+w      = 0.1
+mu     = mean(log(x))
+sigma  = sd(log(x))
+lambda = 20/mean(x) #Initial standard deviation
+n      = length(x)
+
+# Plot the initial guess for the density
+KK  = 2
+aa  = rep(1, KK)
+eta = 0
+tau = 1
+dd  = 2
+qq  = 1
+phi = 1
+rrr = 2000
+
+cc.out     = array(0, dim = c(rrr, n))
+w.out      = rep(0, rrr)
+mu.out     = rep(0, rrr)
+tau.out    = rep(0, rrr)
+lambda.out = rep(0, rrr)
+logpost    = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  cc = rep(0, n)
+  v  = rep(0, KK)
+  
+  for(i in 1:n){
+    v[1]  = log(w) + dexp(x[i], lambda, log = TRUE)
+    v[2]  = log(1-w) + dlnorm(x[i], mu, tau, log = TRUE)
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:2, 1, replace = TRUE, prob = v)
+  }
+  
+  # Sample
+  w         = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+  lambda    = rgamma(1,1 + sum(cc==1), 1 + sum(x[cc==1]))
+  mean.post = (sum(log(x[cc==2]))/tau^2 + 0)/(sum(cc==2)/tau^2 + 1)
+  std.post  = sqrt(1/(sum(cc==2)/tau^2 + 1))
+  mu        = rnorm(1, mean.post, std.post)
+  tau       = sqrt(1/rgamma(1, 2 + sum(cc==2), 1 + sum((log(x[cc==2]) - mu)^2)))
+  
+  # Store samples
+  cc.out[s,]    = cc
+  w.out[s]      = w
+  lambda.out[s] = lambda
+  mu.out[s]     = mu
+  tau.out[s]    = sigma
+}
+
+paste(cc.out, w.out, lambda.out, mu.out, tau.out)
+```
+
+Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
+
+```
+w:0.10; lambda:2.29; mu: 0.79; tau: 0.38
 ```
 
 #### Marking
@@ -897,9 +1197,12 @@ The posterior means, rounded to two decimal places, are $\text{E} \left\{ w \rig
 - 0点 No
 - 2点 Yes
 
+- 0点 No
+- 1点 Yes
+
 <br><br>
 
-### 3rd Peer
+### 4th Peer
 
 #### Asignment
 
@@ -910,6 +1213,522 @@ $$
 f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
 \end{align}
 $$
+
+```{r}
+
+```
+
+Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
+
+```
+```
+
+#### Marking
+
+**Are the initial values appropriate?**
+
+The starting values of four parameters, $\omega$, $\lambda$, $\mu$ and $\tau$, need to be specified, and the context of the problem provides some useful clues.
+
+Because the lognormal component corresponds to the "normal" components, and we expect the majority of the observations to be in this class, it makes sense to bias the weights so that $\omega \le 1/2$.  For example, we could use $\omega = 0.1$, or simply sample a random starting from something like a Beta(1,9) distribution (which has expectation 0.1).
+
+For the same reason, a reasonable starting values for $\mu$ and $\tau$ correspond to their maximum likelihood estimators under the simpler log-Gaussian model. Since a random variable follows a log-Gaussian distribution if and only if its logarithm follows a Gaussian distribution, we can use $\mu = mean(log(x))$ and $\tau = sd(log(x))$ as our starting values. Alternatively, the values could be sampled from distributions centered around these values in order to make the starting values random.
+
+Because the defective components should have shorter lifespan than normal components, it makes sense to take $\frac{1}{\lambda}$ (which is the mean of the first component) to be a small fraction of the overall mean of the data (we use $5%$ of the overall mean, but other similar values would all be reasonable).
+
+Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initialized to either component of the mixture.
+
+In summary, you should expect an initialization such as this one:
+
+```{r error = TRUE}
+w      = 0.1
+mu     = mean(log(x))
+tau    = sd(log(x))
+lambda = 20/mean(x)
+cc     = sample(1:2, n, TRUE, c(1/2, 1/2))
+```
+
+- 0点 No
+- 1点 Some are, but not all
+- 2点 Yes
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ while $\Pr(c_i = 2 \mid \cdots) \propto  (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x_i) - \mu \right)^2\right\}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error = TRUE}
+# Full conditional for cc
+v = rep(0,2)
+for(i in 1:n){
+  v[1]  = log(w) + dexp(x[i], lambda, log=TRUE)
+  v[2]  = log(1-w) + dlnorm(x[i], mu, tau, log=TRUE)
+  v     = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.  For example, the calculation could be vectorized to increase efficiency.
+
+- 0点 No
+- 1点 Yes
+
+**Is the full conditional for the weight $\omega$ correct?**
+
+This is a simple one, as its structure is common to all mixture models. Recalling that the prior on $\omega$ is a uniform distribution on [0,1][0,1], we have
+
+$$
+\omega \mid \cdots \sim \text{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)
+$$
+
+where $m(\mathbf{c})$ is the number of observations that \mathbf{c}c assigns to component 1. The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- 1点 Some are correct, but not all of them
+- 2点 Yes
+
+**Is the full conditional for the weight $\lambda$ correct?**
+
+Since the prior is conditionally conjugate, it is easy to see that
+
+$$
+\lambda \mid \cdots \sim \text{Gam} \left( 1 + m(\mathbf{c}) , 1 + \sum_{i:c_i = 1} x_i\right)
+$$
+
+Hence, the code might look something like
+
+```{r error=TRUE}
+# Full conditional for lambda
+lambda = rgamma(1, 1 + sum(cc==1), 1 + sum(x[cc==1]))
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the full conditional for the weight $\mu$ correct?**
+
+The full-conditional for $\mu$ is a Gaussian distribution,
+
+$$
+\mu \mid \cdots \sim \text{N} \left( \frac{\frac{\sum_{i:c_i=1}x_i}{\tau^2} + 0}{\frac{m(\mathbf{c})}{\tau^2} + 1} , \frac{1}{\frac{m(\mathbf{c})}{\tau^2} + 1} \right)
+$$
+
+The corresponding R code might look like:
+
+```{r error=TRUE}
+# Full conditional for mu
+mean.post = (sum(log(x[cc==2]))/tau^2 + 0)/(sum(cc==2)/tau^2 + 1)
+std.post = sqrt(1/(sum(cc==2)/tau^2 + 1))
+mu = rnorm(1, mean.post, std.post)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the full conditional for the weight $\tau$ correct?**
+
+The full conditional for $\tau^2$ is an inverse Gamma distribution,
+
+$$
+\tau^2 \mid \cdots \sim \\\text{IGam}\left( 2 + n - m\left(\mathbf{c}\right), 1+ \frac{1}{2}\sum_{i:c_i = 2} \left\{ \log x_i - \mu \right\}^2 \right)
+$$
+
+The corresponding R code might look like:
+
+```{r error=TRUE}
+# Full conditional for tau
+tau = sqrt(1/rgamma(1, 2 + sum(cc==2), 1 + 0.5*sum((log(x[cc==2]) - mu)^2)))
+```
+
+- 0点 No
+- 1点 Yes
+
+**Are the posterior means of the parameters generated by the algorithm correct?**
+
+The posterior means, rounded to two decimal places, are $\text{E} \left\{ w \right\} \approx 0.10$, $\text{E} \left\{ \lambda \right\} \approx 2.29$, $\text{E} \left\{ \mu \right\} \approx 0.79$ and $\text{E} \left\{ \tau \right\} \approx 0.38$
+
+- 0点 No
+- 2点 Yes
+
+- 0点 No
+- 1点 Yes
+
+<br><br>
+
+### 5th Peer
+
+#### Asignment
+
+**Provide an MCMC algorithm to fit the mixture model**
+
+$$
+\begin{align}
+f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
+\end{align}
+$$
+
+```{r}
+
+```
+
+Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
+
+```
+```
+
+#### Marking
+
+**Are the initial values appropriate?**
+
+The starting values of four parameters, $\omega$, $\lambda$, $\mu$ and $\tau$, need to be specified, and the context of the problem provides some useful clues.
+
+Because the lognormal component corresponds to the "normal" components, and we expect the majority of the observations to be in this class, it makes sense to bias the weights so that $\omega \le 1/2$.  For example, we could use $\omega = 0.1$, or simply sample a random starting from something like a Beta(1,9) distribution (which has expectation 0.1).
+
+For the same reason, a reasonable starting values for $\mu$ and $\tau$ correspond to their maximum likelihood estimators under the simpler log-Gaussian model. Since a random variable follows a log-Gaussian distribution if and only if its logarithm follows a Gaussian distribution, we can use $\mu = mean(log(x))$ and $\tau = sd(log(x))$ as our starting values. Alternatively, the values could be sampled from distributions centered around these values in order to make the starting values random.
+
+Because the defective components should have shorter lifespan than normal components, it makes sense to take $\frac{1}{\lambda}$ (which is the mean of the first component) to be a small fraction of the overall mean of the data (we use $5%$ of the overall mean, but other similar values would all be reasonable).
+
+Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initialized to either component of the mixture.
+
+In summary, you should expect an initialization such as this one:
+
+```{r error = TRUE}
+w      = 0.1
+mu     = mean(log(x))
+tau    = sd(log(x))
+lambda = 20/mean(x)
+cc     = sample(1:2, n, TRUE, c(1/2, 1/2))
+```
+
+- 0点 No
+- 1点 Some are, but not all
+- 2点 Yes
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ while $\Pr(c_i = 2 \mid \cdots) \propto  (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x_i) - \mu \right)^2\right\}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error = TRUE}
+# Full conditional for cc
+v = rep(0,2)
+for(i in 1:n){
+  v[1]  = log(w) + dexp(x[i], lambda, log=TRUE)
+  v[2]  = log(1-w) + dlnorm(x[i], mu, tau, log=TRUE)
+  v     = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.  For example, the calculation could be vectorized to increase efficiency.
+
+- 0点 No
+- 1点 Yes
+
+**Is the full conditional for the weight $\omega$ correct?**
+
+This is a simple one, as its structure is common to all mixture models. Recalling that the prior on $\omega$ is a uniform distribution on [0,1][0,1], we have
+
+$$
+\omega \mid \cdots \sim \text{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)
+$$
+
+where $m(\mathbf{c})$ is the number of observations that \mathbf{c}c assigns to component 1. The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- 1点 Some are correct, but not all of them
+- 2点 Yes
+
+**Is the full conditional for the weight $\lambda$ correct?**
+
+Since the prior is conditionally conjugate, it is easy to see that
+
+$$
+\lambda \mid \cdots \sim \text{Gam} \left( 1 + m(\mathbf{c}) , 1 + \sum_{i:c_i = 1} x_i\right)
+$$
+
+Hence, the code might look something like
+
+```{r error=TRUE}
+# Full conditional for lambda
+lambda = rgamma(1, 1 + sum(cc==1), 1 + sum(x[cc==1]))
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the full conditional for the weight $\mu$ correct?**
+
+The full-conditional for $\mu$ is a Gaussian distribution,
+
+$$
+\mu \mid \cdots \sim \text{N} \left( \frac{\frac{\sum_{i:c_i=1}x_i}{\tau^2} + 0}{\frac{m(\mathbf{c})}{\tau^2} + 1} , \frac{1}{\frac{m(\mathbf{c})}{\tau^2} + 1} \right)
+$$
+
+The corresponding R code might look like:
+
+```{r error=TRUE}
+# Full conditional for mu
+mean.post = (sum(log(x[cc==2]))/tau^2 + 0)/(sum(cc==2)/tau^2 + 1)
+std.post = sqrt(1/(sum(cc==2)/tau^2 + 1))
+mu = rnorm(1, mean.post, std.post)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the full conditional for the weight $\tau$ correct?**
+
+The full conditional for $\tau^2$ is an inverse Gamma distribution,
+
+$$
+\tau^2 \mid \cdots \sim \\\text{IGam}\left( 2 + n - m\left(\mathbf{c}\right), 1+ \frac{1}{2}\sum_{i:c_i = 2} \left\{ \log x_i - \mu \right\}^2 \right)
+$$
+
+The corresponding R code might look like:
+
+```{r error=TRUE}
+# Full conditional for tau
+tau = sqrt(1/rgamma(1, 2 + sum(cc==2), 1 + 0.5*sum((log(x[cc==2]) - mu)^2)))
+```
+
+- 0点 No
+- 1点 Yes
+
+**Are the posterior means of the parameters generated by the algorithm correct?**
+
+The posterior means, rounded to two decimal places, are $\text{E} \left\{ w \right\} \approx 0.10$, $\text{E} \left\{ \lambda \right\} \approx 2.29$, $\text{E} \left\{ \mu \right\} \approx 0.79$ and $\text{E} \left\{ \tau \right\} \approx 0.38$
+
+- 0点 No
+- 2点 Yes
+
+- 0点 No
+- 1点 Yes
+
+<br><br>
+
+### 6th Peer
+
+#### Asignment
+
+**Provide an MCMC algorithm to fit the mixture model**
+
+$$
+\begin{align}
+f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
+\end{align}
+$$
+
+```{r}
+
+```
+
+Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
+
+```
+```
+
+#### Marking
+
+**Are the initial values appropriate?**
+
+The starting values of four parameters, $\omega$, $\lambda$, $\mu$ and $\tau$, need to be specified, and the context of the problem provides some useful clues.
+
+Because the lognormal component corresponds to the "normal" components, and we expect the majority of the observations to be in this class, it makes sense to bias the weights so that $\omega \le 1/2$.  For example, we could use $\omega = 0.1$, or simply sample a random starting from something like a Beta(1,9) distribution (which has expectation 0.1).
+
+For the same reason, a reasonable starting values for $\mu$ and $\tau$ correspond to their maximum likelihood estimators under the simpler log-Gaussian model. Since a random variable follows a log-Gaussian distribution if and only if its logarithm follows a Gaussian distribution, we can use $\mu = mean(log(x))$ and $\tau = sd(log(x))$ as our starting values. Alternatively, the values could be sampled from distributions centered around these values in order to make the starting values random.
+
+Because the defective components should have shorter lifespan than normal components, it makes sense to take $\frac{1}{\lambda}$ (which is the mean of the first component) to be a small fraction of the overall mean of the data (we use $5%$ of the overall mean, but other similar values would all be reasonable).
+
+Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initialized to either component of the mixture.
+
+In summary, you should expect an initialization such as this one:
+
+```{r error = TRUE}
+w      = 0.1
+mu     = mean(log(x))
+tau    = sd(log(x))
+lambda = 20/mean(x)
+cc     = sample(1:2, n, TRUE, c(1/2, 1/2))
+```
+
+- 0点 No
+- 1点 Some are, but not all
+- 2点 Yes
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ while $\Pr(c_i = 2 \mid \cdots) \propto  (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x_i) - \mu \right)^2\right\}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error = TRUE}
+# Full conditional for cc
+v = rep(0,2)
+for(i in 1:n){
+  v[1]  = log(w) + dexp(x[i], lambda, log=TRUE)
+  v[2]  = log(1-w) + dlnorm(x[i], mu, tau, log=TRUE)
+  v     = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.  For example, the calculation could be vectorized to increase efficiency.
+
+- 0点 No
+- 1点 Yes
+
+**Is the full conditional for the weight $\omega$ correct?**
+
+This is a simple one, as its structure is common to all mixture models. Recalling that the prior on $\omega$ is a uniform distribution on [0,1][0,1], we have
+
+$$
+\omega \mid \cdots \sim \text{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)
+$$
+
+where $m(\mathbf{c})$ is the number of observations that \mathbf{c}c assigns to component 1. The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- 1点 Some are correct, but not all of them
+- 2点 Yes
+
+**Is the full conditional for the weight $\lambda$ correct?**
+
+Since the prior is conditionally conjugate, it is easy to see that
+
+$$
+\lambda \mid \cdots \sim \text{Gam} \left( 1 + m(\mathbf{c}) , 1 + \sum_{i:c_i = 1} x_i\right)
+$$
+
+Hence, the code might look something like
+
+```{r error=TRUE}
+# Full conditional for lambda
+lambda = rgamma(1, 1 + sum(cc==1), 1 + sum(x[cc==1]))
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the full conditional for the weight $\mu$ correct?**
+
+The full-conditional for $\mu$ is a Gaussian distribution,
+
+$$
+\mu \mid \cdots \sim \text{N} \left( \frac{\frac{\sum_{i:c_i=1}x_i}{\tau^2} + 0}{\frac{m(\mathbf{c})}{\tau^2} + 1} , \frac{1}{\frac{m(\mathbf{c})}{\tau^2} + 1} \right)
+$$
+
+The corresponding R code might look like:
+
+```{r error=TRUE}
+# Full conditional for mu
+mean.post = (sum(log(x[cc==2]))/tau^2 + 0)/(sum(cc==2)/tau^2 + 1)
+std.post = sqrt(1/(sum(cc==2)/tau^2 + 1))
+mu = rnorm(1, mean.post, std.post)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the full conditional for the weight $\tau$ correct?**
+
+The full conditional for $\tau^2$ is an inverse Gamma distribution,
+
+$$
+\tau^2 \mid \cdots \sim \\\text{IGam}\left( 2 + n - m\left(\mathbf{c}\right), 1+ \frac{1}{2}\sum_{i:c_i = 2} \left\{ \log x_i - \mu \right\}^2 \right)
+$$
+
+The corresponding R code might look like:
+
+```{r error=TRUE}
+# Full conditional for tau
+tau = sqrt(1/rgamma(1, 2 + sum(cc==2), 1 + 0.5*sum((log(x[cc==2]) - mu)^2)))
+```
+
+- 0点 No
+- 1点 Yes
+
+**Are the posterior means of the parameters generated by the algorithm correct?**
+
+The posterior means, rounded to two decimal places, are $\text{E} \left\{ w \right\} \approx 0.10$, $\text{E} \left\{ \lambda \right\} \approx 2.29$, $\text{E} \left\{ \mu \right\} \approx 0.79$ and $\text{E} \left\{ \tau \right\} \approx 0.38$
+
+- 0点 No
+- 2点 Yes
+
+- 0点 No
+- 1点 Yes
+
+<br><br>
+
+### 7th Peer
+
+#### Asignment
+
+**Provide an MCMC algorithm to fit the mixture model**
+
+$$
+\begin{align}
+f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
+\end{align}
+$$
+
+```{r}
+
+```
+
+Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
+
+```
+```
 
 #### Marking
 
