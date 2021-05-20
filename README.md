@@ -113,7 +113,7 @@
       
       3.1.9) 受講生によるテストの実施: The MCMC algorithm for zero-inflated mixtures. Duration: 1 時間1 時間
       
-      3.1.10) 受講生によるテスト: Markov chain Monte Carlo algorithms for Mixture Models. Duration: 1 時間1 時間 (期限 5月24日 15:59 JST)
+      3.1.10) 受講生によるテスト: [Markov chain Monte Carlo algorithms for Mixture Models. Duration: 1 時間1 時間 (期限 5月24日 15:59 JST)](https://rpubs.com/englianhu/771634)
       
       3.1.11) 他の受講生の課題を確認: Markov chain Monte Carlo algorithms for Mixture Models (期限 5月27日 15:59 JST)
       
