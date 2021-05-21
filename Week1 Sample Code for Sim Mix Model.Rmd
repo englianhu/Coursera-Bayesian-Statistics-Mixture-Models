@@ -1,0 +1,721 @@
+---
+title: "<img src='figure/coursera.jpg' width='37'> <img src='figure/ucsc.png' width='240'>"
+subtitle: "<span style='color:white; background-color:#4E79A7;'>Bayesian Statistics: Mixture Models</span> Sample code for simulating from a Mixture Model (Week1 with Codes)"
+author: "[®γσ, Lian Hu](https://englianhu.github.io/) <img src='figure/quantitative trader 1.jpg' width='12'> <img src='figure/ENG.jpg' width='24'> ®"
+date: "`r lubridate::today('Asia/Tokyo')`"
+output:
+  html_document: 
+    mathjax: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+    code_folding: hide
+    css: CSSBackgrounds.css
+---
+
+<br>
+<span style='color:green'>**Theme Song**</span>
+<br>
+
+<audio src="music/California-Dreaming-Chorus.mp3" controls></audio>
+<br>
+
+------
+
+# Setting
+
+## SCSS Setup
+
+<style>
+pre {
+  overflow-x: auto;
+}
+pre code {
+  word-wrap: normal;
+  white-space: pre;
+}
+.table-hover > tbody > tr:hover { 
+  background-color: #8D918D;
+}
+</style>
+
+```{r class.source = 'bg-success', class.output = 'bg-primary', message = FALSE, warning = FALSE}
+# install.packages("remotes")
+require('BBmisc')
+#remotes::install_github("rstudio/sass")
+lib('sass')
+```
+
+```{scss class.source = 'bg-success', class.output = 'bg-primary'}
+/* https://stackoverflow.com/a/66029010/3806250 */
+h1 { color: #002C54; }
+h2 { color: #2F496E; }
+h3 { color: #375E97; }
+
+/* ----------------------------------------------------------------- */
+/* https://gist.github.com/himynameisdave/c7a7ed14500d29e58149#file-broken-gradient-animation-less */
+.hover01 {
+  /* color: #FFD64D; */
+  background: linear-gradient(155deg, #EDAE01 0%, #FFEB94 100%);
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #EDAE01 20%, #FFEB94 80%);
+    }
+  }
+
+.hover02 {
+  color: #FFD64D;
+  background: linear-gradient(155deg, #002C54 0%, #4CB5F5 100%);
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #002C54 20%, #4CB5F5 80%);
+    }
+  }
+
+.hover03 {
+  color: #FFD64D;
+  background: linear-gradient(155deg, #A10115 0%, #FF3C5C 100%);
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #A10115 20%, #FF3C5C 80%);
+    }
+  }
+```
+
+```{r global_options, class.source = 'hover01', class.output = 'hover02'}
+## https://stackoverflow.com/a/36846793/3806250
+options(width = 999)
+knitr::opts_chunk$set(class.source = 'hover01', class.output = 'hover02', class.error = 'hover03')
+```
+
+<br><br>
+
+## Setup
+
+```{r setup, warning = FALSE, message = FALSE}
+if(!suppressPackageStartupMessages(require('BBmisc'))) {
+  install.packages('BBmisc', dependencies = TRUE, INSTALL_opts = '--no-lock')
+}
+suppressPackageStartupMessages(require('BBmisc'))
+# suppressPackageStartupMessages(require('rmsfuns'))
+
+pkgs <- c('devtools', 'knitr', 'kableExtra', 'tidyr', 
+          'readr', 'lubridate', 'data.table', 'reprex', 
+          'timetk', 'plyr', 'dplyr', 'stringr', 'magrittr', 
+          'tdplyr', 'tidyverse', 'formattable', 
+          'echarts4r', 'paletteer')
+
+suppressAll(lib(pkgs))
+# load_pkg(pkgs)
+
+## Set the timezone but not change the datetime
+Sys.setenv(TZ = 'Asia/Tokyo')
+## options(knitr.table.format = 'html') will set all kableExtra tables to be 'html', otherwise need to set the parameter on every single table.
+options(warn = -1, knitr.table.format = 'html')#, digits.secs = 6)
+
+## https://stackoverflow.com/questions/39417003/long-vectors-not-supported-yet-abnor-in-rmd-but-not-in-r-script
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)#, 
+                      #cache = TRUE, cache.lazy = FALSE)
+
+rm(pkgs)
+```
+
+<br><br>
+
+# 受講生によるテストの実施：Simulating from a Mixture Model
+
+## 説明
+
+Consider the code provided in the lesson "Sample code for simulating from a Mixture Model":
+
+```{r}
+# Sample code for simulating from a Mixture Model
+# Generate n observations from a mixture of two Gaussian 
+# distributions
+n     = 50           # Size of the sample to be generated
+w     = c(0.6, 0.4)  # Weights
+mu    = c(0, 5)      # Means
+sigma = c(1, 2)      # Standard deviations
+cc    = sample(1:2, n, replace=T, prob=w)
+x     = rnorm(n, mu[cc], sigma[cc])
+
+# Plot f(x) along with the observations 
+# just sampled
+xx = seq(-5, 12, length=200)
+yy = w[1]*dnorm(xx, mu[1], sigma[1]) + 
+  w[2]*dnorm(xx, mu[2], sigma[2])
+par(mar=c(4,4,1,1)+0.1)
+plot(xx, yy, type="l", ylab="Density", xlab="x", las=1, lwd=2)
+points(x, y=rep(0,n), pch=1)
+```
+
+*Source : [Coursera-Bayesian-Statistics-Mixture-Models/Week1 Sample Code for Sim Mix Model.R](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week1%20Sample%20Code%20for%20Sim%20Mix%20Model.R)*
+
+Modify the code above to sample 200 random numbers from a mixture of 3 Poisson distributions with means 1, 2 and 6 and weights 0.7, 0.2 and 0.1, respectively, and generate a barplot with the empirical frequencies of all the integers included in the sample.
+
+### Review criteria
+
+The response should follow the same template as the sample code provided above.  Peer reviewers will be asked to check whether the different pieces of code have been adequately modified to reflect the fact that (1) you are working now with 3 components rather than 2, (2) that the components of the mixture are Poisson distributions rather than Gaussians, (3) that the empirical frequencies associated with the sample generated are correctly computed, (4) that a barplot is used to represent the empirical frequencies.
+
+## 自分の提出物
+
+### Assignment
+
+```{r error=TRUE}
+n     = 200               # Size of the sample to be generated
+w     = c(0.7, 0.2, 0.1)  # Weights
+lamba = c(1, 2, 6)        # Means
+cc    = sample(1:3, n, replace=TRUE, prob=w)
+x     = rpois(n, lamba[cc])
+```
+
+```{r error=TRUE}
+empfreq = table(factor(x, levels=seq(0, max(x))))/n
+#barplot(empfreq)
+empfreq |> 
+  tibble() |> 
+  arrange(desc(total)) %>%
+  e_charts(model) %>%
+  e_bar(mpg, stack = "grp") %>%
+  e_bar(qsec, stack = "grp")
+```
+
+### Marking
+
+**Have the parameters of the mixture (both weights and component-specific parameters) been correctly specified?**
+
+The lines
+
+```{r error=TRUE}
+n     = 50
+w     = c(0.6, 0.4)  # Weights
+mu    = c(0, 5)      # Means
+sigma = c(1, 2)      # Standard deviations
+```
+
+in the original code should have been replaced by something like
+
+```{r error=TRUE}
+n      = 200
+w      = c(0.7, 0.2, 0.1)  # Weights
+lambda = c(1, 2, 6)        # Means
+```
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Is the sampling of the indicator variables done correctly?**
+
+The line
+
+```{r error=TRUE}
+cc    = sample(1:2, n, replace=T, prob=w)
+cc
+```
+
+in the original code should now be something like
+
+```{r error=TRUE}
+cc    = sample(1:3, n, replace=T, prob=w)
+cc
+```
+
+to reflect the fact that we now have 3 components in the mixture.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Assuming that the indicator variables have been correctly sampled, are the observations being sampled correctly?**
+
+The line
+
+```{r error=TRUE}
+x     = rnorm(n, mu[cc], sigma[cc])
+x
+```
+
+should now be something like
+
+```{r error=TRUE}
+x     = rpois(n, lambda[cc])
+x
+```
+
+to reflect the fact that the components of the mixture are all Poisson distributions.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Are the empirical frequencies computed correctly?**
+
+The code used to compute the frequencies should look something like
+
+```{r error=TRUE}
+empfreq = table(factor(x, levels=seq(0, max(x))))/n
+empfreq
+```
+
+The main difficulty here is how to properly compute the frequencies using R, rather than anything that is specific to mixture models.  Using the function `table()` directly on the vector $x$ will ignore values with zero counts. Similarly, the function `tabulate()` will ignore the $x = 0$ case. First converting the vector $x$ into a factor while ensuring that any integer between 0 and the maximum in the sample are valid factors avoids the issue.
+
+- 0点 No
+- 1点 Yes for some datasets, but might fail. Use this category if, for example, the function table was used directly on $x$,
+
+```{r error=TRUE}
+empfreq = table(x)/n
+empfreq
+```
+
+Partial credit should also be given if counts rather than frequencies are reported (i.e., if the answer does not divide by $n$).
+
+- <span style='color:green'>2点 Yes</span>
+
+**Does the barplot appear correct?**
+
+The code should be something like 
+
+```{r error=TRUE}
+barplot(empfreq)
+```
+
+or
+
+```{r error=TRUE}
+hist(x, right=F)
+```
+
+When using the hist function, the option right=F  must be specified so that the intervals/bins are specified correctly. This ensures that the intervals are [0,1), [1,2),...,[10,11]. Note that the last interval is a closed one. In the default setting (right=T), the first category [0,1] is closed. That is, the left and right endpoints are included.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+<br><br>
+
+## ピアレビュー
+
+### 1st Peer
+
+#### Assignment
+
+Enter code to sample 200 random numbers from a mixture of 3 Poisson distributions with means 1, 2 and 6 and weights 0.7, 0.2 and 0.1, respectively.
+
+```{r error=TRUE}
+n     = 200               # Size of the sample to be generated
+w     = c(0.7, 0.2, 0.1)  # Weights
+lamba = c(1, 2, 6)        # Means
+cc    = sample(1:3, n, replace=T, prob=w)
+x     = rpois(n, lamba[cc])
+```
+
+Enter code to generate a barplot with the empirical frequencies of all the integers included in the sample.
+
+```{r error=TRUE}
+empfreq = table(factor(x, levels=seq(0, max(x))))/n
+barplot(empfreq)
+```
+
+#### Marking
+
+**Have the parameters of the mixture (both weights and component-specific parameters) been correctly specified?**
+
+The lines
+
+```{r error=TRUE}
+n     = 50
+w     = c(0.6, 0.4)  # Weights
+mu    = c(0, 5)      # Means
+sigma = c(1, 2)      # Standard deviations
+```
+
+in the original code should have been replaced by something like
+
+```{r error=TRUE}
+n      = 200
+w      = c(0.7, 0.2, 0.1)  # Weights
+lambda = c(1, 2, 6)        # Means
+```
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Is the sampling of the indicator variables done correctly?**
+
+The line
+
+```{r error=TRUE}
+cc    = sample(1:2, n, replace=T, prob=w)
+cc
+```
+
+in the original code should now be something like
+
+```{r error=TRUE}
+cc    = sample(1:3, n, replace=T, prob=w)
+cc
+```
+
+to reflect the fact that we now have 3 components in the mixture.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Assuming that the indicator variables have been correctly sampled, are the observations being sampled correctly?**
+
+The line
+
+```{r error=TRUE}
+x     = rnorm(n, mu[cc], sigma[cc])
+x
+```
+
+should now be something like
+
+```{r error=TRUE}
+x     = rpois(n, lambda[cc])
+x
+```
+
+to reflect the fact that the components of the mixture are all Poisson distributions.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Are the empirical frequencies computed correctly?**
+
+The code used to compute the frequencies should look something like
+
+```{r error=TRUE}
+empfreq = table(factor(x, levels=seq(0, max(x))))/n
+empfreq
+```
+
+The main difficulty here is how to properly compute the frequencies using R, rather than anything that is specific to mixture models.  Using the function `table()` directly on the vector $x$ will ignore values with zero counts. Similarly, the function `tabulate()` will ignore the $x = 0$ case. First converting the vector $x$ into a factor while ensuring that any integer between 0 and the maximum in the sample are valid factors avoids the issue.
+
+- 0点 No
+- 1点 Yes for some datasets, but might fail. Use this category if, for example, the function table was used directly on $x$,
+
+```{r error=TRUE}
+empfreq = table(x)/n
+empfreq
+```
+
+Partial credit should also be given if counts rather than frequencies are reported (i.e., if the answer does not divide by $n$).
+
+- <span style='color:green'>2点 Yes</span>
+
+**Does the barplot appear correct?**
+
+The code should be something like 
+
+```{r error=TRUE}
+barplot(empfreq)
+```
+
+or
+
+```{r error=TRUE}
+hist(x, right=F)
+```
+
+When using the hist function, the option right=F  must be specified so that the intervals/bins are specified correctly. This ensures that the intervals are [0,1), [1,2),...,[10,11]. Note that the last interval is a closed one. In the default setting (right=T), the first category [0,1] is closed. That is, the left and right endpoints are included.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+<br>
+
+### 2nd Peer
+
+#### Assignment
+
+#### Marking
+
+**Have the parameters of the mixture (both weights and component-specific parameters) been correctly specified?**
+
+The lines
+
+```{r error=TRUE}
+n     = 50
+w     = c(0.6, 0.4)  # Weights
+mu    = c(0, 5)      # Means
+sigma = c(1, 2)      # Standard deviations
+```
+
+in the original code should have been replaced by something like
+
+```{r error=TRUE}
+n      = 200
+w      = c(0.7, 0.2, 0.1)  # Weights
+lambda = c(1, 2, 6)        # Means
+```
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Is the sampling of the indicator variables done correctly?**
+
+The line
+
+```{r error=TRUE}
+cc    = sample(1:2, n, replace=T, prob=w)
+cc
+```
+
+in the original code should now be something like
+
+```{r error=TRUE}
+cc    = sample(1:3, n, replace=T, prob=w)
+cc
+```
+
+to reflect the fact that we now have 3 components in the mixture.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Assuming that the indicator variables have been correctly sampled, are the observations being sampled correctly?**
+
+The line
+
+```{r error=TRUE}
+x     = rnorm(n, mu[cc], sigma[cc])
+x
+```
+
+should now be something like
+
+```{r error=TRUE}
+x     = rpois(n, lambda[cc])
+x
+```
+
+to reflect the fact that the components of the mixture are all Poisson distributions.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Are the empirical frequencies computed correctly?**
+
+The code used to compute the frequencies should look something like
+
+```{r error=TRUE}
+empfreq = table(factor(x, levels=seq(0, max(x))))/n
+empfreq
+```
+
+The main difficulty here is how to properly compute the frequencies using R, rather than anything that is specific to mixture models.  Using the function `table()` directly on the vector $x$ will ignore values with zero counts. Similarly, the function `tabulate()` will ignore the $x = 0$ case. First converting the vector $x$ into a factor while ensuring that any integer between 0 and the maximum in the sample are valid factors avoids the issue.
+
+- 0点 No
+- 1点 Yes for some datasets, but might fail. Use this category if, for example, the function table was used directly on $x$,
+
+```{r error=TRUE}
+empfreq = table(x)/n
+empfreq
+```
+
+Partial credit should also be given if counts rather than frequencies are reported (i.e., if the answer does not divide by $n$).
+
+- <span style='color:green'>2点 Yes</span>
+
+**Does the barplot appear correct?**
+
+The code should be something like 
+
+```{r error=TRUE}
+barplot(empfreq)
+```
+
+or
+
+```{r error=TRUE}
+hist(x, right=F)
+```
+
+When using the hist function, the option right=F  must be specified so that the intervals/bins are specified correctly. This ensures that the intervals are [0,1), [1,2),...,[10,11]. Note that the last interval is a closed one. In the default setting (right=T), the first category [0,1] is closed. That is, the left and right endpoints are included.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+<br>
+
+### 3rd Peer
+
+#### Assignment
+
+#### Marking
+
+**Have the parameters of the mixture (both weights and component-specific parameters) been correctly specified?**
+
+The lines
+
+```{r error=TRUE}
+n     = 50
+w     = c(0.6, 0.4)  # Weights
+mu    = c(0, 5)      # Means
+sigma = c(1, 2)      # Standard deviations
+```
+
+in the original code should have been replaced by something like
+
+```{r error=TRUE}
+n      = 200
+w      = c(0.7, 0.2, 0.1)  # Weights
+lambda = c(1, 2, 6)        # Means
+```
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Is the sampling of the indicator variables done correctly?**
+
+The line
+
+```{r error=TRUE}
+cc    = sample(1:2, n, replace=T, prob=w)
+cc
+```
+
+in the original code should now be something like
+
+```{r error=TRUE}
+cc    = sample(1:3, n, replace=T, prob=w)
+cc
+```
+
+to reflect the fact that we now have 3 components in the mixture.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Assuming that the indicator variables have been correctly sampled, are the observations being sampled correctly?**
+
+The line
+
+```{r error=TRUE}
+x     = rnorm(n, mu[cc], sigma[cc])
+x
+```
+
+should now be something like
+
+```{r error=TRUE}
+x     = rpois(n, lambda[cc])
+x
+```
+
+to reflect the fact that the components of the mixture are all Poisson distributions.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+**Are the empirical frequencies computed correctly?**
+
+The code used to compute the frequencies should look something like
+
+```{r error=TRUE}
+empfreq = table(factor(x, levels=seq(0, max(x))))/n
+empfreq
+```
+
+The main difficulty here is how to properly compute the frequencies using R, rather than anything that is specific to mixture models.  Using the function `table()` directly on the vector $x$ will ignore values with zero counts. Similarly, the function `tabulate()` will ignore the $x = 0$ case. First converting the vector $x$ into a factor while ensuring that any integer between 0 and the maximum in the sample are valid factors avoids the issue.
+
+- 0点 No
+- 1点 Yes for some datasets, but might fail. Use this category if, for example, the function table was used directly on $x$,
+
+```{r error=TRUE}
+empfreq = table(x)/n
+empfreq
+```
+
+Partial credit should also be given if counts rather than frequencies are reported (i.e., if the answer does not divide by $n$).
+
+- <span style='color:green'>2点 Yes</span>
+
+**Does the barplot appear correct?**
+
+The code should be something like 
+
+```{r error=TRUE}
+barplot(empfreq)
+```
+
+or
+
+```{r error=TRUE}
+hist(x, right=F)
+```
+
+When using the hist function, the option right=F  must be specified so that the intervals/bins are specified correctly. This ensures that the intervals are [0,1), [1,2),...,[10,11]. Note that the last interval is a closed one. In the default setting (right=T), the first category [0,1] is closed. That is, the left and right endpoints are included.
+
+- 0点 No
+- <span style='color:green'>1点 Yes</span>
+
+<br><br>
+
+## ディスカッション
+
+
+<br><br>
+
+# Appendix
+
+## Blooper
+
+## Documenting File Creation 
+
+It's useful to record some information about how your file was created.
+
+- File creation date: 2021-05-22
+- File latest updated date: `r today('Asia/Tokyo')`
+- `r R.version.string`
+- [**rmarkdown** package](https://github.com/rstudio/rmarkdown) version: `r packageVersion('rmarkdown')`
+- File version: 1.0.0
+- Author Profile: [®γσ, Eng Lian Hu](https://github.com/scibrokes/owner)
+- GitHub: [Source Code](https://github.com/englianhu/coursera-bayesian-statistics-mixture-models)
+- Additional session information:
+
+```{r info, warning = FALSE, results = 'asis'}
+suppressMessages(require('dplyr', quietly = TRUE))
+suppressMessages(require('magrittr', quietly = TRUE))
+suppressMessages(require('formattable', quietly = TRUE))
+suppressMessages(require('knitr', quietly = TRUE))
+suppressMessages(require('kableExtra', quietly = TRUE))
+
+sys1 <- devtools::session_info()$platform %>% 
+  unlist %>% data.frame(Category = names(.), session_info = .)
+rownames(sys1) <- NULL
+
+sys2 <- data.frame(Sys.info()) %>% 
+  dplyr::mutate(Category = rownames(.)) %>% .[2:1]
+names(sys2)[2] <- c('Sys.info')
+rownames(sys2) <- NULL
+
+if (nrow(sys1) == 9 & nrow(sys2) == 8) {
+  sys2 %<>% rbind(., data.frame(
+  Category = 'Current time', 
+  Sys.info = paste(as.character(lubridate::now('Asia/Tokyo')), 'JST🗾')))
+} else {
+  sys1 %<>% rbind(., data.frame(
+  Category = 'Current time', 
+  session_info = paste(as.character(lubridate::now('Asia/Tokyo')), 'JST🗾')))
+}
+
+sys <- cbind(sys1, sys2) %>% 
+  kbl(caption = 'Additional session information:') %>% 
+  kable_styling(bootstrap_options = c('striped', 'hover', 'condensed', 'responsive')) %>% 
+  row_spec(0, background = 'DimGrey', color = 'yellow') %>% 
+  column_spec(1, background = 'CornflowerBlue', color = 'red') %>% 
+  column_spec(2, background = 'grey', color = 'black') %>% 
+  column_spec(3, background = 'CornflowerBlue', color = 'blue') %>% 
+  column_spec(4, background = 'grey', color = 'white') %>% 
+  row_spec(9, bold = T, color = 'yellow', background = '#D7261E')
+
+rm(sys1, sys2)
+sys
+```
+
+## Reference
+
+<br><br>
