@@ -184,10 +184,10 @@ e_common(
 
 tibble(no = 1:nrow(empfreq), value = empfreq) |>
   e_charts(no) |>
-   e_theme('dark-mushroom') |>
+  e_theme('dark-mushroom') |>
   e_bar(value, stack = 'grp') |>
   e_line(value, stack = 'grp2') |>
-   e_title('Timeline', 'Plot', sublink = 'https://echarts4r.john-coene.com/reference/e_bar.html')
+  e_title('Timeline', 'Plot', sublink = 'https://echarts4r.john-coene.com/reference/e_bar.html')
 ```
 
 ### Marking

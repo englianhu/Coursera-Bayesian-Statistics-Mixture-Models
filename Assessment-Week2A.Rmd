@@ -25,7 +25,9 @@ output:
 
 ------
 
-<br>
+# Setting
+
+## SCSS Setup
 
 <style>
 pre {
@@ -35,48 +37,91 @@ pre code {
   word-wrap: normal;
   white-space: pre;
 }
+.table-hover > tbody > tr:hover { 
+  background-color: #8D918D;
+}
 </style>
 
-*Source : [Width of R code chunk output in RMarkdown files knitr-ed to html](https://stackoverflow.com/a/36846864/3806250)*
+```{r class.source = 'bg-success', class.output = 'bg-primary', message = FALSE, warning = FALSE}
+# install.packages("remotes")
+require('BBmisc')
+#remotes::install_github("rstudio/sass")
+lib('sass')
+```
 
-```{css class.source = 'bg-success', class.output = 'bg-primary'}
+```{scss class.source = 'bg-success', class.output = 'bg-primary'}
 /* https://stackoverflow.com/a/66029010/3806250 */
 h1 { color: #002C54; }
 h2 { color: #2F496E; }
 h3 { color: #375E97; }
 
-/* https://bookdown.org/yihui/rmarkdown-cookbook/chunk-styling.html */
-.gradient1 {
-  background: linear-gradient(155deg, #F9BA32 0%, #FFEB94 100%);
-}
+/* ----------------------------------------------------------------- */
+/* https://gist.github.com/himynameisdave/c7a7ed14500d29e58149#file-broken-gradient-animation-less */
+.hover01 {
+  /* color: #FFD64D; */
+  background: linear-gradient(155deg, #EDAE01 0%, #FFEB94 100%);
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #EDAE01 20%, #FFEB94 80%);
+    }
+  }
 
-.gradient2 {
+.hover02 {
   color: #FFD64D;
   background: linear-gradient(155deg, #002C54 0%, #4CB5F5 100%);
-  /*background-image: linear-gradient(to right,golden,golden, yellow, yellow);*/
-  /*-webkit-background-clip: text;*/
-  /*display: inline-block;*/
-  /*padding: 14px;*/
-  /*-webkit-text-fill-color: transparent;*/
-  /*font-family: 'Stay Out Regular';*/
-}
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #002C54 20%, #4CB5F5 80%);
+    }
+  }
 
-.shine {
-	background: #FFD64D -webkit-gradient(linear, left top, right top, from(#222), to(#222), color-stop(0.5, yellow)) 0 0 no-repeat;
-	-webkit-background-size: 150px;
-	color: $text-color;
-	-webkit-background-clip: text;
-	-webkit-animation-name: shine;
-	-webkit-animation-duration: $duration;
-	-webkit-animation-iteration-count: infinite;
-	text-shadow: 0 0px 0px golden-rod;
-}
+.hover03 {
+  color: #FFD64D;
+  background: linear-gradient(155deg, #A10115 0%, #FF3C5C 100%);
+  transition: all 0.45s;
+  &:hover{
+    background: linear-gradient(155deg, #A10115 20%, #FF3C5C 80%);
+    }
+  }
 ```
 
-```{r global_options, class.source = 'bg-success', class.output = 'bg-primary'}
+```{r global_options, class.source = 'hover01', class.output = 'hover02'}
 ## https://stackoverflow.com/a/36846793/3806250
 options(width = 999)
-knitr::opts_chunk$set(class.source = 'gradient1', class.output = 'gradient2', class.error = 'bg-danger')
+knitr::opts_chunk$set(class.source = 'hover01', class.output = 'hover02', class.error = 'hover03')
+```
+
+<br><br>
+
+## Setup
+
+```{r setup, warning=FALSE, message=FALSE}
+if(!suppressPackageStartupMessages(require('BBmisc'))) {
+  install.packages('BBmisc', dependencies = TRUE, INSTALL_opts = '--no-lock')
+}
+suppressPackageStartupMessages(require('BBmisc'))
+# suppressPackageStartupMessages(require('rmsfuns'))
+
+pkgs <- c('devtools', 'knitr', 'kableExtra', 'tidyr', 
+          'readr', 'lubridate', 'data.table', 'reprex', 
+          'timetk', 'plyr', 'dplyr', 'stringr', 'magrittr', 
+          'tdplyr', 'tidyverse', 'formattable', 
+          'echarts4r', 'paletteer')
+
+suppressAll(lib(pkgs))
+# load_pkg(pkgs)
+
+## Set the timezone but not change the datetime
+Sys.setenv(TZ = 'Asia/Tokyo')
+## options(knitr.table.format = 'html') will set all kableExtra tables to be 'html', otherwise need to set the parameter on every single table.
+options(warn = -1, knitr.table.format = 'html')#, digits.secs = 6)
+
+## https://stackoverflow.com/questions/39417003/long-vectors-not-supported-yet-abnor-in-rmd-but-not-in-r-script
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+#, 
+                      #cache = TRUE, cache.lazy = FALSE)
+
+rm(pkgs)
 ```
 
 <br><br>
@@ -117,50 +162,9 @@ The code you generate should follow the same structure as "Sample code for EM ex
 
 ## 自分の提出物
 
-## ピアレビューディスカッション
+### Assignment
 
-### ルーブリック
-
-#### Setup
-
-```{r setup, warning = FALSE, message = FALSE}
-if(!suppressPackageStartupMessages(require('BBmisc'))) {
-  install.packages('BBmisc', dependencies = TRUE, INSTALL_opts = '--no-lock')
-}
-suppressPackageStartupMessages(require('BBmisc'))
-# suppressPackageStartupMessages(require('rmsfuns'))
-
-pkgs <- c('devtools', 'knitr', 'kableExtra', 'tidyr', 
-          'readr', 'lubridate', 'data.table', 'reprex', 
-          'timetk', 'plyr', 'dplyr', 'stringr', 'magrittr', 
-          'tdplyr', 'tidyverse', 'formattable', 
-          'echarts4r', 'paletteer')
-
-suppressAll(lib(pkgs))
-# load_pkg(pkgs)
-
-## Set the timezone but not change the datetime
-Sys.setenv(TZ = 'Asia/Tokyo')
-## options(knitr.table.format = 'html') will set all kableExtra tables to be 'html', otherwise need to set the parameter on every single table.
-options(warn = -1, knitr.table.format = 'html')#, digits.secs = 6)
-
-## https://stackoverflow.com/questions/39417003/long-vectors-not-supported-yet-abnor-in-rmd-but-not-in-r-script
-knitr::opts_chunk$set(cache = TRUE, warning = FALSE, 
-                      message = FALSE, cache.lazy = FALSE)
-
-rm(pkgs)
-```
-
-```{r error = TRUE}
-dat <- fread('data/fuses.csv') %>% as.matrix
-head(dat)
-```
-
-<span style='color:green;'>*Source : `r paste(dim(dat), collapse = ' x ')`*</span>
-
-#### Assignment
-
-```{r}
+```{r error=TRUE}
 #read the data from the file
 dat = read.csv(file = "data/fuses.csv", header = FALSE)
 fuses = dat$V1
@@ -225,7 +229,9 @@ while(!sw){
   s = s + 1
   print(paste(s, QQn))
 }
+```
 
+```{r error=TRUE}
 #Plot final estimate over data
 layout(matrix(c(1,2),2,1), widths=c(1,1), heights=c(1.3,3))
 par(mar=c(3.1,4.1,0.5,0.5))
@@ -235,28 +241,28 @@ par(mar=c(3.1,4.1,0.5,0.5))
 ## https://www.infoworld.com/article/3607068/plot-in-r-with-echarts4r.html
 ## https://echarts.apache.org/en/theme-builder.html
 Qplot <- tibble(Index = 1:length(QQ.out[1:s]), Value = QQ.out[1:s])
-Qplot %>% 
-  e_charts(x = Index) %>% 
-  e_line(Value) %>% 
+Qplot |>
+  e_charts(x = Index) |>
+  e_theme('dark-mushroom') |>
+  e_line(Value, stack = 'grp2') |>
   e_datazoom(
     type = "slider", 
     toolbox = FALSE,
-    bottom = -5
-  ) %>% 
-  e_tooltip() %>% 
-  e_title("Exopential Regression") %>% 
-  e_x_axis(Index, axisPointer = list(show = TRUE)) %>% 
+    bottom = -5) |>
+  e_tooltip() |>
+  e_title('Exopential Regression', 'Plot', sublink = 'https://echarts4r.john-coene.com/reference/e_bar.html') |>
+  e_x_axis(Index, axisPointer = list(show = TRUE)) |>
   e_legend(
     orient = 'vertical', 
     type = c('scroll'), 
     right = 80)
 ```
 
-Reference from tutorial : [Sample Code for EM Example 1](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Sample-Code-for%20EM-EX1.R)
+Reference from tutorial : [Sample Code for EM Example 1](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week2%20Sample%20Code%20for%20EM%20EX1.R)
 
 <br><br>
 
-### ルーブリック
+### Marking
 
 **Are the initial values appropriate?**
 
@@ -270,7 +276,7 @@ Finally, because the defective components should have shorter lifespan than norm
 
 In summary, you should expect an initialization such as this one:
 
-```{r error = TRUE}
+```{r error=TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
@@ -278,9 +284,7 @@ lambda = 20/mean(x)
 ```
 
 - 0点 No
-
 - 1点 Some are, but not all
-
 - <span style='color:Green;'>2点 Yes</span>
 
 **Are the observation-specific weights $v_{i,k}$ computed correctly (E step)?  **
@@ -289,7 +293,7 @@ In this case it is easy to see that $v_{i,1}^{(t+1)} \propto w^{(t)} \lambda^{(t
 
 Hence, the code for the E step could look something like
 
-```{r error = TRUE}
+```{r error=TRUE}
 ## E step
 v = array(0, dim=c(n,2))
 v[,1] = log(w) + dexp(x, lambda, log=TRUE)    
@@ -302,7 +306,6 @@ for(i in 1:n){
 Remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R. For example, the calculation could be vectorized to increase efficiency.
 
 - 0点 No
-
 - <span style='color:Green;'>1点 Yes</span>
 
 **Are the formulas for the maximum of the QQ functions correct (M step)?**
@@ -326,7 +329,7 @@ $\hat{\tau}^{(t+1)} = \sqrt{\frac{\sum_{i=1}^{n} v_{i,2}\left( \log x_i - \hat{\
 
 Hence, the code for this section might look something like:
 
-```{r error = TRUE}
+```{r error=TRUE}
 ## M step
 w      = mean(v[,1])
 lambda = sum(v[,1])/sum(v[,1]*x)
@@ -337,9 +340,7 @@ tau    = sqrt(sum(v[,2]*(log(x) - mu)^2)/sum(v[,2]))
 However, remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
 
 - 0点 No
-
 - 1点 Some are correct, but not all of them
-
 - <span style='color:Green;'>3点 Yes</span>
 
 **Is the converge check correct?**
@@ -353,7 +354,7 @@ Q\left(w, \lambda, \mu, \tau \mid \hat{w}^{(t)}, \hat{\lambda}^{(t)}, \hat{\mu}^
 
 Hence, the convergence check might look something like
 
-```{r error = TRUE}
+```{r error=TRUE}
 QQn = 0
 for(i in 1:n){
   QQn = QQn + v[i,1]*(log(w) + dexp(x[i], lambda, log=TRUE)) + 
@@ -367,24 +368,22 @@ QQ = QQn
 ```
 
 - 0点 No
-
 - <span style='color:Green;'>1点 Yes</span>
-
-### ルーブリック
 
 **Are the estimates of the parameters generated by the algorithm correct?**
 
 The point estimates, rounded to two decimal places, are $\hat{w}=0.09$, $\hat{\lambda} = 3.05$, $\hat{\mu} = 0.78$ and $\hat{\tau}=0.38$.
 
 - 0点 No
-
 - <span style='color:Green;'>2点 Yes</span>
 
 <br><br>
 
-## レビュー
+## ピアレビュー
 
 ### 1st Peer
+
+#### Asignment
 
 Provide the EM algorithm to fit the mixture model
 
@@ -392,7 +391,7 @@ Provide the EM algorithm to fit the mixture model
 f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1-w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
 \end{align}
 
-```{r}
+```{r error=TRUE}
 dat = read.csv(file = "data/fuses.csv", header = FALSE)
 x <- dat$V1
 w     = 1/2        #Assign equal weight to each component to start with
@@ -439,19 +438,20 @@ Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{
 
 $w = 0.09, lambda = 3.05, mu = 0.79, tau = 0.38$
 
-#### ルーブリック
+#### Marking
 
 **Are the estimates of the parameters generated by the algorithm correct?**
 
 The point estimates, rounded to two decimal places, are $w = 0.09$, $lambda = 3.05$, $mu = 0.79$, $tau = 0.38$.
 
 - 0点 No
-
 - <span style='color:Green;'>2点 Yes</span>
 
-<br><br>
+<br>
 
 ### 2nd Peer
+
+#### Asignment
 
 Provide the EM algorithm to fit the mixture model
 
@@ -459,7 +459,7 @@ Provide the EM algorithm to fit the mixture model
 f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1-w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
 \end{align}
 
-```{r}
+```{r error=TRUE}
 #read the data from the file
 dat = read.csv(file = "data/fuses.csv", header = FALSE)
 fuses = dat$V1
@@ -535,19 +535,20 @@ Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{
 
 $w = 0.09, lambda = 3.05, mu = 0.79, tau = 0.38$
 
-#### ルーブリック
+#### Marking
 
 **Are the estimates of the parameters generated by the algorithm correct?**
 
 The point estimates, rounded to two decimal places, are $w = 0.09$, $lambda = 3.05$, $mu = 0.79$, $tau = 0.38$.
 
 - 0点 No
-
 - <span style='color:Green;'>2点 Yes</span>
 
-<br><br>
+<br>
 
 ### 3rd Peer
+
+#### Asignment
 
 Provide the EM algorithm to fit the mixture model
 
@@ -555,7 +556,7 @@ Provide the EM algorithm to fit the mixture model
 f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1-w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
 \end{align}
 
-```{r}
+```{r error=TRUE}
 #### Example of an EM algorithm for fitting a location mixture of 2 Gaussian components
 #### The algorithm is tested using simulated data
 
@@ -665,14 +666,149 @@ Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{
 
 $w = 0.09, lambda = 3.05, mu = 0.79, tau = 0.38$
 
-#### ルーブリック
+#### Marking
 
 **Are the estimates of the parameters generated by the algorithm correct?**
 
 The point estimates, rounded to two decimal places, are $w = 0.09$, $lambda = 3.05$, $mu = 0.79$, $tau = 0.38$.
 
 - 0点 No
+- <span style='color:Green;'>2点 Yes</span>
 
+<br>
+
+### 4th Peer
+
+#### Asignment
+
+Provide the EM algorithm to fit the mixture model
+
+\begin{align}
+f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1-w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
+\end{align}
+
+```{r error=TRUE}
+## Read fuses.csv
+df = read.csv("data/fuses.csv", header = FALSE)
+x = df$V1
+n = nrow(df)
+
+## Initialize the parameters
+w     = 1/2                   #Assign equal weight to each component to start with
+mu    = mean(log(x))               #Random cluster centers randomly spread over the support of the data
+tau = sd(log(x))                   #Initial standard deviation
+lambda= 1/mu   
+```
+
+```{r error=TRUE}
+  ## E step
+  v = array(0, dim=c(n,KK))
+  v[,1] = log(w) + dexp(x, lambda, log=TRUE)    #Compute the log of the weights
+  v[,2] = log(1-w) + dlnorm(x, mu, tau, log=TRUE)  #Compute the log of the weights
+  for(i in 1:n){
+    v[i,] = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,])))  #Go from logs to actual weights in a numerically stable manner
+  }
+
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = 0 
+  denom = 0
+  for(i in 1:n){
+    denom = denom + v[i,1]*x[i]
+  }
+  lambda = sum(v[,1])/denom
+
+  for(i in 1:n){
+    mu    = mu + v[i,2]*log(x[i])
+  }
+  mu = mu/sum(v[,2])
+
+  # Standard deviations
+  tau = 0
+  for(i in 1:n){
+    tau = tau + v[i,2]*(log(x[i]) - mu)^2
+  }
+  tau = sqrt(tau/sum(v[,2]))
+  
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    QQn = QQn + v[i,1]*(log(w) + dexp(x[i], lambda, log=TRUE)) +
+      v[i,2]*(log(1-w) + dlnorm(x[i], mu, tau, log=TRUE))
+  }
+```
+
+Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
+
+```{r error=TRUE}
+print(round(w,2)) #0.09
+print(round(lambda,2)) #3.05
+print(round(mu,2)) #0.78
+print(round(tau,2)) #0.38
+```
+
+#### Marking
+
+**Are the estimates of the parameters generated by the algorithm correct?**
+
+The point estimates, rounded to two decimal places, are $w = 0.09$, $lambda = 3.05$, $mu = 0.79$, $tau = 0.38$.
+
+- 0点 No
+- <span style='color:Green;'>2点 Yes</span>
+
+<br>
+
+### 5th Peer
+
+#### Asignment
+
+Provide the EM algorithm to fit the mixture model
+
+\begin{align}
+f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1-w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
+\end{align}
+
+```{r error=TRUE}
+
+```
+
+Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
+
+#### Marking
+
+**Are the estimates of the parameters generated by the algorithm correct?**
+
+The point estimates, rounded to two decimal places, are $w = 0.09$, $lambda = 3.05$, $mu = 0.79$, $tau = 0.38$.
+
+- 0点 No
+- <span style='color:Green;'>2点 Yes</span>
+
+<br>
+
+### 6th Peer
+
+#### Asignment
+
+Provide the EM algorithm to fit the mixture model
+
+\begin{align}
+f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1-w)  \frac{1}{\sqrt{2\pi} \tau x} \exp\left\{ - \frac{1}{2 \tau^2} \left( \log(x) - \mu \right)^2\right\} \\ \quad\quad\quad x>0.
+\end{align}
+
+```{r error=TRUE}
+
+```
+
+Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
+
+#### Marking
+
+**Are the estimates of the parameters generated by the algorithm correct?**
+
+The point estimates, rounded to two decimal places, are $w = 0.09$, $lambda = 3.05$, $mu = 0.79$, $tau = 0.38$.
+
+- 0点 No
 - <span style='color:Green;'>2点 Yes</span>
 
 <br><br>
@@ -698,19 +834,21 @@ It's useful to record some information about how your file was created.
 - GitHub: [Source Code](https://github.com/englianhu/coursera-bayesian-statistics-mixture-models)
 - Additional session information:
 
-```{r info, warning = FALSE, results = 'asis'}
+```{r info, warning=FALSE, error=TRUE, results='asis'}
 suppressMessages(require('dplyr', quietly = TRUE))
 suppressMessages(require('magrittr', quietly = TRUE))
 suppressMessages(require('formattable', quietly = TRUE))
 suppressMessages(require('knitr', quietly = TRUE))
 suppressMessages(require('kableExtra', quietly = TRUE))
 
-sys1 <- devtools::session_info()$platform %>% 
-  unlist %>% data.frame(Category = names(.), session_info = .)
+sys1 <- devtools::session_info()$platform %>%
+  unlist %>%
+  data.frame(Category = names(.), session_info = .)
 rownames(sys1) <- NULL
 
-sys2 <- data.frame(Sys.info()) %>% 
-  dplyr::mutate(Category = rownames(.)) %>% .[2:1]
+sys2 <- data.frame(Sys.info()) %>%
+  dplyr::mutate(Category = rownames(.)) %>%
+  .[2:1]
 names(sys2)[2] <- c('Sys.info')
 rownames(sys2) <- NULL
 
@@ -724,14 +862,14 @@ if (nrow(sys1) == 9 & nrow(sys2) == 8) {
   session_info = paste(as.character(lubridate::now('Asia/Tokyo')), 'JST🗾')))
 }
 
-sys <- cbind(sys1, sys2) %>% 
-  kbl(caption = 'Additional session information:') %>% 
-  kable_styling(bootstrap_options = c('striped', 'hover', 'condensed', 'responsive')) %>% 
-  row_spec(0, background = 'DimGrey', color = 'yellow') %>% 
-  column_spec(1, background = 'CornflowerBlue', color = 'red') %>% 
-  column_spec(2, background = 'grey', color = 'black') %>% 
-  column_spec(3, background = 'CornflowerBlue', color = 'blue') %>% 
-  column_spec(4, background = 'grey', color = 'white') %>% 
+sys <- cbind(sys1, sys2) %>%
+  kbl(caption = 'Additional session information:') %>%
+  kable_styling(bootstrap_options = c('striped', 'hover', 'condensed', 'responsive')) %>%
+  row_spec(0, background = 'DimGrey', color = 'yellow') %>%
+  column_spec(1, background = 'CornflowerBlue', color = 'red') %>%
+  column_spec(2, background = 'grey', color = 'black') %>%
+  column_spec(3, background = 'CornflowerBlue', color = 'blue') %>%
+  column_spec(4, background = 'grey', color = 'white') %>%
   row_spec(9, bold = T, color = 'yellow', background = '#D7261E')
 
 rm(sys1, sys2)
