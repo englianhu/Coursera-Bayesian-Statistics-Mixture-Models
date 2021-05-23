@@ -42,18 +42,20 @@ pre code {
 }
 </style>
 
-```{r class.source = 'bg-success', class.output = 'bg-primary', message = FALSE, warning = FALSE}
+```{r class.source='bg-success', class.output='bg-primary', message = FALSE, warning = FALSE}
 # install.packages("remotes")
-require('BBmisc')
+library('BBmisc', 'rmsfuns')
 #remotes::install_github("rstudio/sass")
 lib('sass')
 ```
 
-```{scss class.source = 'bg-success', class.output = 'bg-primary'}
+```{scss class.source='bg-success', class.output='bg-primary'}
 /* https://stackoverflow.com/a/66029010/3806250 */
 h1 { color: #002C54; }
 h2 { color: #2F496E; }
 h3 { color: #375E97; }
+h4 { color: #556DAC; }
+h5 { color: #92AAC7; }
 
 /* ----------------------------------------------------------------- */
 /* https://gist.github.com/himynameisdave/c7a7ed14500d29e58149#file-broken-gradient-animation-less */
@@ -85,7 +87,7 @@ h3 { color: #375E97; }
   }
 ```
 
-```{r global_options, class.source = 'hover01', class.output = 'hover02'}
+```{r global_options, class.source='hover01', class.output='hover02'}
 ## https://stackoverflow.com/a/36846793/3806250
 options(width = 999)
 knitr::opts_chunk$set(class.source = 'hover01', class.output = 'hover02', class.error = 'hover03')
@@ -95,7 +97,7 @@ knitr::opts_chunk$set(class.source = 'hover01', class.output = 'hover02', class.
 
 ## Setup
 
-```{r setup, warning = FALSE, message = FALSE}
+```{r warning=FALSE, message=FALSE}
 if(!suppressPackageStartupMessages(require('BBmisc'))) {
   install.packages('BBmisc', dependencies = TRUE, INSTALL_opts = '--no-lock')
 }
@@ -150,6 +152,24 @@ Reviewers will check whether the code has been modified correctly, and whether t
 ## 自分の提出物
 
 ### Assignment
+
+Provide an MCMC algorithm to fit the two-component, location-and-scale mixture of Gaussians.
+
+```{r error=TRUE}
+
+```
+
+Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
+
+```{r error=TRUE}
+
+```
+
+Provide the a graph of the density estimate on the interval [0,7].
+
+```{r error=TRUE}
+
+```
 
 ### Marking
 
@@ -1312,7 +1332,7 @@ It's useful to record some information about how your file was created.
 - GitHub: [Source Code](https://github.com/englianhu/coursera-bayesian-statistics-mixture-models)
 - Additional session information:
 
-```{r info, warning = FALSE, error=TRUE, results = 'asis'}
+```{r info, warning=FALSE, error=TRUE, results='asis'}
 suppressMessages(require('dplyr', quietly = TRUE))
 suppressMessages(require('magrittr', quietly = TRUE))
 suppressMessages(require('formattable', quietly = TRUE))

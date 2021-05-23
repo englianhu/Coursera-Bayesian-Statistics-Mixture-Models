@@ -114,7 +114,7 @@
       
       3.1.9) 受講生によるテストの実施: [The MCMC algorithm for zero-inflated mixtures. Duration: 1 時間](https://rpubs.com/englianhu/773086)
       
-      3.1.10) 受講生によるテスト: [Markov chain Monte Carlo algorithms for Mixture Models. Duration: 1 時間](https://rpubs.com/englianhu/771634)
+      3.1.10) 受講生によるテスト: [Markov chain Monte Carlo algorithms for Mixture Models. Duration: 1 時間](https://rpubs.com/englianhu/773101)
       
       3.1.11) 他の受講生の課題を確認: Markov chain Monte Carlo algorithms for Mixture Models
       
@@ -128,7 +128,7 @@
       
       4.1.3) 学習用教材: Sample code for density estimation problems. Duration: 10分
       
-      4.1.4) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分
+      4.1.4) 受講生によるテスト: The EM algorithm and density estimation. Duration: 50分
       
       4.1.5) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分
       
