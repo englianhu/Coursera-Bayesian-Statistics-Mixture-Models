@@ -1065,6 +1065,8 @@ if(abs(QQn-QQ)/abs(QQn)<epsilon){
   sw=TRUE
   }
 QQ = QQn
+paste('QQ =', QQ)
+paste('QQn =', QQn)
 ```
 
 - 0点 No
@@ -1173,8 +1175,12 @@ epsilon = 10^(-5)
 Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
 
 ```{r error=TRUE}
-c(w_hat,lambda_hat,mu_hat,tau_hat)
+#c(w_hat,lambda_hat,mu_hat,tau_hat)
 #[1] 0.09 3.05 0.78 0.38
+paste('w =', w)
+paste('lambda =', lambda)
+paste('mu =', mu)
+paste('tau =', tau)
 ```
 
 #### Marking

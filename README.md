@@ -30,6 +30,7 @@
       1.3.4) 学習用教材: Example of a bimodal mixture of Gaussians. Duration: 3分
       
       1.3.5) 学習用教材: Example of a unimodal and skewed mixture of Gaussians. Duration: 3分
+      
       1.3.6) 学習用教材: Example of a unimodal, symmetric and heavy tailed mixture of Gaussians. Duration: 3分
       
       1.3.7) 練習問題: Mixtures of Gaussians 2 個の問題
@@ -63,11 +64,11 @@
       
       1.4.8) 練習問題: Identifiability 2 個の問題
       
-      1.4.9) テスト: [Likelihood function for mixture models 2 個の問題 (期限 5月10日 15:59 JST)](https://rpubs.com/englianhu/767576)
+      1.4.9) テスト: [Likelihood function for mixture models 2 個の問題](https://rpubs.com/englianhu/767576)
       
-      1.4.10) 受講生によるテスト: [Likelihood function for mixture models. Duration: 20分 期限 (5月10日 15:59 JST)](https://rpubs.com/englianhu/767588)
+      1.4.10) 受講生によるテスト: [Likelihood function for mixture models. Duration: 20分](https://rpubs.com/englianhu/767588)
       
-      1.4.11) 他の受講生の課題を確認: [Likelihood function for mixture models (期限 5月13日 15:59 JST)](https://rpubs.com/englianhu/767588)
+      1.4.11) 他の受講生の課題を確認: [Likelihood function for mixture models](https://rpubs.com/englianhu/767588)
       
 2) Week 2 : Maximum likelihood estimation for Mixture Models
     
@@ -77,7 +78,7 @@
       
       2.1.2) 動画: 講座 [EM for location mixtures of Gaussians. Duration: 22分](https://www.youtube.com/watch?v=8U4hCrc5Nbg)
       
-      2.1.3) 動画: 講座 [EM example 1. Duration: 12 分12 分](https://www.youtube.com/watch?v=59cmpfeg46E)
+      2.1.3) 動画: 講座 [EM example 1. Duration: 12 分](https://www.youtube.com/watch?v=59cmpfeg46E)
       
       2.1.4) 学習用教材: [Sample code for EM example 1. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Sample-Code-for%20EM-EX1.R)
       
@@ -87,9 +88,9 @@
       
       2.1.7) 受講生によるテストの実施: [The EM algorithm for zero-inflated mixtures. Duration: 1時間](https://rpubs.com/englianhu/768524)
       
-      2.1.8) 受講生によるテスト: [The EM algorithm for Mixture Models. Duration: 1 時間1 時間 (期限 5月17日 15:59 JST)](https://rpubs.com/englianhu/768289)
+      2.1.8) 受講生によるテスト: [The EM algorithm for Mixture Models. Duration: 1 時間](https://rpubs.com/englianhu/768289)
       
-      2.1.9) 他の受講生の課題を確認: [The EM algorithm for Mixture Models (期限 5月20日 15:59 JST)](https://rpubs.com/englianhu/768289)
+      2.1.9) 他の受講生の課題を確認: [The EM algorithm for Mixture Models](https://rpubs.com/englianhu/768289)
       
 3) Week 3 : Bayesian estimation for Mixture Models
     
@@ -111,11 +112,11 @@
       
       3.1.8) 学習用教材: Sample code for MCMC example 2. Duration: 10分
       
-      3.1.9) 受講生によるテストの実施: The MCMC algorithm for zero-inflated mixtures. Duration: 1 時間1 時間
+      3.1.9) 受講生によるテストの実施: [The MCMC algorithm for zero-inflated mixtures. Duration: 1 時間](https://rpubs.com/englianhu/773052)
       
-      3.1.10) 受講生によるテスト: [Markov chain Monte Carlo algorithms for Mixture Models. Duration: 1 時間1 時間 (期限 5月24日 15:59 JST)](https://rpubs.com/englianhu/771634)
+      3.1.10) 受講生によるテスト: [Markov chain Monte Carlo algorithms for Mixture Models. Duration: 1 時間](https://rpubs.com/englianhu/771634)
       
-      3.1.11) 他の受講生の課題を確認: Markov chain Monte Carlo algorithms for Mixture Models (期限 5月27日 15:59 JST)
+      3.1.11) 他の受講生の課題を確認: Markov chain Monte Carlo algorithms for Mixture Models
       
 4) Week 4 : Applications of Mixture Models
     
@@ -127,11 +128,11 @@
       
       4.1.3) 学習用教材: Sample code for density estimation problems. Duration: 10分
       
-      4.1.4) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+      4.1.4) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分
       
-      4.1.5) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分 期限 5月31日 15:59 JST
+      4.1.5) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分
       
-      4.1.6) 他の受講生の課題を確認: MCMC algorithms and density estimation 期限 6月3日 15:59 JST
+      4.1.6) 他の受講生の課題を確認: MCMC algorithms and density estimation
         
     4.2) Clustering
       
@@ -149,11 +150,11 @@
       
       4.3.3) 動画: 講座 [Classification example. Duration: 10分](https://www.youtube.com/watch?v=RLUK4v12q6E)
       
-      4.3.4) 学習用教材: Sample EM algorithm for classification problems. Duration: 10 分10 分
+      4.3.4) 学習用教材: Sample EM algorithm for classification problems. Duration: 10 分
         
-      4.3.5) 受講生によるテスト: Classification. Duration: 45分 期限 5月31日 15:59 JST
+      4.3.5) 受講生によるテスト: Classification. Duration: 45分
       
-      4.3.6) 他の受講生の課題を確認: Classification 期限 6月3日 15:59 JST
+      4.3.6) 他の受講生の課題を確認: Classification
 
 5) Week 5 : Practical considerations
     
@@ -169,7 +170,7 @@
       
       5.1.5) 学習用教材: Sample code to illustrate multimodality issues 2. Duration: 10分
       
-      5.1.6) テスト: Computational considerations for Mixture Models 3 個の問題 期限 6月7日 15:59 JST
+      5.1.6) テスト: Computational considerations for Mixture Models 3 個の問題
         
     5.2) Determining the number of components in a Mixture Model
       
@@ -181,13 +182,13 @@
       
       5.2.4) 学習用教材: Sample code: Bayesian Information Criteria. Duration: 10分
       
-      5.2.5) 受講生によるテスト: BIC for zero-inflated mixtures. Duration: 1 時間 期限 6月7日 15:59 JST
+      5.2.5) 受講生によるテスト: BIC for zero-inflated mixtures. Duration: 1 時間
       
-      5.2.6) 他の受講生の課題を確認: BIC for zero-inflated mixtures 期限 6月10日 15:59 JST
+      5.2.6) 他の受講生の課題を確認: BIC for zero-inflated mixtures
       
       5.2.7) 動画: 講座 [Estimating the number of components in Bayesian settings. Duration: 9 分](https://www.youtube.com/watch?v=S_xLIcD2P_E)
       
-      5.2.8) テスト: Estimating the number of components in Bayesian settings 4 個の問題 期限 6月7日 15:59 JST
+      5.2.8) テスト: Estimating the number of components in Bayesian settings 4 個の問題
       
       5.2.9) 動画: 講座 [Estimating the full partition structure in Bayesian settings. Duration: 18分](https://www.youtube.com/watch?v=j_xoQBi9xVA)
       
