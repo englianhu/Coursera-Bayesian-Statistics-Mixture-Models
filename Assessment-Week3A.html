@@ -388,6 +388,51 @@ rm(pkgs)</code></pre>
 <h2 number="2.2"><span class="header-section-number">2.2</span> 自分の提出物</h2>
 <div id="assignment" class="section level3" number="2.2.1">
 <h3 number="2.2.1"><span class="header-section-number">2.2.1</span> Assignment</h3>
+<pre class="r hover01"><code>KK        = 2
+w         = 1/2
+mu        = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n         = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>aa        = rep(1,KK)  # Uniform prior on w
+maxv      = 1 - 1e-6
+# Number of iterations of the sampler
+rrr       = 6000
+burn      = 1000
+w_out     = rep(0, rrr)
+mu_out    = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  cc      = rep(0,n)
+  for(i in 1:n){
+    v     = rep(0,KK)
+    v[1]  = log(w)
+    #v[1]  = log(w) + dunif(x[i], max=maxv, log=T) # treat first component as uniform (0, .9999)
+    v[2]  = log(1-w) + dpois(x[i], mu, log=T)
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=T, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+
+  # Sample the mean
+  for(k in 2:KK){
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    mu    = rgamma(1, xsumk + 1, nk + 1)
+  }
+
+  # Store samples
+  w_out[s]    = w
+  mu_out[s]   = mu
+}</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<pre class="r hover01"><code>mean(mu_out[burn:rrr])# = 3.051</code></pre>
+<pre class="hover02"><code>## [1] 0</code></pre>
+<pre class="r hover01"><code>mean(w_out[burn:rrr])# = 0.398</code></pre>
+<pre class="hover02"><code>## [1] 0</code></pre>
 <p><br><br></p>
 </div>
 <div id="marking" class="section level3" number="2.2.2">
@@ -401,9 +446,129 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.1"><span class="header-section-number">2.3.1</span> 1st Peer</h3>
 <div id="asignment" class="section level4" number="2.3.1.1">
 <h4 number="2.3.1.1"><span class="header-section-number">2.3.1.1</span> Asignment</h4>
+<p>Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.</p>
+<pre class="r hover01"><code>n        = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc       = rep(0, n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<pre class="r hover01"><code>cc[x==0] = sample(1:2, sum(x==0), replace=TRUE, prob=c(1/2, 1/2))</code></pre>
+<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc[x!=0] = 2</code></pre>
+<pre class="hover03"><code>## Error in cc[x != 0] = 2: object &#39;cc&#39; not found</code></pre>
+<pre class="r hover01"><code>lambda   = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>w        = 0.2 # Full conditional for cc
+
+for(i in 1:n){
+   v = rep(0,2)
+   
+   if(x[i]==0){
+     v[1] = log(w)
+     v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+     v    = exp(v - max(v))/sum(exp(v - max(v)))
+     
+    }else{
+      v[1] = 0
+      v[2] = 1
+    }
+   cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}</code></pre>
+<pre class="hover03"><code>## Error in 1:n: NA/NaN argument</code></pre>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + sum(cc == 2)): object &#39;cc&#39; not found</code></pre>
+<pre class="r hover01"><code>lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)</code></pre>
+<pre class="hover03"><code>## Error in rgamma(1, sum(x[cc == 2]) + 1, sum(cc == 2) + 1): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>w</code></pre>
+<pre class="hover02"><code>## [1] 0.2</code></pre>
+<pre class="r hover01"><code>lambda</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;lambda&#39; not found</code></pre>
+<p>Provide you estimates of the posterior means <span class="math inline">\(\mbox{E}\left(\lambda \mid \mathbf{x} \right)\)</span> and <span class="math inline">\(\mbox{E}\left(w \mid \mathbf{x} \right)\)</span>.</p>
+<pre class="r hover01"><code>mean(mu_out[burn:rrr])# = 3.051</code></pre>
+<pre class="hover02"><code>## [1] 0</code></pre>
+<pre class="r hover01"><code>mean(w_out[burn:rrr])# = 0.398</code></pre>
+<pre class="hover02"><code>## [1] 0</code></pre>
 </div>
 <div id="marking-1" class="section level4" number="2.3.1.2">
 <h4 number="2.3.1.2"><span class="header-section-number">2.3.1.2</span> Marking</h4>
+<p><strong>Are the parameters initialized in a reasonable way?</strong></p>
+<p>Correctly initializing the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> is key. In particular, observations such that <span class="math inline">\(x_i \neq 0\)</span> must have <span class="math inline">\(c_i = 2\)</span>. As for observations for which <span class="math inline">\(x_i = 0\)</span>, these can be randomly initialized to either component.</p>
+<p>For the other parameters, it is reasonable to initialize <span class="math inline">\(\lambda\)</span> to the mean of the observations and the weight <span class="math inline">\(\omega\)</span> to a relatively small value (as we did in the EM algorithm).</p>
+<p>Hence, the code for the initialization of the algorithm might look something like:</p>
+<pre class="r hover01"><code>n        = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc       = rep(0, n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<pre class="r hover01"><code>cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))</code></pre>
+<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc[x!=0] = 2</code></pre>
+<pre class="hover03"><code>## Error in cc[x != 0] = 2: object &#39;cc&#39; not found</code></pre>
+<pre class="r hover01"><code>lambda   = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>w        = 0.2</code></pre>
+<p>However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> correct?</strong></p>
+<p>The indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> are conditionally independent from each other, and we have</p>
+<p><span class="math inline">\(\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w &amp; x_i=0 \\ 0 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>while</p>
+<p><span class="math inline">\(\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} &amp; x_i=0 \\ 1 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>Hence, the code to sample the indicators might look something like this:</p>
+<pre class="r hover01"><code># Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}</code></pre>
+<pre class="hover03"><code>## Error in 1:n: NA/NaN argument</code></pre>
+<p>Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the weight ww correct?</strong></p>
+<p>This is a simple one, as its structure is common to all mixture models. Recalling that the prior on <span class="math inline">\(\omega\)</span> is a uniform distribution on [0,1], we have</p>
+<p><span class="math inline">\(\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)\)</span></p>
+<p>where <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1. The associated code might look something like this</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + n - sum(cc == 1)): object &#39;cc&#39; not found</code></pre>
+<p>or, alternatively,</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + sum(cc == 2)): object &#39;cc&#39; not found</code></pre>
+<p>Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the rate <span class="math inline">\(\lambda\)</span> correct?</strong></p>
+<p>Because we use a exponential prior on <span class="math inline">\(\lambda\)</span>, the full conditional posterior is a Gamma distribution,</p>
+<p><span class="math inline">\(\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)\)</span></p>
+<p>where, as before, <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1 (so that <span class="math inline">\(n - m(\mathbf{c})\)</span> is the number of observations assigned to component 2), and <span class="math inline">\(\sum_{c_i = 2}^{i} x_i\)</span> is the sum of the observations assigned to component 2.</p>
+<p>Hence, the code for this prompt might look something like:</p>
+<pre class="r hover01"><code>lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)</code></pre>
+<pre class="hover03"><code>## Error in rgamma(1, sum(x[cc == 2]) + 1, sum(cc == 2) + 1): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Are the posterior means generated by the algorithm correct?</strong></p>
+<p>Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in. While there might a bit of Monte Carlo error in the answers reported, the values should be <span class="math inline">\(E(\lambda∣x)≈3.05\)</span> and <span class="math inline">\(E(\omega∣x)≈0.40\)</span>. Note that these values are very close to those generated by the EM algorithm.</p>
+<ul>
+<li><span style="color:red;">0点 No</span></li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -411,9 +576,134 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.2"><span class="header-section-number">2.3.2</span> 2nd Peer</h3>
 <div id="asignment-1" class="section level4" number="2.3.2.1">
 <h4 number="2.3.2.1"><span class="header-section-number">2.3.2.1</span> Asignment</h4>
+<p>Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.</p>
+<pre class="r hover01"><code>KK        = 2
+w         = 1/2
+mu        = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n         = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>aa        = rep(1,KK)  # Uniform prior on w
+maxv      = 1 - 1e-6
+# Number of iterations of the sampler
+rrr       = 6000
+burn      = 1000
+w_out     = rep(0, rrr)
+mu_out    = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  cc      = rep(0,n)
+  for(i in 1:n){
+    v     = rep(0,KK)
+    v[1]  = log(w)
+    #v[1]  = log(w) + dunif(x[i], max=maxv, log=T) # treat first component as uniform (0, .9999)
+    v[2]  = log(1-w) + dpois(x[i], mu, log=T)
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=T, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+
+  # Sample the mean
+  for(k in 2:KK){
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    mu    = rgamma(1, xsumk + 1, nk + 1)
+  }
+
+  # Store samples
+  w_out[s]    = w
+  mu_out[s]   = mu
+}</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<p>Provide you estimates of the posterior means <span class="math inline">\(\mbox{E}\left(\lambda \mid \mathbf{x} \right)\)</span> and <span class="math inline">\(\mbox{E}\left(w \mid \mathbf{x} \right)\)</span>.</p>
+<pre class="r hover01"><code>mean(mu_out[burn:rrr])# = 3.051</code></pre>
+<pre class="hover02"><code>## [1] 0</code></pre>
+<pre class="r hover01"><code>mean(w_out[burn:rrr])# = 0.398</code></pre>
+<pre class="hover02"><code>## [1] 0</code></pre>
 </div>
 <div id="marking-2" class="section level4" number="2.3.2.2">
 <h4 number="2.3.2.2"><span class="header-section-number">2.3.2.2</span> Marking</h4>
+<p><strong>Are the parameters initialized in a reasonable way?</strong></p>
+<p>Correctly initializing the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> is key. In particular, observations such that <span class="math inline">\(x_i \neq 0\)</span> must have <span class="math inline">\(c_i = 2\)</span>. As for observations for which <span class="math inline">\(x_i = 0\)</span>, these can be randomly initialized to either component.</p>
+<p>For the other parameters, it is reasonable to initialize <span class="math inline">\(\lambda\)</span> to the mean of the observations and the weight <span class="math inline">\(\omega\)</span> to a relatively small value (as we did in the EM algorithm).</p>
+<p>Hence, the code for the initialization of the algorithm might look something like:</p>
+<pre class="r hover01"><code>n        = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc       = rep(0, n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<pre class="r hover01"><code>cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))</code></pre>
+<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc[x!=0] = 2</code></pre>
+<pre class="hover03"><code>## Error in cc[x != 0] = 2: object &#39;cc&#39; not found</code></pre>
+<pre class="r hover01"><code>lambda   = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>w        = 0.2</code></pre>
+<p>However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> correct?</strong></p>
+<p>The indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> are conditionally independent from each other, and we have</p>
+<p><span class="math inline">\(\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w &amp; x_i=0 \\ 0 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>while</p>
+<p><span class="math inline">\(\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} &amp; x_i=0 \\ 1 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>Hence, the code to sample the indicators might look something like this:</p>
+<pre class="r hover01"><code># Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}</code></pre>
+<pre class="hover03"><code>## Error in 1:n: NA/NaN argument</code></pre>
+<p>Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the weight ww correct?</strong></p>
+<p>This is a simple one, as its structure is common to all mixture models. Recalling that the prior on <span class="math inline">\(\omega\)</span> is a uniform distribution on [0,1], we have</p>
+<p><span class="math inline">\(\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)\)</span></p>
+<p>where <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1. The associated code might look something like this</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + n - sum(cc == 1)): object &#39;cc&#39; not found</code></pre>
+<p>or, alternatively,</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + sum(cc == 2)): object &#39;cc&#39; not found</code></pre>
+<p>Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the rate <span class="math inline">\(\lambda\)</span> correct?</strong></p>
+<p>Because we use a exponential prior on <span class="math inline">\(\lambda\)</span>, the full conditional posterior is a Gamma distribution,</p>
+<p><span class="math inline">\(\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)\)</span></p>
+<p>where, as before, <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1 (so that <span class="math inline">\(n - m(\mathbf{c})\)</span> is the number of observations assigned to component 2), and <span class="math inline">\(\sum_{c_i = 2}^{i} x_i\)</span> is the sum of the observations assigned to component 2.</p>
+<p>Hence, the code for this prompt might look something like:</p>
+<pre class="r hover01"><code>lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)</code></pre>
+<pre class="hover03"><code>## Error in rgamma(1, sum(x[cc == 2]) + 1, sum(cc == 2) + 1): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Are the posterior means generated by the algorithm correct?</strong></p>
+<p>Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in. While there might a bit of Monte Carlo error in the answers reported, the values should be <span class="math inline">\(E(\lambda∣x)≈3.05\)</span> and <span class="math inline">\(E(\omega∣x)≈0.40\)</span>. Note that these values are very close to those generated by the EM algorithm.</p>
+<ul>
+<li><span style="color:red;">0点 No</span></li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -421,9 +711,188 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.3"><span class="header-section-number">2.3.3</span> 3rd Peer</h3>
 <div id="asignment-2" class="section level4" number="2.3.3.1">
 <h4 number="2.3.3.1"><span class="header-section-number">2.3.3.1</span> Asignment</h4>
+<p>Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.</p>
+<pre class="r hover01"><code>## Initialize the parameters
+KK     = 2                               # number of components
+n      = length(x)                         # number of samples</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>v      = array(0, dim=c(n,KK))</code></pre>
+<pre class="hover03"><code>## Error in array(0, dim = c(n, KK)): &#39;list&#39; object cannot be coerced to type &#39;integer&#39;</code></pre>
+<pre class="r hover01"><code>v[,1]  = 0.5*(x==0)                    #Assign half weight for nests with 0 eggs to first component</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>v[,2]  = 1-v[,1]                              #Assign all of the remaining nests to the second component</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;v&#39; not found</code></pre>
+<pre class="r hover01"><code>w      = mean(v[,1])                          #weight of the first component</code></pre>
+<pre class="hover03"><code>## Error in mean(v[, 1]): object &#39;v&#39; not found</code></pre>
+<pre class="r hover01"><code>lambda = sum(x*v[,2])/sum(v[,2])     #parameter (mean) of the second component</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>## The actual MCMC algorithm starts here
+# Priors
+aa     = rep(1,KK)  # Uniform prior on w
+alpha  = 2 #For Gamma distribution prior number of obs = alpha-1
+beta   = 1 #Sum of observations = beta
+
+# Number of iterations of the sampler
+rrr    = 6000
+burn   = 1000
+
+# Storing the samples
+cc.out      = array(0, dim=c(rrr, n))</code></pre>
+<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n)): &#39;list&#39; object cannot be coerced to type &#39;integer&#39;</code></pre>
+<pre class="r hover01"><code>w.out       = rep(0, rrr)
+lambda.out  = array(0, dim=c(rrr, 1))
+logpost     = rep(0, rrr)
+
+# MCMC iterations
+# MCMC iterations
+for(s in 1:rrr){
+  # Sample the indicators
+  cc = rep(0,n)
+  for(i in 1:n){
+    v       = rep(0,KK)
+    if (x[i]==0) {
+      v[1]  = (w/(w+(1-w)*exp(-lambda)))
+    } else {
+      v[1]  = 0.0
+    }
+    v[2]    = 1.0 - v[1]
+    cc[i]   = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w         = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  
+  # Sample lambda
+  nk        = sum(cc==2)
+  xsumk     = sum(x[cc==2])
+  alpha.hat = alpha + xsumk
+  beta.hat  = beta + nk
+  lambda    = rgamma(1, shape = alpha.hat, rate = beta.hat)
+  
+  # Store samples
+  cc.out[s,]     = cc
+  w.out[s]       = w
+  lambda.out[s,] = lambda
+  for(i in 1:n){
+    if(cc[i]==1){
+      logpost[s] = logpost[s] + log(w)
+    }else{
+      logpost[s] = logpost[s] + log(1-w) + dpois(x[i], lambda, log=TRUE)
+    }
+  }
+  logpost[s] = logpost[s] + dbeta(w, aa[1], aa[2],log = T)
+  logpost[s] = logpost[s] + dgamma(lambda, shape = alpha, rate = beta)
+  if(s/500==floor(s/500)){
+    print(paste(&quot;s =&quot;,s, w, lambda, logpost[s]))
+  }
+}</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<pre class="r hover01"><code>## Plot the logposterior distribution for various samples
+par(mfrow=c(1,1))
+par(mar=c(4,4,1,1)+0.1)
+plot(logpost, type=&quot;l&quot;, xlab=&quot;Iterations&quot;, ylab=&quot;Log posterior&quot;)</code></pre>
+<p><img src="data:image/png;base64,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" width="672" /></p>
+<pre class="r hover01"><code>w_avg = sum(w.out[(burn+1):rrr])/(rrr-burn)
+lambda_avg = sum(lambda.out[(burn+1):rrr])/(rrr-burn)
+print(paste(w_avg, lambda_avg))</code></pre>
+<pre class="hover02"><code>## [1] &quot;0 0&quot;</code></pre>
+<pre class="r hover01"><code>w_sum = 0
+lambda_sum = 0
+counter = 0
+for(s in 1:(rrr-burn)){
+  w_sum = w_sum + w.out[s+burn]
+  lambda_sum = lambda_sum + lambda.out[s+burn]
+  counter = counter + 1
+}
+print(paste(counter, w_sum/counter, lambda_sum/counter))</code></pre>
+<pre class="hover02"><code>## [1] &quot;5000 0 0&quot;</code></pre>
+<p>Provide you estimates of the posterior means <span class="math inline">\(\mbox{E}\left(\lambda \mid \mathbf{x} \right)\)</span> and <span class="math inline">\(\mbox{E}\left(w \mid \mathbf{x} \right)\)</span>.</p>
+<pre class="r hover01"><code>#E(lambda|x) = 3.056 and E(w|x) = 0.398
+mean(lambda_sum)</code></pre>
+<pre class="hover02"><code>## [1] 0</code></pre>
+<pre class="r hover01"><code>mean(w_sum)</code></pre>
+<pre class="hover02"><code>## [1] 0</code></pre>
 </div>
 <div id="marking-3" class="section level4" number="2.3.3.2">
 <h4 number="2.3.3.2"><span class="header-section-number">2.3.3.2</span> Marking</h4>
+<p><strong>Are the parameters initialized in a reasonable way?</strong></p>
+<p>Correctly initializing the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> is key. In particular, observations such that <span class="math inline">\(x_i \neq 0\)</span> must have <span class="math inline">\(c_i = 2\)</span>. As for observations for which <span class="math inline">\(x_i = 0\)</span>, these can be randomly initialized to either component.</p>
+<p>For the other parameters, it is reasonable to initialize <span class="math inline">\(\lambda\)</span> to the mean of the observations and the weight <span class="math inline">\(\omega\)</span> to a relatively small value (as we did in the EM algorithm).</p>
+<p>Hence, the code for the initialization of the algorithm might look something like:</p>
+<pre class="r hover01"><code>n        = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc       = rep(0, n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<pre class="r hover01"><code>cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))</code></pre>
+<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc[x!=0] = 2</code></pre>
+<pre class="hover03"><code>## Error in cc[x != 0] = 2: object &#39;cc&#39; not found</code></pre>
+<pre class="r hover01"><code>lambda   = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>w        = 0.2</code></pre>
+<p>However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> correct?</strong></p>
+<p>The indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> are conditionally independent from each other, and we have</p>
+<p><span class="math inline">\(\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w &amp; x_i=0 \\ 0 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>while</p>
+<p><span class="math inline">\(\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} &amp; x_i=0 \\ 1 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>Hence, the code to sample the indicators might look something like this:</p>
+<pre class="r hover01"><code># Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}</code></pre>
+<pre class="hover03"><code>## Error in 1:n: NA/NaN argument</code></pre>
+<p>Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the weight ww correct?</strong></p>
+<p>This is a simple one, as its structure is common to all mixture models. Recalling that the prior on <span class="math inline">\(\omega\)</span> is a uniform distribution on [0,1], we have</p>
+<p><span class="math inline">\(\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)\)</span></p>
+<p>where <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1. The associated code might look something like this</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + n - sum(cc == 1)): object &#39;cc&#39; not found</code></pre>
+<p>or, alternatively,</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + sum(cc == 2)): object &#39;cc&#39; not found</code></pre>
+<p>Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the rate <span class="math inline">\(\lambda\)</span> correct?</strong></p>
+<p>Because we use a exponential prior on <span class="math inline">\(\lambda\)</span>, the full conditional posterior is a Gamma distribution,</p>
+<p><span class="math inline">\(\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)\)</span></p>
+<p>where, as before, <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1 (so that <span class="math inline">\(n - m(\mathbf{c})\)</span> is the number of observations assigned to component 2), and <span class="math inline">\(\sum_{c_i = 2}^{i} x_i\)</span> is the sum of the observations assigned to component 2.</p>
+<p>Hence, the code for this prompt might look something like:</p>
+<pre class="r hover01"><code>lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)</code></pre>
+<pre class="hover03"><code>## Error in rgamma(1, sum(x[cc == 2]) + 1, sum(cc == 2) + 1): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Are the posterior means generated by the algorithm correct?</strong></p>
+<p>Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in. While there might a bit of Monte Carlo error in the answers reported, the values should be <span class="math inline">\(E(\lambda∣x)≈3.05\)</span> and <span class="math inline">\(E(\omega∣x)≈0.40\)</span>. Note that these values are very close to those generated by the EM algorithm.</p>
+<ul>
+<li><span style="color:red;">0点 No</span></li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -431,9 +900,89 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.4"><span class="header-section-number">2.3.4</span> 4th Peer</h3>
 <div id="asignment-3" class="section level4" number="2.3.4.1">
 <h4 number="2.3.4.1"><span class="header-section-number">2.3.4.1</span> Asignment</h4>
+<p>Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.</p>
+<p>Provide you estimates of the posterior means <span class="math inline">\(\mbox{E}\left(\lambda \mid \mathbf{x} \right)\)</span> and <span class="math inline">\(\mbox{E}\left(w \mid \mathbf{x} \right)\)</span>.</p>
 </div>
 <div id="marking-4" class="section level4" number="2.3.4.2">
 <h4 number="2.3.4.2"><span class="header-section-number">2.3.4.2</span> Marking</h4>
+<p><strong>Are the parameters initialized in a reasonable way?</strong></p>
+<p>Correctly initializing the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> is key. In particular, observations such that <span class="math inline">\(x_i \neq 0\)</span> must have <span class="math inline">\(c_i = 2\)</span>. As for observations for which <span class="math inline">\(x_i = 0\)</span>, these can be randomly initialized to either component.</p>
+<p>For the other parameters, it is reasonable to initialize <span class="math inline">\(\lambda\)</span> to the mean of the observations and the weight <span class="math inline">\(\omega\)</span> to a relatively small value (as we did in the EM algorithm).</p>
+<p>Hence, the code for the initialization of the algorithm might look something like:</p>
+<pre class="r hover01"><code>n        = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc       = rep(0, n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<pre class="r hover01"><code>cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))</code></pre>
+<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc[x!=0] = 2</code></pre>
+<pre class="hover03"><code>## Error in cc[x != 0] = 2: object &#39;cc&#39; not found</code></pre>
+<pre class="r hover01"><code>lambda   = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>w        = 0.2</code></pre>
+<p>However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> correct?</strong></p>
+<p>The indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> are conditionally independent from each other, and we have</p>
+<p><span class="math inline">\(\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w &amp; x_i=0 \\ 0 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>while</p>
+<p><span class="math inline">\(\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} &amp; x_i=0 \\ 1 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>Hence, the code to sample the indicators might look something like this:</p>
+<pre class="r hover01"><code># Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}</code></pre>
+<pre class="hover03"><code>## Error in 1:n: NA/NaN argument</code></pre>
+<p>Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the weight ww correct?</strong></p>
+<p>This is a simple one, as its structure is common to all mixture models. Recalling that the prior on <span class="math inline">\(\omega\)</span> is a uniform distribution on [0,1], we have</p>
+<p><span class="math inline">\(\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)\)</span></p>
+<p>where <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1. The associated code might look something like this</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + n - sum(cc == 1)): object &#39;cc&#39; not found</code></pre>
+<p>or, alternatively,</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + sum(cc == 2)): object &#39;cc&#39; not found</code></pre>
+<p>Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the rate <span class="math inline">\(\lambda\)</span> correct?</strong></p>
+<p>Because we use a exponential prior on <span class="math inline">\(\lambda\)</span>, the full conditional posterior is a Gamma distribution,</p>
+<p><span class="math inline">\(\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)\)</span></p>
+<p>where, as before, <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1 (so that <span class="math inline">\(n - m(\mathbf{c})\)</span> is the number of observations assigned to component 2), and <span class="math inline">\(\sum_{c_i = 2}^{i} x_i\)</span> is the sum of the observations assigned to component 2.</p>
+<p>Hence, the code for this prompt might look something like:</p>
+<pre class="r hover01"><code>lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)</code></pre>
+<pre class="hover03"><code>## Error in rgamma(1, sum(x[cc == 2]) + 1, sum(cc == 2) + 1): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Are the posterior means generated by the algorithm correct?</strong></p>
+<p>Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in. While there might a bit of Monte Carlo error in the answers reported, the values should be <span class="math inline">\(E(\lambda∣x)≈3.05\)</span> and <span class="math inline">\(E(\omega∣x)≈0.40\)</span>. Note that these values are very close to those generated by the EM algorithm.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -441,9 +990,89 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.5"><span class="header-section-number">2.3.5</span> 5th Peer</h3>
 <div id="asignment-4" class="section level4" number="2.3.5.1">
 <h4 number="2.3.5.1"><span class="header-section-number">2.3.5.1</span> Asignment</h4>
+<p>Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.</p>
+<p>Provide you estimates of the posterior means <span class="math inline">\(\mbox{E}\left(\lambda \mid \mathbf{x} \right)\)</span> and <span class="math inline">\(\mbox{E}\left(w \mid \mathbf{x} \right)\)</span>.</p>
 </div>
 <div id="marking-5" class="section level4" number="2.3.5.2">
 <h4 number="2.3.5.2"><span class="header-section-number">2.3.5.2</span> Marking</h4>
+<p><strong>Are the parameters initialized in a reasonable way?</strong></p>
+<p>Correctly initializing the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> is key. In particular, observations such that <span class="math inline">\(x_i \neq 0\)</span> must have <span class="math inline">\(c_i = 2\)</span>. As for observations for which <span class="math inline">\(x_i = 0\)</span>, these can be randomly initialized to either component.</p>
+<p>For the other parameters, it is reasonable to initialize <span class="math inline">\(\lambda\)</span> to the mean of the observations and the weight <span class="math inline">\(\omega\)</span> to a relatively small value (as we did in the EM algorithm).</p>
+<p>Hence, the code for the initialization of the algorithm might look something like:</p>
+<pre class="r hover01"><code>n        = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc       = rep(0, n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<pre class="r hover01"><code>cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))</code></pre>
+<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc[x!=0] = 2</code></pre>
+<pre class="hover03"><code>## Error in cc[x != 0] = 2: object &#39;cc&#39; not found</code></pre>
+<pre class="r hover01"><code>lambda   = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>w        = 0.2</code></pre>
+<p>However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> correct?</strong></p>
+<p>The indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> are conditionally independent from each other, and we have</p>
+<p><span class="math inline">\(\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w &amp; x_i=0 \\ 0 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>while</p>
+<p><span class="math inline">\(\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} &amp; x_i=0 \\ 1 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>Hence, the code to sample the indicators might look something like this:</p>
+<pre class="r hover01"><code># Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}</code></pre>
+<pre class="hover03"><code>## Error in 1:n: NA/NaN argument</code></pre>
+<p>Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the weight ww correct?</strong></p>
+<p>This is a simple one, as its structure is common to all mixture models. Recalling that the prior on <span class="math inline">\(\omega\)</span> is a uniform distribution on [0,1], we have</p>
+<p><span class="math inline">\(\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)\)</span></p>
+<p>where <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1. The associated code might look something like this</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + n - sum(cc == 1)): object &#39;cc&#39; not found</code></pre>
+<p>or, alternatively,</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + sum(cc == 2)): object &#39;cc&#39; not found</code></pre>
+<p>Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the rate <span class="math inline">\(\lambda\)</span> correct?</strong></p>
+<p>Because we use a exponential prior on <span class="math inline">\(\lambda\)</span>, the full conditional posterior is a Gamma distribution,</p>
+<p><span class="math inline">\(\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)\)</span></p>
+<p>where, as before, <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1 (so that <span class="math inline">\(n - m(\mathbf{c})\)</span> is the number of observations assigned to component 2), and <span class="math inline">\(\sum_{c_i = 2}^{i} x_i\)</span> is the sum of the observations assigned to component 2.</p>
+<p>Hence, the code for this prompt might look something like:</p>
+<pre class="r hover01"><code>lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)</code></pre>
+<pre class="hover03"><code>## Error in rgamma(1, sum(x[cc == 2]) + 1, sum(cc == 2) + 1): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Are the posterior means generated by the algorithm correct?</strong></p>
+<p>Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in. While there might a bit of Monte Carlo error in the answers reported, the values should be <span class="math inline">\(E(\lambda∣x)≈3.05\)</span> and <span class="math inline">\(E(\omega∣x)≈0.40\)</span>. Note that these values are very close to those generated by the EM algorithm.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -451,9 +1080,89 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.6"><span class="header-section-number">2.3.6</span> 6th Peer</h3>
 <div id="asignment-5" class="section level4" number="2.3.6.1">
 <h4 number="2.3.6.1"><span class="header-section-number">2.3.6.1</span> Asignment</h4>
+<p>Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.</p>
+<p>Provide you estimates of the posterior means <span class="math inline">\(\mbox{E}\left(\lambda \mid \mathbf{x} \right)\)</span> and <span class="math inline">\(\mbox{E}\left(w \mid \mathbf{x} \right)\)</span>.</p>
 </div>
 <div id="marking-6" class="section level4" number="2.3.6.2">
 <h4 number="2.3.6.2"><span class="header-section-number">2.3.6.2</span> Marking</h4>
+<p><strong>Are the parameters initialized in a reasonable way?</strong></p>
+<p>Correctly initializing the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> is key. In particular, observations such that <span class="math inline">\(x_i \neq 0\)</span> must have <span class="math inline">\(c_i = 2\)</span>. As for observations for which <span class="math inline">\(x_i = 0\)</span>, these can be randomly initialized to either component.</p>
+<p>For the other parameters, it is reasonable to initialize <span class="math inline">\(\lambda\)</span> to the mean of the observations and the weight <span class="math inline">\(\omega\)</span> to a relatively small value (as we did in the EM algorithm).</p>
+<p>Hence, the code for the initialization of the algorithm might look something like:</p>
+<pre class="r hover01"><code>n        = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc       = rep(0, n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): cannot coerce type &#39;closure&#39; to vector of type &#39;double&#39;</code></pre>
+<pre class="r hover01"><code>cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))</code></pre>
+<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>cc[x!=0] = 2</code></pre>
+<pre class="hover03"><code>## Error in cc[x != 0] = 2: object &#39;cc&#39; not found</code></pre>
+<pre class="r hover01"><code>lambda   = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>w        = 0.2</code></pre>
+<p>However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> correct?</strong></p>
+<p>The indicators <span class="math inline">\(c_1, \ldots, c_n\)</span> are conditionally independent from each other, and we have</p>
+<p><span class="math inline">\(\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w &amp; x_i=0 \\ 0 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>while</p>
+<p><span class="math inline">\(\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} &amp; x_i=0 \\ 1 &amp; \mbox{otherwise} \end{cases}\)</span></p>
+<p>Hence, the code to sample the indicators might look something like this:</p>
+<pre class="r hover01"><code># Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}</code></pre>
+<pre class="hover03"><code>## Error in 1:n: NA/NaN argument</code></pre>
+<p>Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the weight ww correct?</strong></p>
+<p>This is a simple one, as its structure is common to all mixture models. Recalling that the prior on <span class="math inline">\(\omega\)</span> is a uniform distribution on [0,1], we have</p>
+<p><span class="math inline">\(\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)\)</span></p>
+<p>where <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1. The associated code might look something like this</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + n - sum(cc == 1)): object &#39;cc&#39; not found</code></pre>
+<p>or, alternatively,</p>
+<pre class="r hover01"><code># Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))</code></pre>
+<pre class="hover03"><code>## Error in rbeta(1, 1 + sum(cc == 1), 1 + sum(cc == 2)): object &#39;cc&#39; not found</code></pre>
+<p>Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Is the full conditional for the rate <span class="math inline">\(\lambda\)</span> correct?</strong></p>
+<p>Because we use a exponential prior on <span class="math inline">\(\lambda\)</span>, the full conditional posterior is a Gamma distribution,</p>
+<p><span class="math inline">\(\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)\)</span></p>
+<p>where, as before, <span class="math inline">\(m(\mathbf{c})\)</span> is the number of observations that <span class="math inline">\(\mathbf{c}\)</span> assigns to component 1 (so that <span class="math inline">\(n - m(\mathbf{c})\)</span> is the number of observations assigned to component 2), and <span class="math inline">\(\sum_{c_i = 2}^{i} x_i\)</span> is the sum of the observations assigned to component 2.</p>
+<p>Hence, the code for this prompt might look something like:</p>
+<pre class="r hover01"><code>lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)</code></pre>
+<pre class="hover03"><code>## Error in rgamma(1, sum(x[cc == 2]) + 1, sum(cc == 2) + 1): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li><span style="color:green;">1点 Yes</span></li>
+</ul>
+<p><strong>Are the posterior means generated by the algorithm correct?</strong></p>
+<p>Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in. While there might a bit of Monte Carlo error in the answers reported, the values should be <span class="math inline">\(E(\lambda∣x)≈3.05\)</span> and <span class="math inline">\(E(\omega∣x)≈0.40\)</span>. Note that these values are very close to those generated by the EM algorithm.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br><br></p>
 </div>
 </div>
@@ -664,7 +1373,7 @@ date
 Current time
 </td>
 <td style="text-align:left;color: white !important;background-color: grey !important;font-weight: bold;color: yellow !important;background-color: #D7261E !important;">
-2021-05-24 03:37:04 JST🗾
+2021-05-24 04:58:46 JST🗾
 </td>
 </tr>
 </tbody>

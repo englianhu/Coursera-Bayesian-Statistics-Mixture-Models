@@ -112,7 +112,7 @@
       
       3.1.8) 学習用教材: Sample code for MCMC example 2. Duration: 10分
       
-      3.1.9) 受講生によるテストの実施: [The MCMC algorithm for zero-inflated mixtures. Duration: 1 時間](https://rpubs.com/englianhu/773052)
+      3.1.9) 受講生によるテストの実施: [The MCMC algorithm for zero-inflated mixtures. Duration: 1 時間](https://rpubs.com/englianhu/773086)
       
       3.1.10) 受講生によるテスト: [Markov chain Monte Carlo algorithms for Mixture Models. Duration: 1 時間](https://rpubs.com/englianhu/771634)
       

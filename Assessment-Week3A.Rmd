@@ -168,13 +168,49 @@ The code you generate should follow the same structure as "Sample code for MCMC 
 ### Assignment
 
 ```{r error=TRUE}
+KK        = 2
+w         = 1/2
+mu        = mean(x)
+n         = length(x)
+aa        = rep(1,KK)  # Uniform prior on w
+maxv      = 1 - 1e-6
+# Number of iterations of the sampler
+rrr       = 6000
+burn      = 1000
+w_out     = rep(0, rrr)
+mu_out    = rep(0, rrr)
 
+for(s in 1:rrr){
+  # Sample the indicators
+  cc      = rep(0,n)
+  for(i in 1:n){
+    v     = rep(0,KK)
+    v[1]  = log(w)
+    #v[1]  = log(w) + dunif(x[i], max=maxv, log=T) # treat first component as uniform (0, .9999)
+    v[2]  = log(1-w) + dpois(x[i], mu, log=T)
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=T, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
 
+  # Sample the mean
+  for(k in 2:KK){
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    mu    = rgamma(1, xsumk + 1, nk + 1)
+  }
+
+  # Store samples
+  w_out[s]    = w
+  mu_out[s]   = mu
+}
 ```
 
 ```{r error=TRUE}
-
-
+mean(mu_out[burn:rrr])# = 3.051
+mean(w_out[burn:rrr])# = 0.398
 ```
 
 
@@ -191,9 +227,150 @@ The code you generate should follow the same structure as "Sample code for MCMC 
 
 #### Asignment
 
+Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.
+
+```{r error=TRUE}
+n        = length(x)
+cc       = rep(0, n)
+cc[x==0] = sample(1:2, sum(x==0), replace=TRUE, prob=c(1/2, 1/2))
+cc[x!=0] = 2
+lambda   = mean(x)
+w        = 0.2 # Full conditional for cc
+
+for(i in 1:n){
+   v = rep(0,2)
+   
+   if(x[i]==0){
+     v[1] = log(w)
+     v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+     v    = exp(v - max(v))/sum(exp(v - max(v)))
+     
+    }else{
+      v[1] = 0
+      v[2] = 1
+    }
+   cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)
+
+w
+lambda
+```
+
+Provide you estimates of the posterior means $\mbox{E}\left(\lambda \mid \mathbf{x} \right)$ and $\mbox{E}\left(w \mid \mathbf{x} \right)$.
+
+```{r error=TRUE}
+mean(mu_out[burn:rrr])# = 3.051
+mean(w_out[burn:rrr])# = 0.398
+```
 
 #### Marking
 
+**Are the parameters initialized in a reasonable way?**
+
+Correctly initializing the indicators $c_1, \ldots, c_n$ is key. In particular, observations such that $x_i \neq 0$ must have $c_i = 2$. As for observations for which $x_i = 0$, these can be randomly initialized to either component.
+
+For the other parameters, it is reasonable to initialize $\lambda$ to the mean of the observations and the weight $\omega$ to a relatively small value (as we did in the EM algorithm).
+
+Hence, the code for the initialization of the algorithm might look something like:
+
+```{r error=TRUE}
+n        = length(x)
+cc       = rep(0, n)
+cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))
+cc[x!=0] = 2
+lambda   = mean(x)
+w        = 0.2
+```
+
+However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w & x_i=0 \\ 0 & \mbox{otherwise} \end{cases}$
+
+while
+
+$\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} & x_i=0 \\ 1 & \mbox{otherwise} \end{cases}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error=TRUE}
+# Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the weight ww correct?**
+
+This is a simple one, as its structure is common to all mixture models.  Recalling that the prior on $\omega$ is a uniform distribution on [0,1], we have
+
+$\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)$
+
+where $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1.  The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the rate $\lambda$ correct?**
+
+Because we use a exponential prior on $\lambda$, the full conditional posterior is a Gamma distribution,
+
+$\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)$
+
+where, as before, $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1 (so that $n - m(\mathbf{c})$ is the number of observations assigned to component 2), and $\sum_{c_i = 2}^{i} x_i$ is the sum of the observations assigned to component 2.
+
+Hence, the code for this prompt might look something like:
+
+```{r error=TRUE}
+lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)
+```
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Are the posterior means generated by the algorithm correct?**
+
+Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in.  While there might a bit of Monte Carlo error in the answers reported, the values should be $E(\lambda∣x)≈3.05$ and $E(\omega∣x)≈0.40$. Note that these values are very close to those generated by the EM algorithm.
+
+- <span style='color:red;'>0点 No</span>
+- 1点 Yes
 
 <br>
 
@@ -201,9 +378,161 @@ The code you generate should follow the same structure as "Sample code for MCMC 
 
 #### Asignment
 
+Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.
+
+```{r error=TRUE}
+KK        = 2
+w         = 1/2
+mu        = mean(x)
+n         = length(x)
+aa        = rep(1,KK)  # Uniform prior on w
+maxv      = 1 - 1e-6
+# Number of iterations of the sampler
+rrr       = 6000
+burn      = 1000
+w_out     = rep(0, rrr)
+mu_out    = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  cc      = rep(0,n)
+  for(i in 1:n){
+    v     = rep(0,KK)
+    v[1]  = log(w)
+    #v[1]  = log(w) + dunif(x[i], max=maxv, log=T) # treat first component as uniform (0, .9999)
+    v[2]  = log(1-w) + dpois(x[i], mu, log=T)
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=T, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+
+  # Sample the mean
+  for(k in 2:KK){
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    mu    = rgamma(1, xsumk + 1, nk + 1)
+  }
+
+  # Store samples
+  w_out[s]    = w
+  mu_out[s]   = mu
+}
+```
+
+Provide you estimates of the posterior means $\mbox{E}\left(\lambda \mid \mathbf{x} \right)$ and $\mbox{E}\left(w \mid \mathbf{x} \right)$.
+
+```{r error=TRUE}
+mean(mu_out[burn:rrr])# = 3.051
+mean(w_out[burn:rrr])# = 0.398
+```
 
 #### Marking
 
+**Are the parameters initialized in a reasonable way?**
+
+Correctly initializing the indicators $c_1, \ldots, c_n$ is key. In particular, observations such that $x_i \neq 0$ must have $c_i = 2$. As for observations for which $x_i = 0$, these can be randomly initialized to either component.
+
+For the other parameters, it is reasonable to initialize $\lambda$ to the mean of the observations and the weight $\omega$ to a relatively small value (as we did in the EM algorithm).
+
+Hence, the code for the initialization of the algorithm might look something like:
+
+```{r error=TRUE}
+n        = length(x)
+cc       = rep(0, n)
+cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))
+cc[x!=0] = 2
+lambda   = mean(x)
+w        = 0.2
+```
+
+However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w & x_i=0 \\ 0 & \mbox{otherwise} \end{cases}$
+
+while
+
+$\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} & x_i=0 \\ 1 & \mbox{otherwise} \end{cases}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error=TRUE}
+# Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the weight ww correct?**
+
+This is a simple one, as its structure is common to all mixture models.  Recalling that the prior on $\omega$ is a uniform distribution on [0,1], we have
+
+$\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)$
+
+where $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1.  The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the rate $\lambda$ correct?**
+
+Because we use a exponential prior on $\lambda$, the full conditional posterior is a Gamma distribution,
+
+$\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)$
+
+where, as before, $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1 (so that $n - m(\mathbf{c})$ is the number of observations assigned to component 2), and $\sum_{c_i = 2}^{i} x_i$ is the sum of the observations assigned to component 2.
+
+Hence, the code for this prompt might look something like:
+
+```{r error=TRUE}
+lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)
+```
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Are the posterior means generated by the algorithm correct?**
+
+Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in.  While there might a bit of Monte Carlo error in the answers reported, the values should be $E(\lambda∣x)≈3.05$ and $E(\omega∣x)≈0.40$. Note that these values are very close to those generated by the EM algorithm.
+
+- <span style='color:red;'>0点 No</span>
+- 1点 Yes
 
 <br>
 
@@ -211,9 +540,212 @@ The code you generate should follow the same structure as "Sample code for MCMC 
 
 #### Asignment
 
+Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.
+
+```{r error=TRUE}
+## Initialize the parameters
+KK     = 2                               # number of components
+n      = length(x)                         # number of samples
+v      = array(0, dim=c(n,KK))
+v[,1]  = 0.5*(x==0)                    #Assign half weight for nests with 0 eggs to first component
+v[,2]  = 1-v[,1]                              #Assign all of the remaining nests to the second component
+w      = mean(v[,1])                          #weight of the first component
+lambda = sum(x*v[,2])/sum(v[,2])     #parameter (mean) of the second component
+
+## The actual MCMC algorithm starts here
+# Priors
+aa     = rep(1,KK)  # Uniform prior on w
+alpha  = 2 #For Gamma distribution prior number of obs = alpha-1
+beta   = 1 #Sum of observations = beta
+
+# Number of iterations of the sampler
+rrr    = 6000
+burn   = 1000
+
+# Storing the samples
+cc.out      = array(0, dim=c(rrr, n))
+w.out       = rep(0, rrr)
+lambda.out  = array(0, dim=c(rrr, 1))
+logpost     = rep(0, rrr)
+
+# MCMC iterations
+# MCMC iterations
+for(s in 1:rrr){
+  # Sample the indicators
+  cc = rep(0,n)
+  for(i in 1:n){
+    v       = rep(0,KK)
+    if (x[i]==0) {
+      v[1]  = (w/(w+(1-w)*exp(-lambda)))
+    } else {
+      v[1]  = 0.0
+    }
+    v[2]    = 1.0 - v[1]
+    cc[i]   = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w         = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  
+  # Sample lambda
+  nk        = sum(cc==2)
+  xsumk     = sum(x[cc==2])
+  alpha.hat = alpha + xsumk
+  beta.hat  = beta + nk
+  lambda    = rgamma(1, shape = alpha.hat, rate = beta.hat)
+  
+  # Store samples
+  cc.out[s,]     = cc
+  w.out[s]       = w
+  lambda.out[s,] = lambda
+  for(i in 1:n){
+    if(cc[i]==1){
+      logpost[s] = logpost[s] + log(w)
+    }else{
+      logpost[s] = logpost[s] + log(1-w) + dpois(x[i], lambda, log=TRUE)
+    }
+  }
+  logpost[s] = logpost[s] + dbeta(w, aa[1], aa[2],log = T)
+  logpost[s] = logpost[s] + dgamma(lambda, shape = alpha, rate = beta)
+  if(s/500==floor(s/500)){
+    print(paste("s =",s, w, lambda, logpost[s]))
+  }
+}
+
+
+## Plot the logposterior distribution for various samples
+par(mfrow=c(1,1))
+par(mar=c(4,4,1,1)+0.1)
+plot(logpost, type="l", xlab="Iterations", ylab="Log posterior")
+
+w_avg = sum(w.out[(burn+1):rrr])/(rrr-burn)
+lambda_avg = sum(lambda.out[(burn+1):rrr])/(rrr-burn)
+print(paste(w_avg, lambda_avg))
+
+w_sum = 0
+lambda_sum = 0
+counter = 0
+for(s in 1:(rrr-burn)){
+  w_sum = w_sum + w.out[s+burn]
+  lambda_sum = lambda_sum + lambda.out[s+burn]
+  counter = counter + 1
+}
+print(paste(counter, w_sum/counter, lambda_sum/counter))
+```
+
+Provide you estimates of the posterior means $\mbox{E}\left(\lambda \mid \mathbf{x} \right)$ and $\mbox{E}\left(w \mid \mathbf{x} \right)$.
+
+```{r error=TRUE}
+#E(lambda|x) = 3.056 and E(w|x) = 0.398
+mean(lambda_sum)
+mean(w_sum)
+```
 
 #### Marking
 
+**Are the parameters initialized in a reasonable way?**
+
+Correctly initializing the indicators $c_1, \ldots, c_n$ is key. In particular, observations such that $x_i \neq 0$ must have $c_i = 2$. As for observations for which $x_i = 0$, these can be randomly initialized to either component.
+
+For the other parameters, it is reasonable to initialize $\lambda$ to the mean of the observations and the weight $\omega$ to a relatively small value (as we did in the EM algorithm).
+
+Hence, the code for the initialization of the algorithm might look something like:
+
+```{r error=TRUE}
+n        = length(x)
+cc       = rep(0, n)
+cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))
+cc[x!=0] = 2
+lambda   = mean(x)
+w        = 0.2
+```
+
+However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w & x_i=0 \\ 0 & \mbox{otherwise} \end{cases}$
+
+while
+
+$\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} & x_i=0 \\ 1 & \mbox{otherwise} \end{cases}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error=TRUE}
+# Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the weight ww correct?**
+
+This is a simple one, as its structure is common to all mixture models.  Recalling that the prior on $\omega$ is a uniform distribution on [0,1], we have
+
+$\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)$
+
+where $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1.  The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the rate $\lambda$ correct?**
+
+Because we use a exponential prior on $\lambda$, the full conditional posterior is a Gamma distribution,
+
+$\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)$
+
+where, as before, $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1 (so that $n - m(\mathbf{c})$ is the number of observations assigned to component 2), and $\sum_{c_i = 2}^{i} x_i$ is the sum of the observations assigned to component 2.
+
+Hence, the code for this prompt might look something like:
+
+```{r error=TRUE}
+lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)
+```
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Are the posterior means generated by the algorithm correct?**
+
+Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in.  While there might a bit of Monte Carlo error in the answers reported, the values should be $E(\lambda∣x)≈3.05$ and $E(\omega∣x)≈0.40$. Note that these values are very close to those generated by the EM algorithm.
+
+- <span style='color:red;'>0点 No</span>
+- 1点 Yes
 
 <br>
 
@@ -221,9 +753,123 @@ The code you generate should follow the same structure as "Sample code for MCMC 
 
 #### Asignment
 
+Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.
+
+```{r error=TRUE}
+
+```
+
+Provide you estimates of the posterior means $\mbox{E}\left(\lambda \mid \mathbf{x} \right)$ and $\mbox{E}\left(w \mid \mathbf{x} \right)$.
+
+```{r error=TRUE}
+
+```
 
 #### Marking
 
+**Are the parameters initialized in a reasonable way?**
+
+Correctly initializing the indicators $c_1, \ldots, c_n$ is key. In particular, observations such that $x_i \neq 0$ must have $c_i = 2$. As for observations for which $x_i = 0$, these can be randomly initialized to either component.
+
+For the other parameters, it is reasonable to initialize $\lambda$ to the mean of the observations and the weight $\omega$ to a relatively small value (as we did in the EM algorithm).
+
+Hence, the code for the initialization of the algorithm might look something like:
+
+```{r error=TRUE}
+n        = length(x)
+cc       = rep(0, n)
+cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))
+cc[x!=0] = 2
+lambda   = mean(x)
+w        = 0.2
+```
+
+However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w & x_i=0 \\ 0 & \mbox{otherwise} \end{cases}$
+
+while
+
+$\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} & x_i=0 \\ 1 & \mbox{otherwise} \end{cases}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error=TRUE}
+# Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the weight ww correct?**
+
+This is a simple one, as its structure is common to all mixture models.  Recalling that the prior on $\omega$ is a uniform distribution on [0,1], we have
+
+$\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)$
+
+where $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1.  The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the rate $\lambda$ correct?**
+
+Because we use a exponential prior on $\lambda$, the full conditional posterior is a Gamma distribution,
+
+$\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)$
+
+where, as before, $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1 (so that $n - m(\mathbf{c})$ is the number of observations assigned to component 2), and $\sum_{c_i = 2}^{i} x_i$ is the sum of the observations assigned to component 2.
+
+Hence, the code for this prompt might look something like:
+
+```{r error=TRUE}
+lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)
+```
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Are the posterior means generated by the algorithm correct?**
+
+Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in.  While there might a bit of Monte Carlo error in the answers reported, the values should be $E(\lambda∣x)≈3.05$ and $E(\omega∣x)≈0.40$. Note that these values are very close to those generated by the EM algorithm.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -231,9 +877,123 @@ The code you generate should follow the same structure as "Sample code for MCMC 
 
 #### Asignment
 
+Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.
+
+```{r error=TRUE}
+
+```
+
+Provide you estimates of the posterior means $\mbox{E}\left(\lambda \mid \mathbf{x} \right)$ and $\mbox{E}\left(w \mid \mathbf{x} \right)$.
+
+```{r error=TRUE}
+
+```
 
 #### Marking
 
+**Are the parameters initialized in a reasonable way?**
+
+Correctly initializing the indicators $c_1, \ldots, c_n$ is key. In particular, observations such that $x_i \neq 0$ must have $c_i = 2$. As for observations for which $x_i = 0$, these can be randomly initialized to either component.
+
+For the other parameters, it is reasonable to initialize $\lambda$ to the mean of the observations and the weight $\omega$ to a relatively small value (as we did in the EM algorithm).
+
+Hence, the code for the initialization of the algorithm might look something like:
+
+```{r error=TRUE}
+n        = length(x)
+cc       = rep(0, n)
+cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))
+cc[x!=0] = 2
+lambda   = mean(x)
+w        = 0.2
+```
+
+However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w & x_i=0 \\ 0 & \mbox{otherwise} \end{cases}$
+
+while
+
+$\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} & x_i=0 \\ 1 & \mbox{otherwise} \end{cases}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error=TRUE}
+# Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the weight ww correct?**
+
+This is a simple one, as its structure is common to all mixture models.  Recalling that the prior on $\omega$ is a uniform distribution on [0,1], we have
+
+$\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)$
+
+where $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1.  The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the rate $\lambda$ correct?**
+
+Because we use a exponential prior on $\lambda$, the full conditional posterior is a Gamma distribution,
+
+$\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)$
+
+where, as before, $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1 (so that $n - m(\mathbf{c})$ is the number of observations assigned to component 2), and $\sum_{c_i = 2}^{i} x_i$ is the sum of the observations assigned to component 2.
+
+Hence, the code for this prompt might look something like:
+
+```{r error=TRUE}
+lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)
+```
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Are the posterior means generated by the algorithm correct?**
+
+Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in.  While there might a bit of Monte Carlo error in the answers reported, the values should be $E(\lambda∣x)≈3.05$ and $E(\omega∣x)≈0.40$. Note that these values are very close to those generated by the EM algorithm.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -241,9 +1001,123 @@ The code you generate should follow the same structure as "Sample code for MCMC 
 
 #### Asignment
 
+Provide a Markov chain Monte Carlo algorithm to fit a zero-inflated Poisson distribution.
+
+```{r error=TRUE}
+
+```
+
+Provide you estimates of the posterior means $\mbox{E}\left(\lambda \mid \mathbf{x} \right)$ and $\mbox{E}\left(w \mid \mathbf{x} \right)$.
+
+```{r error=TRUE}
+
+```
 
 #### Marking
 
+**Are the parameters initialized in a reasonable way?**
+
+Correctly initializing the indicators $c_1, \ldots, c_n$ is key. In particular, observations such that $x_i \neq 0$ must have $c_i = 2$. As for observations for which $x_i = 0$, these can be randomly initialized to either component.
+
+For the other parameters, it is reasonable to initialize $\lambda$ to the mean of the observations and the weight $\omega$ to a relatively small value (as we did in the EM algorithm).
+
+Hence, the code for the initialization of the algorithm might look something like:
+
+```{r error=TRUE}
+n        = length(x)
+cc       = rep(0, n)
+cc[x==0] = sample(1:2, sum(x==0), replace=T, prob=c(1/2, 1/2))
+cc[x!=0] = 2
+lambda   = mean(x)
+w        = 0.2
+```
+
+However, be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the indicators $c_1, \ldots, c_n$ correct?**
+
+The indicators $c_1, \ldots, c_n$ are conditionally independent from each other, and we have
+
+$\Pr(c_i = 1 \mid \cdots) \propto \begin{cases} w & x_i=0 \\ 0 & \mbox{otherwise} \end{cases}$
+
+while
+
+$\Pr(c_i = 2 \mid \cdots) \propto \begin{cases} (1-w) \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} & x_i=0 \\ 1 & \mbox{otherwise} \end{cases}$
+
+Hence, the code to sample the indicators might look something like this:
+
+```{r error=TRUE}
+# Full conditional for cc
+for(i in 1:n){
+  v = rep(0,2)
+  if(x[i]==0){
+    v[1] = log(w)
+    v[2] = log(1-w) + dpois(x[i], lambda, log=TRUE)
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+  }else{
+    v[1] = 0
+    v[2] = 1
+  }
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+Please be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the weight ww correct?**
+
+This is a simple one, as its structure is common to all mixture models.  Recalling that the prior on $\omega$ is a uniform distribution on [0,1], we have
+
+$\omega \mid \cdots \sim \mbox{Beta}\left(m(\mathbf{c})+1, n-m(\mathbf{c})+1\right)$
+
+where $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1.  The associated code might look something like this
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+n-sum(cc==1))
+```
+
+or, alternatively,
+
+```{r error=TRUE}
+# Full conditional for w
+w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+```
+
+Please remember to be open-minded when reviewing this code, as there are many ways to accomplish the same thing in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the full conditional for the rate $\lambda$ correct?**
+
+Because we use a exponential prior on $\lambda$, the full conditional posterior is a Gamma distribution,
+
+$\lambda \mid \cdots \sim \mbox{Gamma}\left( 1 + \sum_{i : c_i = 2} x_i , 1 + n-m(\mathbf{c}) \right)$
+
+where, as before, $m(\mathbf{c})$ is the number of observations that $\mathbf{c}$ assigns to component 1 (so that $n - m(\mathbf{c})$ is the number of observations assigned to component 2), and $\sum_{c_i = 2}^{i} x_i$ is the sum of the observations assigned to component 2.
+
+Hence, the code for this prompt might look something like:
+
+```{r error=TRUE}
+lambda = rgamma(1, sum(x[cc==2]) + 1, sum(cc==2) + 1)
+```
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Are the posterior means generated by the algorithm correct?**
+
+Recall that the posterior means can be approximated by simple averages of the posterior samples obtained after burn in.  While there might a bit of Monte Carlo error in the answers reported, the values should be $E(\lambda∣x)≈3.05$ and $E(\omega∣x)≈0.40$. Note that these values are very close to those generated by the EM algorithm.
+
+- 0点 No
+- 1点 Yes
 
 <br><br>
 
