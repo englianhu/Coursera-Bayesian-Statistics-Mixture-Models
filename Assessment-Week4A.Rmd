@@ -105,10 +105,10 @@ suppressPackageStartupMessages(require('BBmisc'))
 # suppressPackageStartupMessages(require('rmsfuns'))
 
 pkgs <- c('devtools', 'knitr', 'kableExtra', 'tidyr', 
-          'readr', 'lubridate', 'data.table', 'reprex', 
+          'readr', 'lubridate', 'reprex', 'echarts4r', 
           'timetk', 'plyr', 'dplyr', 'stringr', 'magrittr', 
           'tdplyr', 'tidyverse', 'formattable', 
-          'echarts4r', 'paletteer')
+          'paletteer')
 
 suppressAll(lib(pkgs))
 # load_pkg(pkgs)
@@ -277,8 +277,8 @@ Provide the a graph of the density estimate on the interval [0,7].
 ## Plot Bayesian estimate with pointwise credible bands along with kernel density estimate and frequentist point estimate
 colscale = c("black", "blue", "red")
 yy = density(x)
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruption Duration", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col=colscale[1], lwd=2)
@@ -385,8 +385,8 @@ This is an example that, as before, assumes that the weights are parameterized a
 
 ```{r error=TRUE}
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -495,8 +495,8 @@ for(s in 1:(rrr-burn)){
 density.mcmc.m = apply(density.mcmc , 2, mean)
 
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -624,8 +624,8 @@ Provide the a graph of the density estimate on the interval [0,7].
 ## Plot Bayesian estimate with pointwise credible bands along with kernel density estimate and frequentist point estimate
 colscale = c("black", "blue", "red")
 yy = density(x)
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruption Duration", ylab="Density")
 
@@ -734,8 +734,8 @@ This is an example that, as before, assumes that the weights are parameterized a
 
 ```{r error=TRUE}
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -844,8 +844,8 @@ for(s in 1:(rrr-burn)){
 density.mcmc.m = apply(density.mcmc , 2, mean)
 
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -969,8 +969,8 @@ density.mcmc.m = apply(density.mcmc , 2, mean)
 colscale = c("black", "blue", "red")
 #yy = density(x)
 yy = density(Eruptions)
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(Eruptions, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Duration", ylab="Density")
 polygon(c(Eruptions,rev(Eruptions)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(Eruptions, density.mcmc.m, col=colscale[3], lwd=2)
@@ -1082,8 +1082,8 @@ This is an example that, as before, assumes that the weights are parameterized a
 
 ```{r error=TRUE}
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -1192,8 +1192,8 @@ for(s in 1:(rrr-burn)){
 density.mcmc.m = apply(density.mcmc , 2, mean)
 
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -1316,8 +1316,8 @@ Provide the a graph of the density estimate on the interval [0,7].
 ## Plot Bayesian estimate with pointwise credible bands along with kernel density estimate and frequentist point estimate
 colscale = c("black", "blue", "red")
 yy = density(x)
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruption Duration", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col=colscale[1], lwd=2)
@@ -1424,8 +1424,8 @@ This is an example that, as before, assumes that the weights are parameterized a
 
 ```{r error=TRUE}
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -1534,8 +1534,8 @@ for(s in 1:(rrr-burn)){
 density.mcmc.m = apply(density.mcmc , 2, mean)
 
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -1774,8 +1774,8 @@ This is an example that, as before, assumes that the weights are parameterized a
 
 ```{r error=TRUE}
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -1884,8 +1884,8 @@ for(s in 1:(rrr-burn)){
 density.mcmc.m = apply(density.mcmc , 2, mean)
 
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -1996,9 +1996,9 @@ for(s in 1:(rrr-burn)){
   }
 }
 
-density.mcmc.m  = apply(density.mcmc , 2, mean)
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.m  = replace_na(apply(density.mcmc , 2, mean, na.rm=TRUE), 0)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="eruptions", ylab="Density") polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 
@@ -2111,8 +2111,8 @@ This is an example that, as before, assumes that the weights are parameterized a
 
 ```{r error=TRUE}
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -2221,8 +2221,8 @@ for(s in 1:(rrr-burn)){
 density.mcmc.m = apply(density.mcmc , 2, mean)
 
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -2353,8 +2353,8 @@ This is an example that, as before, assumes that the weights are parameterized a
 
 ```{r error=TRUE}
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -2463,8 +2463,8 @@ for(s in 1:(rrr-burn)){
 density.mcmc.m = apply(density.mcmc , 2, mean)
 
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -2595,8 +2595,8 @@ This is an example that, as before, assumes that the weights are parameterized a
 
 ```{r error=TRUE}
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)
@@ -2705,8 +2705,8 @@ for(s in 1:(rrr-burn)){
 density.mcmc.m = apply(density.mcmc , 2, mean)
 
 ## Plot Bayesian estimate with pointwise credible bands
-density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
-density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col="black", lwd=2)

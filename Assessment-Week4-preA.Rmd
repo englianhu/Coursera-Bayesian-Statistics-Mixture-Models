@@ -105,8 +105,8 @@ suppressPackageStartupMessages(require('BBmisc'))
 # suppressPackageStartupMessages(require('rmsfuns'))
 
 pkgs <- c('devtools', 'knitr', 'kableExtra', 'tidyr', 
-          'readr', 'lubridate', 'data.table', 'reprex', 
-          'timetk', 'plyr', 'dplyr', 'stringr', 'magrittr', 
+          'readr', 'lubridate', 'reprex', 'magrittr', 
+          'timetk', 'plyr', 'dplyr', 'stringr', 
           'tdplyr', 'tidyverse', 'formattable', 
           'echarts4r', 'paletteer')
 
@@ -154,19 +154,160 @@ Reviewers will check whether the code has been modified correctly, and whether t
 Provide an EM algorithm to fit the two-component, location-and-scale mixture of Gaussians.
 
 ```{r error=TRUE}
+## Initialize the parameters
+x = faithful$eruptions
+n     = length(x)
+KK = 2
+w     = rep(1, KK)/KK
+mu    = rnorm(KK, mean(x), sd(x))
+sigma = rep(sd(x)/KK, KK)
+xx  = seq(0,7,length.out=150)
 
+epsilon = 0.000001
+s       = 0
+sw      = FALSE
+KL      = -Inf
+KL.out  = NULL
+
+print(paste(w, mu, sigma))
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,KK))
+  for(k in 1:KK){
+    v[,k] = log(w[k]) + dnorm(x, mu[k], sigma[k],log=TRUE)  
+  }
+  for(i in 1:n){
+    v[i,] = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,])))
+  }
+  
+  ## M step
+  # Weights
+  w = apply(v,2,mean)
+  mu = rep(0, KK)
+  for(k in 1:KK){
+    for(i in 1:n){
+      mu[k]    = mu[k] + v[i,k]*x[i]
+    }
+    mu[k] = mu[k]/sum(v[,k])
+  }
+  # Standard deviations
+  sigma = rep(0,KK)
+  for(k in 1:KK){
+    for(i in 1:n){
+      sigma[k] = sigma[k] + v[i,k]*(x[i] - mu[k])^2
+    }
+    sigma[k] = sqrt(sigma[k]/sum(v[,k]))
+  }
+  
+  ##Check convergence
+  KLn = 0
+  for(i in 1:n){
+    for(k in 1:KK){
+      KLn = KLn + v[i,k]*(log(w[k]) + dnorm(x[i], mu[k], sigma[k], log=TRUE))
+    }
+  }
+  if(abs(KLn-KL)/abs(KLn)<epsilon){
+    sw=TRUE
+  }
+  KL = KLn
+  KL.out = c(KL.out, KL)
+  s = s + 1
+  print(paste(w, mu, sigma))
+  print(paste(s, KLn))
+}
 ```
 
 Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
 
 ```{r error=TRUE}
+## Plot EM Density Estimate
+Eruptions  = seq(0, 7,length.out=300)
+nxx = length(xx)
+density.EM = rep(0, nxx)
+for(s in 1:nxx){
+  for(k in 1:KK){
+    density.EM[s] = density.EM[s] + w[k]*dnorm(Eruptions[s], mu[k], sigma[k])
+  }
+}
 
+yy = density(x)
+#plot(Eruptions, density.EM, col="red", lwd=2, type="l")
+plot(Eruptions, rep(density.EM, 2), col="red", lwd=2, type="l")
+points(x, rep(0,n))
 ```
 
 Provide the a graph of the density estimate on the interval [0,7].
 
 ```{r error=TRUE}
+###### Setup
+#data
+x = faithful$eruptions
+n     = length(x)
 
+###### EM algorithm to fit the location-and-scale mixture of 2 Gaussians
+w      = 0.5
+mu     = c(mean(x)-sd(x), mean(x)+sd(x))
+sigma  = rep(sd(x)/4,2)
+s      = 0
+sw     = FALSE
+QQ     = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    v[i,1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=T)
+    v[i,2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=T)
+    v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+  }
+  
+  ## M step
+  # Weights
+  w  = mean(v[,1])
+  
+  # Means
+  mu = rep(0, 2)
+  for(k in 1:2){
+    for(i in 1:n){
+      mu[k]    = mu[k] + v[i,k]*x[i]
+    }
+    mu[k] = mu[k]/sum(v[,k])
+  }
+  
+  # Variances
+  sigma = rep(0,2)
+  for(k in 1:2){
+    for(i in 1:n){
+      sigma[k] = sigma[k] + v[i,k]*(x[i] - mu[k])^2
+    }
+  }
+  
+  ## Check convergence
+  QQn = 0
+  
+  for(i in 1:n){
+    QQn = QQn + v[i,1]*(log(w) + dnorm(x[i],mu[1],sigma[1],log=TRUE)) + v[i,2]*(log(1-w) + dnorm(x[i],mu[2],sigma[2],log=TRUE))
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+
+xx  = seq(0,7,length.out=150)
+nxx = length(xx)
+density.EM = rep(0, nxx)
+
+for(s in 1:nxx){
+  density.EM[s] = density.EM[s] + w*dnorm(xx[s], mu[1], sigma[1]) +  (1-w)*dnorm(xx[s], mu[2], sigma[2])
+}
+plot(xx, density.EM, col="red", lwd=2, type="l", xlab="Eruptions")
+points(x,rep(0,n))
 ```
 
 ### Marking
@@ -226,7 +367,7 @@ As always, please remember that there are multiple ways to achieve the same goal
 This is an example that, as before, assumes that the weights are parameterized as ww and $1-\omega$.
 
 ```{r error=TRUE}
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 density.EM = rep(0, nxx)
 for(s in 1:nxx){
@@ -307,7 +448,7 @@ while(!sw){
   print(paste(s, QQn))
 }
 
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 density.EM = rep(0, nxx)
 for(s in 1:nxx){
@@ -332,6 +473,8 @@ points(x,rep(0,n))
 Provide an EM algorithm to fit the two-component, location-and-scale mixture of Gaussians.
 
 ```{r error=TRUE}
+KK    = 2
+
 while(!sw){
   ## E step
   v = array(0, dim=c(n,KK))
@@ -383,12 +526,40 @@ Provide code to generate the density estimate on a grid consisting of 150 points
 ```{r error=TRUE}
 xx  = seq(0,7,length.out=150)
 nxx = length(xx)
-density.EM = rep(0, nxx)
+
+#density.EM = rep(0, nxx)
+density.EM = array(0, dim=c(nxx,2))
 for(s in 1:nxx){
   for(k in 1:KK){
-    density.EM[s] = density.EM[s] + w[k]*dnorm(xx[s], mu[k], sigma)
+    density.EM[is.nan(density.EM[s,k]),k] <- rep(0,2)
+    #density.EM[s] = density.EM[s] + w[k]*dnorm(xx[s], mu[k], sigma)
+    density.EM[s,] = density.EM[s,] + w[k]*dnorm(xx[s], mu[k], sigma[k])
   }
 }
+## Since density.EM[,1] == density.EM[,2]
+density.EM = density.EM[,1]
+
+## Number of iterations of the sampler
+rrr   = 12000
+burn  = 2000
+
+## Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK))
+sigma.out = rep(0, rrr)
+logpost   = rep(0, rrr)
+
+## Compute the samples of the density over a dense grid
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+    for(k in 1:KK){
+      density.mcmc[is.nan(density.mcmc[s,k]),k] <- 0
+      density.mcmc[s,] = density.mcmc[s,] + w.out[s+burn,k]*dnorm(xx,mu.out[s+burn,k],sigma.out[s+burn])
+    }
+}
+density.mcmc[is.nan(density.mcmc)] <- 0
+density.mcmc.m = apply(density.mcmc , 2, mean)
 ```
 
 Provide the a graph of the density estimate on the interval [0,7].
@@ -396,19 +567,28 @@ Provide the a graph of the density estimate on the interval [0,7].
 Here is the code to generate the graph. I apparently can not copy the graph to this window.
 
 ```{r error=TRUE}
- ## Plot Bayesian estimate with pointwise credible bands along with kernel density estimate and frequentist point estimate
+## Plot Bayesian estimate with pointwise credible bands along with kernel density estimate and frequentist point estimate
 colscale = c("black", "blue", "red")
 yy = density(x)
+#density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+#density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
 density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
 density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
-plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruption Duration", ylab="Density")
+
+#plot(xx, density.mcmc.m, type="n", ylim=c(0,max(density.mcmc.uq)), xlab="Eruption Duration", ylab="Density")
+plot(xx, density.EM, type="n", ylim=c(0,max(density.mcmc.uq)), xlab="Eruption Duration", ylab="Density")
+
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
-lines(xx, density.mcmc.m, col=colscale[1], lwd=2)
+#lines(xx, density.mcmc.m, col=colscale[1], lwd=2)
 lines(xx, density.EM, col=colscale[2], lty=2, lwd=2)
 lines(yy, col=colscale[3], lty=3, lwd=2)
 points(x, rep(0,n))
-legend(27000, 0.00017, c("KDE","EM","MCMC"), col=colscale[c(3,2,1)], lty=c(3,2,1), lwd=2, bty="n")
+
+#legend(27000, 0.00017, c("KDE","EM","MCMC"), col=colscale[c(3,2,1)], lty=c(3,2,1), lwd=2, bty="n")
+legend(length(xx), length(yy), c("KDE","EM","MCMC"), col=colscale[c(3,2,1)], lty=c(3,2,1), lwd=2, bty="n")
 ```
+
+![graph plotted from `Rmarkdown`](figure/0000e9.png)
 
 #### Marking
 
@@ -467,7 +647,7 @@ As always, please remember that there are multiple ways to achieve the same goal
 This is an example that, as before, assumes that the weights are parameterized as ww and $1-\omega$.
 
 ```{r error=TRUE}
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 density.EM = rep(0, nxx)
 for(s in 1:nxx){
@@ -572,7 +752,8 @@ Provide an EM algorithm to fit the two-component, location-and-scale mixture of 
 
 ```{r error=TRUE}
 ## Initialize the parameters
-w     = rep(1,KK)/KK
+KK = 2
+w     = rep(1, KK)/KK
 mu    = rnorm(KK, mean(x), sd(x))
 sigma = rep(sd(x)/KK, KK)
 
@@ -644,7 +825,8 @@ for(s in 1:nxx){
 }
 
 yy = density(x)
-plot(Eruptions, density.EM, col="red", lwd=2, type="l")
+#plot(Eruptions, density.EM, col="red", lwd=2, type="l")
+plot(Eruptions, rep(density.EM, 2), col="red", lwd=2, type="l")
 points(x, rep(0,n))
 ```
 
@@ -653,7 +835,19 @@ Provide the a graph of the density estimate on the interval [0,7].
 Here is the code to generate the graph. I apparently can not copy the graph to this window.
 
 ```{r error=TRUE}
+## Plot EM Density Estimate
+Eruptions  = seq(0, 7,length.out=300)
+nxx = length(xx)
+density.EM = rep(0, nxx)
+for(s in 1:nxx){
+  for(k in 1:KK){
+    density.EM[s] = density.EM[s] + w[k]*dnorm(Eruptions[s], mu[k], sigma[k])
+  }
+}
 
+yy = density(x)
+plot(Eruptions, rep(density.EM, 2), col="red", lwd=2, type="l")
+points(x, rep(0,n))
 ```
 
 #### Marking
@@ -675,7 +869,7 @@ for(i in 1:n){
 An alternative implementation that is also valid would parameterize the weights in terms of $\omega_1$ and $\omega_2$, so be open minded when grading.
 
 - 0点 No
-- 1点 Yes
+- <span style='color:green;'>1点 Yes</span>
 
 **Is the M step implemented correctly?**
 
@@ -706,14 +900,14 @@ for(k in 1:2){
 As always, please remember that there are multiple ways to achieve the same goal in R.
 
 - 0点 No
-- 1点 Yes
+- <span style='color:green;'>1点 Yes</span>
 
 **Does the code to generate the density estimate appear correct?**
 
 This is an example that, as before, assumes that the weights are parameterized as ww and $1-\omega$.
 
 ```{r error=TRUE}
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 density.EM = rep(0, nxx)
 for(s in 1:nxx){
@@ -724,7 +918,7 @@ plot(xx, density.EM, col="red", lwd=2, type="l")
 points(x,rep(0,n))
 ```
 
-- 0点 No
+- <span style='color:red;'>0点 No</span>
 - 1点 Yes
 
 **Does the graph appear to be correct?**
@@ -794,7 +988,7 @@ while(!sw){
   print(paste(s, QQn))
 }
 
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 density.EM = rep(0, nxx)
 for(s in 1:nxx){
@@ -805,7 +999,7 @@ plot(xx, density.EM, col="red", lwd=2, type="l", xlab="Eruptions")
 points(x,rep(0,n))
 ```
 
-- 0点 No
+- <span style='color:red;'>0点 No</span>
 - 1点 Yes
 
 <br>
@@ -817,13 +1011,48 @@ points(x,rep(0,n))
 Provide an EM algorithm to fit the two-component, location-and-scale mixture of Gaussians.
 
 ```{r error=TRUE}
+## E step
+KK = 2
+v = array(0, dim=c(n,2))
+for(i in 1:n){
+  v[i,1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=T)
+  v[i,2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=T)
+  v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,])))
+}
 
+## M step
+# Weights
+w  = mean(v[,1])
+
+# Means
+mu = rep(0, 2)
+for(k in 1:2){
+  for(i in 1:n){
+    mu[k]    = mu[k] + v[i,k]*x[i]
+  }
+  mu[k] = mu[k]/sum(v[,k])
+}
+# Variances
+sigma = rep(0,2)
+for(k in 1:2){
+  for(i in 1:n){
+    sigma[k] = sigma[k] + v[i,k]*(x[i] - mu[k])^2
+  }
+  sigma[k] = sqrt(sigma[k]/sum(v[,k]))
+}
 ```
 
 Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
 
 ```{r error=TRUE}
-
+xx  = seq(0,7,length.out=150)
+nxx = length(xx)
+density.EM = rep(0, nxx)
+for(s in 1:nxx){
+  density.EM[s] = density.EM[s] + w*dnorm(xx[s], mu[1], sigma[1]) +  (1-w)*dnorm(xx[s], mu[2], sigma[2])
+}
+plot(xx, density.EM, col="red", lwd=2, type="l")
+points(x,rep(0,n))
 ```
 
 Provide the a graph of the density estimate on the interval [0,7].
@@ -831,7 +1060,75 @@ Provide the a graph of the density estimate on the interval [0,7].
 Here is the code to generate the graph. I apparently can not copy the graph to this window.
 
 ```{r error=TRUE}
+###### Setup
+#data
+x = faithful$eruptions
+n     = length(x)
 
+###### EM algorithm to fit the location-and-scale mixture of 2 Gaussians
+w      = 0.5
+mu     = c(mean(x)-sd(x), mean(x)+sd(x))
+sigma  = rep(sd(x)/4,2)
+s      = 0
+sw     = FALSE
+QQ     = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    v[i,1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=T)
+    v[i,2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=T)
+    v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+  }
+  
+  ## M step
+  # Weights
+  w  = mean(v[,1])
+  
+  # Means
+  mu = rep(0, 2)
+  for(k in 1:2){
+    for(i in 1:n){
+      mu[k]    = mu[k] + v[i,k]*x[i]
+    }
+    mu[k] = mu[k]/sum(v[,k])
+  }
+  
+  # Variances
+  sigma = rep(0,2)
+  for(k in 1:2){
+    for(i in 1:n){
+      sigma[k] = sigma[k] + v[i,k]*(x[i] - mu[k])^2
+    }
+  }
+  
+  ## Check convergence
+  QQn = 0
+  
+  for(i in 1:n){
+    QQn = QQn + v[i,1]*(log(w) + dnorm(x[i],mu[1],sigma[1],log=TRUE)) + v[i,2]*(log(1-w) + dnorm(x[i],mu[2],sigma[2],log=TRUE))
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+
+xx  = seq(0,7,length.out=150)
+nxx = length(xx)
+density.EM = rep(0, nxx)
+
+for(s in 1:nxx){
+  density.EM[s] = density.EM[s] + w*dnorm(xx[s], mu[1], sigma[1]) +  (1-w)*dnorm(xx[s], mu[2], sigma[2])
+}
+plot(xx, density.EM, col="red", lwd=2, type="l", xlab="Eruptions")
+points(x,rep(0,n))
 ```
 
 #### Marking
@@ -891,12 +1188,11 @@ As always, please remember that there are multiple ways to achieve the same goal
 This is an example that, as before, assumes that the weights are parameterized as ww and $1-\omega$.
 
 ```{r error=TRUE}
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 density.EM = rep(0, nxx)
 for(s in 1:nxx){
-  density.EM[s] = density.EM[s] + w*dnorm(xx[s], mu[1], sigma[1]) + 
-                                  (1-w)*dnorm(xx[s], mu[2], sigma[2])
+  density.EM[s] = density.EM[s] + w*dnorm(xx[s], mu[1], sigma[1]) + (1-w)*dnorm(xx[s], mu[2], sigma[2])
 }
 plot(xx, density.EM, col="red", lwd=2, type="l")
 points(x,rep(0,n))
@@ -972,19 +1268,248 @@ while(!sw){
   print(paste(s, QQn))
 }
 
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 density.EM = rep(0, nxx)
 for(s in 1:nxx){
-  density.EM[s] = density.EM[s] + w*dnorm(xx[s], mu[1], sigma[1]) + 
-                                  (1-w)*dnorm(xx[s], mu[2], sigma[2])
+  density.EM[s] = density.EM[s] + w*dnorm(xx[s], mu[1], sigma[1]) + (1-w)*dnorm(xx[s], mu[2], sigma[2])
 }
 plot(xx, density.EM, col="red", lwd=2, type="l", xlab="Eruptions")
 points(x,rep(0,n))
 ```
 
 - 0点 No
-- 1点 Yes
+- <span style='color:green;'>1点 Yes</span>
+
+### 4th Peer
+
+#### Assignment
+
+Provide an EM algorithm to fit the two-component, location-and-scale mixture of Gaussians.
+
+```{r error=TRUE}
+KK = 2
+n = length(x)
+w = 1/2
+mu = c(2, 4.5) # estimate from graph visually
+sigma = c(1, 1)
+epsilon = 1e-6
+s       = 0
+sw      = FALSE
+KL      = -Inf
+KL.out  = NULL
+
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,KK))
+  for(k in 1:KK){
+    v[,k] = log((k-1) - w*(-1)**k) + dnorm(x, mu[k], sigma[k],log=TRUE)  
+  }
+  for(i in 1:n){
+    ve = exp(v[i,] - max(v[i,]))
+    v[i,] = ve/sum(ve)
+  }
+  
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  mu = rep(0, KK)
+  for(k in 1:KK) {
+    mu[k] = sum(v[,k] * x) / sum(v[,k])
+  }
+  # Standard deviations
+  for (k in 1:KK) {
+    sigma[k] = sqrt(sum(v[,k]*(x - mu[k])**2)/sum(v[,k]))
+  }
+  
+  ##Check convergence
+  KLn = 0
+  for(i in 1:n){
+    KLn = KLn + v[i, 1] * (log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)) +
+      v[i, 2] * (log(1- w) + dnorm(x[i], mu[2], sigma[2], log=TRUE))
+  }
+  if(abs(KLn-KL)/abs(KLn)<epsilon){sw=TRUE}
+  KL = KLn
+  KL.out = c(KL.out, KL)
+  s = s + 1
+  print(paste(s, KLn))
+}
+```
+
+Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
+
+```{r error=TRUE}
+xx  = seq(0,7,length.out=150)
+nxx = length(xx)
+density.EM = rep(0, nxx)
+for(i in 1:nxx){
+  for(k in 1:KK){
+    density.EM[i] = density.EM[i] + ((k-1) - w*(-1)**k) * dnorm(xx[i], mu[k], sigma[k])
+  }
+}
+plot(xx, density.EM, col="red", lwd=2, type="l")
+points(x,rep(0,n))
+```
+
+Provide the a graph of the density estimate on the interval [0,7].
+
+Here is the code to generate the graph. I apparently can not copy the graph to this window.
+
+```{r error=TRUE}
+
+```
+
+![](figure/density-est-fathful.png)
+
+#### Marking
+
+**Is the E step implemented correctly?**
+
+There are a couple of ways in which the E step can be implemented. This is an example that uses $\omega$ and $1-\omega$ as the weights of the two components
+
+```{r error=TRUE}
+## E step
+v = array(0, dim=c(n,2))
+for(i in 1:n){
+  v[i,1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=T)
+  v[i,2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=T)
+  v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+}
+```
+
+An alternative implementation that is also valid would parameterize the weights in terms of $\omega_1$ and $\omega_2$, so be open minded when grading.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Is the M step implemented correctly?**
+
+The exact form of the implementation of the M step also depends on how the weights are parameterized. Assuming that $\omega$ and $1-\omega$ are used,
+
+```{r error=TRUE}
+## M step
+# Weights
+w  = mean(v[,1])
+# Means
+mu = rep(0, 2)
+for(k in 1:2){
+  for(i in 1:n){
+    mu[k]    = mu[k] + v[i,k]*x[i]
+  }
+  mu[k] = mu[k]/sum(v[,k])
+}
+# Variances
+sigma = rep(0,2)
+for(k in 1:2){
+  for(i in 1:n){
+    sigma[k] = sigma[k] + v[i,k]*(x[i] - mu[k])^2
+  }
+  sigma[k] = sqrt(sigma[k]/sum(v[,k]))
+}
+```
+
+As always, please remember that there are multiple ways to achieve the same goal in R.
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Does the code to generate the density estimate appear correct?**
+
+This is an example that, as before, assumes that the weights are parameterized as ww and $1-\omega$.
+
+```{r error=TRUE}
+xx  = seq(0,7,length.out=150)
+nxx = length(xx)
+density.EM = rep(0, nxx)
+for(s in 1:nxx){
+  density.EM[s] = density.EM[s] + w*dnorm(xx[s], mu[1], sigma[1]) + (1-w)*dnorm(xx[s], mu[2], sigma[2])
+}
+plot(xx, density.EM, col="red", lwd=2, type="l")
+points(x,rep(0,n))
+```
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
+
+**Does the graph appear to be correct?**
+
+The density estimate should look similar to the Figure below.  Note that the variance of both components is clearly different.
+
+![](figure/faithfuleruptionEM.png)
+
+The complete code for the EM algorithm follows:
+
+```{r error=TRUE}
+###### Setup data
+x = faithful$eruptions
+n = length(x)
+
+###### EM algorithm to fit the location-and-scale mixture of 2 Gaussians
+w      = 0.5          
+mu     = c(mean(x)-sd(x), mean(x)+sd(x))
+sigma  = rep(sd(x)/4,2)
+
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    v[i,1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=T)
+    v[i,2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=T)
+    v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+  }
+
+  ## M step
+  # Weights
+  w  = mean(v[,1])
+  # Means
+  mu = rep(0, 2)
+  for(k in 1:2){
+    for(i in 1:n){
+      mu[k]    = mu[k] + v[i,k]*x[i]
+    }
+    mu[k] = mu[k]/sum(v[,k])
+  }
+  # Variances
+  sigma = rep(0,2)
+  for(k in 1:2){
+    for(i in 1:n){
+      sigma[k] = sigma[k] + v[i,k]*(x[i] - mu[k])^2
+    }
+    sigma[k] = sqrt(sigma[k]/sum(v[,k]))
+  }
+  ## Check convergence
+  QQn = 0
+  for(i in 1:n){
+    QQn = QQn + v[i,1]*(log(w) + dnorm(x[i],mu[1],sigma[1],log=TRUE)) +
+                v[i,2]*(log(1-w) + dnorm(x[i],mu[2],sigma[2],log=TRUE))
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+
+xx  = seq(0,7,length.out=150)
+nxx = length(xx)
+density.EM = rep(0, nxx)
+for(s in 1:nxx){
+  density.EM[s] = density.EM[s] + w*dnorm(xx[s], mu[1], sigma[1]) + (1-w)*dnorm(xx[s], mu[2], sigma[2])
+}
+plot(xx, density.EM, col="red", lwd=2, type="l", xlab="Eruptions")
+points(x,rep(0,n))
+```
+
+- 0点 No
+- <span style='color:green;'>1点 Yes</span>
 
 <br><br>
 
