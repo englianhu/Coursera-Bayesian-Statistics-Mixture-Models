@@ -191,7 +191,7 @@ sigma_0 = invgamma::rinvgamma(KK, dd, qq)
 w     = rep(1,KK)/KK
 mu    = rnorm(KK, mean(x), sd(x))
 sigma = sd(x)/KK
-cc    = sample(1:KK, n, replace=T, prob=w)
+cc    = base::sample(1:KK, size=n, replace=TRUE, prob=w)
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -214,7 +214,7 @@ for(s in 1:rrr){
       v[k] = log(w[k]) + dnorm(x[i], mu[k], sigma, log=TRUE)  #Compute the log of the weights
     }
     v = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:KK, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -306,7 +306,7 @@ for(i in 1:n){
   v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
   v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
   v    = exp(v - max(v))/sum(exp(v - max(v)))
-  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
 }
 ```
 
@@ -423,7 +423,7 @@ qq  = var(x)/2
 w     = 1/2
 mu    = rnorm(2, mean(x), sd(x))
 sigma = rep(sd(x)/2,2)
-cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+cc    = base::sample(1:2, n, replace=T, prob=c(1/2,1/2))
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -443,7 +443,7 @@ for(s in 1:rrr){
     v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
     v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
     v    = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -536,7 +536,7 @@ sigma_0 = rinvgamma(KK, dd, qq)
 w     = rep(1,KK)/KK
 mu    = rnorm(KK, mean(x), sd(x))
 sigma = sd(x)/KK
-cc    = sample(1:KK, n, replace=T, prob=w)
+cc    = base::sample(1:KK, n, replace=T, prob=w)
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -561,7 +561,7 @@ for(s in 1:rrr){
       v[k] = log(w[k]) + dnorm(x[i], mu[k], sigma, log = TRUE)  #Compute the log of the weights
     }
     v      = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i]  = sample(1:KK, 1, replace = TRUE, prob = v)
+    cc[i]  = base::sample(1:KK, 1, replace = TRUE, prob = v)
   }
   
   # Sample the weights
@@ -655,7 +655,7 @@ for(i in 1:n){
   v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
   v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
   v    = exp(v - max(v))/sum(exp(v - max(v)))
-  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
 }
 ```
 
@@ -772,7 +772,7 @@ qq  = var(x)/2
 w     = 1/2
 mu    = rnorm(2, mean(x), sd(x))
 sigma = rep(sd(x)/2,2)
-cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+cc    = base::sample(1:2, n, replace=T, prob=c(1/2,1/2))
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -792,7 +792,7 @@ for(s in 1:rrr){
     v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
     v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
     v    = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -884,7 +884,7 @@ qq  = var(x)/KK
 w     = rep(1,KK)/KK
 mu    = rnorm(KK, mean(x), sd(x))
 sigma = rep(sd(x)/KK, KK)
-cc    = sample(1:KK, n, replace=T, prob=w)
+cc    = base::sample(1:KK, n, replace=T, prob=w)
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -905,7 +905,7 @@ for(s in 1:rrr){
       v[k] = log(w[k]) + dnorm(x[i], mu[k], sigma[k], log=TRUE)  #Compute the log of the weights
     }
     v = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:KK, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -1003,7 +1003,7 @@ for(i in 1:n){
   v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
   v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
   v    = exp(v - max(v))/sum(exp(v - max(v)))
-  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
 }
 ```
 
@@ -1120,7 +1120,7 @@ qq  = var(x)/2
 w     = 1/2
 mu    = rnorm(2, mean(x), sd(x))
 sigma = rep(sd(x)/2,2)
-cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+cc    = base::sample(1:2, n, replace=T, prob=c(1/2,1/2))
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -1140,7 +1140,7 @@ for(s in 1:rrr){
     v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
     v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
     v    = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -1231,7 +1231,7 @@ sigma_0 = rinvgamma(KK, dd, qq)
 w     = rep(1,KK)/KK
 mu    = rnorm(KK, mean(x), sd(x))
 sigma = sd(x)/KK
-cc    = sample(1:KK, n, replace=T, prob=w)
+cc    = base::sample(1:KK, n, replace=T, prob=w)
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -1254,7 +1254,7 @@ for(s in 1:rrr){
       v[k] = log(w[k]) + dnorm(x[i], mu[k], sigma, log=TRUE)  #Compute the log of the weights
     }
     v = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:KK, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -1345,7 +1345,7 @@ for(i in 1:n){
   v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
   v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
   v    = exp(v - max(v))/sum(exp(v - max(v)))
-  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
 }
 ```
 
@@ -1462,7 +1462,7 @@ qq  = var(x)/2
 w     = 1/2
 mu    = rnorm(2, mean(x), sd(x))
 sigma = rep(sd(x)/2,2)
-cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+cc    = base::sample(1:2, n, replace=T, prob=c(1/2,1/2))
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -1482,7 +1482,7 @@ for(s in 1:rrr){
     v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
     v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
     v    = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -1574,7 +1574,7 @@ qq  = var(x)/KK
 w     = rep(1,KK)/KK
 mu    = rnorm(KK, mean(x), sd(x))
 sigma = rep(sd(x)/KK, KK)
-cc    = sample(1:KK, n, replace=T, prob=w)
+cc    = base::sample(1:KK, n, replace=T, prob=w)
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -1595,7 +1595,7 @@ for(s in 1:rrr){
       v[k] = log(w[k]) + dnorm(x[i], mu[k], sigma[k], log=TRUE)  #Compute the log of the weights
     }
     v = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:KK, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -1695,7 +1695,7 @@ for(i in 1:n){
   v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
   v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
   v    = exp(v - max(v))/sum(exp(v - max(v)))
-  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
 }
 ```
 
@@ -1812,7 +1812,7 @@ qq  = var(x)/2
 w     = 1/2
 mu    = rnorm(2, mean(x), sd(x))
 sigma = rep(sd(x)/2,2)
-cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+cc    = base::sample(1:2, n, replace=T, prob=c(1/2,1/2))
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -1832,7 +1832,7 @@ for(s in 1:rrr){
     v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
     v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
     v    = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -1912,7 +1912,7 @@ n  = length(x)
 w     = rep(1,KK)/KK
 mu    = rnorm(KK, mean(x), sd(x))
 sigma = rep(1,KK)*sd(x)/KK
-cc    = sample(1:KK, n, replace=T, prob=w)
+cc    = base::sample(1:KK, n, replace=T, prob=w)
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -1939,7 +1939,7 @@ for(s in 1:rrr){   # Sample the indicators
     for(k in 1:KK){
       v[k]  = log(w[k]) + dnorm(x[i], mu[k], sigma[k], log=TRUE)  #Compute the log of the weights     }
       v     = exp(v - max(v))/sum(exp(v - max(v)))
-      cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+      cc[i] = base::sample(1:KK, 1, replace=TRUE, prob=v)
       
       # Sample the weights
       w[1]  = rbeta(1,1+sum(cc==1),1+sum(cc==2))
@@ -2032,7 +2032,7 @@ for(i in 1:n){
   v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
   v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
   v    = exp(v - max(v))/sum(exp(v - max(v)))
-  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
 }
 ```
 
@@ -2149,7 +2149,7 @@ qq  = var(x)/2
 w     = 1/2
 mu    = rnorm(2, mean(x), sd(x))
 sigma = rep(sd(x)/2,2)
-cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+cc    = base::sample(1:2, n, replace=T, prob=c(1/2,1/2))
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -2169,7 +2169,7 @@ for(s in 1:rrr){
     v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
     v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
     v    = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -2274,7 +2274,7 @@ for(i in 1:n){
   v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
   v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
   v    = exp(v - max(v))/sum(exp(v - max(v)))
-  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
 }
 ```
 
@@ -2391,7 +2391,7 @@ qq  = var(x)/2
 w     = 1/2
 mu    = rnorm(2, mean(x), sd(x))
 sigma = rep(sd(x)/2,2)
-cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+cc    = base::sample(1:2, n, replace=T, prob=c(1/2,1/2))
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -2411,7 +2411,7 @@ for(s in 1:rrr){
     v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
     v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
     v    = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
@@ -2516,7 +2516,7 @@ for(i in 1:n){
   v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
   v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
   v    = exp(v - max(v))/sum(exp(v - max(v)))
-  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
 }
 ```
 
@@ -2633,7 +2633,7 @@ qq  = var(x)/2
 w     = 1/2
 mu    = rnorm(2, mean(x), sd(x))
 sigma = rep(sd(x)/2,2)
-cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+cc    = base::sample(1:2, n, replace=T, prob=c(1/2,1/2))
 
 ## Number of iterations of the sampler
 rrr   = 12000
@@ -2653,7 +2653,7 @@ for(s in 1:rrr){
     v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
     v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
     v    = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+    cc[i] = base::sample(1:2, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
