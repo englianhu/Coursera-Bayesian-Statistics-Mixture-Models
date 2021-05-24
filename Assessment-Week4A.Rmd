@@ -173,7 +173,12 @@ suppressAll(lib('EDISON', 'extraDistr', 'MCMCpack'))
 ```{r error=TRUE}
 ### Get a "Bayesian" kernel density estimator based on the same location mixture of 6 normals
 ## Priors set up using an "empirical Bayes" approach
-KK = 2
+### Loading data and setting up global variables
+library(MASS)
+library(MCMCpack)
+data(faithful)
+KK = 2          # As asked
+x  = faithful[,1]
 aa  = rep(1,KK)  
 eta = mean(x)    
 tau = sqrt(var(x))
