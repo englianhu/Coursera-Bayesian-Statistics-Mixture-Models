@@ -519,6 +519,11 @@ Provide an MCMC algorithm to fit the two-component, location-and-scale mixture o
 ```{r error=TRUE}
 ### Get a "Bayesian" kernel density estimator based on the same location mixture of 6 normals
 ## Priors set up using an "empirical Bayes" approach
+library(MASS)
+library(MCMCpack)
+data(faithful)
+KK = 2          # As asked
+x  = faithful[,1]
 aa      = rep(1,KK)  
 eta     = mean(x)    
 tau     = sqrt(var(x))
@@ -600,7 +605,7 @@ for(s in 1:rrr){
 Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
 
 ```{r error=TRUE}
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 
 ## Compute the samples of the density over a dense grid
@@ -626,7 +631,7 @@ plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruption 
 
 polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
 lines(xx, density.mcmc.m, col=colscale[1], lwd=2)
-#lines(xx, density.EM, col=colscale[2], lty=2, lwd=2)
+lines(xx, density.EM, col=colscale[2], lty=2, lwd=2)
 lines(yy, col=colscale[3], lty=3, lwd=2)
 points(x, rep(0,n))
 legend(5, 0.45, c("KDE","EM","MCMC"), col=colscale[c(3,2,1)], lty=c(3,2,1), lwd=2, bty="n")
@@ -925,7 +930,7 @@ for(s in 1:rrr){
       }
     }
     qq.star = qq + sumsq/2
-    sigma[k] = sqrt(rinvgamma(1, shape = dd.star, scale = qq.star))
+    sigma[k] = sqrt(invgamma::rinvgamma(1, shape = dd.star, scale = qq.star))
   }
   
   # Store samples
@@ -939,7 +944,7 @@ for(s in 1:rrr){
   logpost[s] = logpost[s] + log(ddirichlet(w, aa))
   for(k in 1:KK){
     logpost[s] = logpost[s] + dnorm(mu[k], eta, tau, log=TRUE)
-    logpost[s] = logpost[s] + log(dinvgamma(sigma[k]^2, shape = dd, scale = qq))
+    logpost[s] = logpost[s] + log(invgamma::dinvgamma(sigma[k]^2, shape = dd, scale = qq))
   }
   if(s/500==floor(s/500)){
     print(paste("s =",s, w, mu, sigma, logpost[s]))
@@ -950,7 +955,7 @@ for(s in 1:rrr){
 Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
 
 ```{r error=TRUE}
-Eruptions = seq(0,7, length=150)
+Eruptions = seq(0,7, length.out=150)
 ## Compute the samples of the density over a dense grid
 density.mcmc = array(0, dim=c(rrr-burn,length(Eruptions)))
 for(s in 1:(rrr-burn)){
@@ -1209,6 +1214,11 @@ Provide an MCMC algorithm to fit the two-component, location-and-scale mixture o
 ```{r error=TRUE}
 ### Get a "Bayesian" kernel density estimator based on the same location mixture of 6 normals
 ## Priors set up using an "empirical Bayes" approach
+library(MASS)
+library(MCMCpack)
+data(faithful)
+KK = 2          # As asked
+x  = faithful[,1]
 aa  = rep(1,KK)  
 eta = mean(x)    
 tau = sqrt(var(x))
@@ -1287,7 +1297,7 @@ for(s in 1:rrr){
 Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
 
 ```{r error=TRUE}
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 
 ## Compute the samples of the density over a dense grid
@@ -1976,7 +1986,7 @@ for(s in 1:rrr){   # Sample the indicators
 Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
 
 ```{r error=TRUE}
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 nxx = length(xx)
 density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
 
