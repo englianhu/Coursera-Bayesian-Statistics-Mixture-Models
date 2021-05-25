@@ -173,67 +173,68 @@ f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1-w)  \frac{1}{\sqrt{2\pi} \
 
 ```{r error=TRUE}
 #read the data from the file
-dat = read.csv(file = "data/fuses.csv", header = FALSE)
-fuses = dat$V1
-logfuses = log(fuses)
+dat      <- read.csv(file = "data/fuses.csv", header = FALSE)
+fuses    <- dat$V1
+x        <- fuses
+logfuses <- log(fuses)
 
 ## Run the actual EM algorithm
 ## Initialize the parameters
 
-KK         = 2                               # number of components
-n = length(fuses)                         # number of samples
-v = array(0, dim=c(n,KK))
-v[,1] = 0.5                    #Assign half weight to first component
-v[,2] = 1-v[,1]                #Assign all of the remaining weights to the second component
-mean1 = sum(v[,1]*fuses)/sum(v[, 1]) #mean of the first component
-lambda = 1.0/mean1            #parameter for the first component
-mu = sum(v[,2]*logfuses)/sum(v[,2])    #parameter (mean) of the second component
-tausquared = sum(v[,2]*((logfuses-mu)**2))/sum(v[,2]) #parameter (variance) for the second component
-tau = sqrt(tausquared)
-w = mean(v[,1])
+KK     <- 2                       # number of components
+n      <- length(fuses)           # number of samples
+v      <- array(0, dim=c(n,KK))
+v[,1]  <- 0.5            #Assign half weight to first component
+v[,2]  <- 1-v[,1]        #Assign all of the remaining weights to the second component
+mean1  <- sum(v[,1]*fuses)/sum(v[, 1]) #mean of the first component
+lambda <- 1.0/mean1            #parameter for the first component
+mu     <- sum(v[,2]*logfuses)/sum(v[,2])    #parameter (mean) of the second component
+tausquared <- sum(v[,2]*((logfuses-mu)**2))/sum(v[,2]) #parameter (variance) for the second component
+tau <- sqrt(tausquared)
+w   <- mean(v[,1])
 print(paste(lambda, mu, tausquared, tau, w))
 
 
-s  = 0
-sw = FALSE
-QQ = -Inf
-QQ.out = NULL
-epsilon = 10^(-5)
+s  <- 0
+sw <- FALSE
+QQ <- -Inf
+QQ.out  <- NULL
+epsilon <- 10^(-5)
 
 ##Checking convergence of the algorithm
 while(!sw){
   ## E step
-  v = array(0, dim=c(n,KK))
-  v[,1] = log(w) + dexp(fuses, lambda,log=TRUE)    #Compute the log of the weights
-  v[,2] = log(1-w) + dnorm(logfuses, mu, tau, log=TRUE)  #Compute the log of the weights
+  v <- array(0, dim=c(n,KK))
+  v[,1] <- log(w) + dexp(fuses, lambda,log=TRUE)    #Compute the log of the weights
+  v[,2] <- log(1-w) + dnorm(logfuses, mu, tau, log=TRUE)  #Compute the log of the weights
   for(i in 1:n){
-    v[i,] = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,])))  #Go from logs to actual weights in a numerically stable manner
+    v[i,] <- exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,])))  #Go from logs to actual weights in a numerically stable manner
   }
   
   ## M step
   # Weights
-  w = mean(v[,1])
+  w      <- mean(v[,1])
   ## parameters
-  mean1 = sum(v[,1]*fuses)/sum(v[, 1]) #mean of the first component
-  lambda = 1.0/mean1            #parameter for the first component
-  mu = sum(v[,2]*logfuses)/sum(v[,2])    #parameter (mean) of the second component
-  tausquared = sum(v[,2]*((logfuses-mu)**2))/sum(v[,2]) #parameter (variance) for the second component
-  tau = sqrt(tausquared)
-  w = mean(v[,1])
+  mean1  <- sum(v[,1]*fuses)/sum(v[, 1]) #mean of the first component
+  lambda <- 1.0/mean1            #parameter for the first component
+  mu     <- sum(v[,2]*logfuses)/sum(v[,2])    #parameter (mean) of the second component
+  tausquared <- sum(v[,2]*((logfuses-mu)**2))/sum(v[,2]) #parameter (variance) for the second component
+  tau    <- sqrt(tausquared)
+  w      <- mean(v[,1])
   print(paste(s, lambda, mu, tausquared, tau, w))
   
   ##Check convergence
-  QQn = 0
+  QQn <- 0
   for(i in 1:n){
-    QQn = QQn + v[i,1]*(log(w) + dexp(fuses[i], lambda, log=TRUE)) +
+    QQn <- QQn + v[i,1]*(log(w) + dexp(fuses[i], lambda, log=TRUE)) +
       v[i,2]*(log(1-w) + dnorm(logfuses[i], mu, tau, log=TRUE))
   }
   if(abs(QQn-QQ)/abs(QQn)<epsilon){
     sw=TRUE
   }
-  QQ = QQn
-  QQ.out = c(QQ.out, QQ)
-  s = s + 1
+  QQ     <- QQn
+  QQ.out <- c(QQ.out, QQ)
+  s      <- s + 1
   print(paste(s, QQn))
 }
 ```
@@ -270,19 +271,21 @@ Reference from tutorial : [Sample Code for EM Example 1](https://github.com/engl
 Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
 
 ```{r error=TRUE}
-w
-mean1
-lambda
-mu
-tausquared
-tau
+#w          0.0864682
+#mean1      0.3107224
+#lambda     3.218307
+#mu         0.7825582
+#tausquared 0.1429285
+#tau        0.3780589
 
-paste('w =', w)
-paste('mean1 =', mean1)
-paste('lambda =', lambda)
-paste('mu =', mu)
-paste('tausquared =', tausquared)
-paste('tau =', tau)
+cat(
+paste(
+'\n w =', w, 
+'\n mean1 =', mean1, 
+'\n lambda =', lambda, 
+'\n mu =', mu, 
+'\n tausquared =', tausquared, 
+'\n tau =', tau, '\n'))
 ```
 
 <br><br>
@@ -461,7 +464,15 @@ QQ
 
 Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
 
-$w = 0.09, lambda = 3.05, mu = 0.79, tau = 0.38$
+```{r error=TRUE}
+# w = 0.09, lambda = 3.05, mu = 0.79, tau = 0.38
+cat(
+paste(
+'\n w =', w, 
+'\n lambda =', lambda, 
+'\n mu =', mu, 
+'\n sigma =', sigma, '\n'))
+```
 
 #### Marking
 
@@ -664,7 +675,15 @@ plot(QQ.out[1:s],type="l", xlim=c(1,max(10,s)), las=1, ylab="Q", lwd=2)
 
 Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
 
-$w = 0.09, lambda = 3.05, mu = 0.79, tau = 0.38$
+```{r error=TRUE}
+#w = 0.09, lambda = 3.05, mu = 0.79, tau = 0.38
+cat(
+paste(
+'\n w =', w, 
+'\n lambda =', lambda, 
+'\n mu =', mu, 
+'\n tau =', tau, '\n'))
+```
 
 #### Marking
 
@@ -795,7 +814,15 @@ legend(6,0.22,c("Truth","Estimate"),col=c("black","red"), lty=c(1,2), bty="n")
 
 Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
 
-$w = 0.09, lambda = 3.05, mu = 0.79, tau = 0.38$
+```{r error=TRUE}
+#w = 0.09, lambda = 3.05, mu = 0.79, tau = 0.38
+cat(
+paste(
+'\n w =', w, 
+'\n lambda =', lambda, 
+'\n mu =', mu))#, 
+#'\n tau =', tau, '\n'))
+```
 
 #### Marking
 
@@ -981,10 +1008,17 @@ QQn
 Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
 
 ```{r error=TRUE}
-print(paste('w =', round(w,2))) #0.09
-print(paste('lambda =', round(lambda,2))) #3.05
-print(paste('mu =', round(mu,2))) #0.78
-print(paste('tau =', round(tau,2))) #0.38
+#w = 0.09
+#lambda = 3.05
+#mu = 0.78
+#tau = 0.38
+
+cat(
+paste(
+'\n w =', w, 
+'\n lambda =', lambda, 
+'\n mu =', mu, 
+'\n tau =', tau, '\n'))
 ```
 
 #### Marking
@@ -1202,10 +1236,18 @@ Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{
 ```{r error=TRUE}
 #c(w_hat,lambda_hat,mu_hat,tau_hat)
 #[1] 0.09 3.05 0.78 0.38
-paste('w =', w)
-paste('lambda =', lambda)
-paste('mu =', mu)
-paste('tau =', tau)
+
+#paste('w =', w)
+#paste('lambda =', lambda)
+#paste('mu =', mu)
+#paste('tau =', tau)
+
+cat(
+paste(
+'\n w =', w, 
+'\n lambda =', lambda, 
+'\n mu =', mu, 
+'\n tau =', tau, '\n'))
 ```
 
 #### Marking
@@ -1387,15 +1429,22 @@ while(!sw){
 Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
 
 ```{r error=TRUE}
-w.hat = 1.00
-lambda.hat = 0.46
-mu.hat = 2.15
-tau.hat = 0.63
+#w.hat = 1.00
+#lambda.hat = 0.46
+#mu.hat = 2.15
+#tau.hat = 0.63
 
-paste('w.hat =', w.hat)
-paste('lambda.hat =', lambda.hat)
-paste('mu.hat =', mu.hat)
-paste('tau.hat =', tau.hat)
+#paste('w.hat =', w.hat)
+#paste('lambda.hat =', lambda.hat)
+#paste('mu.hat =', mu.hat)
+#paste('tau.hat =', tau.hat)
+
+cat(
+paste(
+'\n w.hat =', w.hat, 
+'\n lambda.hat =', lambda.hat, 
+'\n mu.hat =', mu.hat, 
+'\n tau.hat =', tau.hat, '\n'))
 ```
 
 #### Marking
@@ -1533,6 +1582,7 @@ set.seed(81196)    # So that results are reproducible (same simulated data every
 
 fuses <- read_csv(file = "data/fuses.csv", col_names = F)
 colnames(fuses) <- "life"
+x <- fuses$life
 yy.true = density(fuses$life)$y
 
 plot(yy.true, type = "l")
@@ -1623,10 +1673,17 @@ Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{
 #mu     = 0.78
 #tau   = 0.38
 
-paste('w      =', w)
-paste('lambda =', lambda)
-paste('mu     =', mu)
-paste('tau    =', tau)
+#paste('w      =', w)
+#paste('lambda =', lambda)
+#paste('mu     =', mu)
+#paste('tau    =', tau)
+
+cat(
+paste(
+'\n w =', w, 
+#'\n lambda =', lambda, 
+'\n mu =', mu, 
+'\n sigma =', sigma, '\n'))
 ```
 
 #### Marking
@@ -1809,20 +1866,22 @@ while(!sw){
 Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
 
 ```{r error=TRUE}
-w.hat
-lambda.hat
-mu.hat
-tau.hat
-
 #w.hat = 0.09
 #lambda.hat = 3.05
 #mu.hat = 0.78
 #tau.hat = 0.38
 
-paste('w.hat =', w.hat)
-paste('lambda.hat =', lambda.hat)
-paste('mu.hat =', tau.hat)
-paste('tau.hat =', mu.hat)
+#paste('w.hat =', w.hat)
+#paste('lambda.hat =', lambda.hat)
+#paste('mu.hat =', tau.hat)
+#paste('tau.hat =', mu.hat)
+
+cat(
+paste(
+'\n w.hat =', w.hat, 
+'\n lambda.hat =', lambda.hat, 
+'\n mu.hat =', mu.hat, 
+'\n tau.hat =', tau.hat, '\n'))
 ```
 
 #### Marking
@@ -2032,15 +2091,22 @@ while(!sw){
 Provide you maximum likelihood estimates $\hat{\omega}$, $\hat{\lambda}$, $\hat{\mu}$ and $\hat{\tau}$, **rounded** to two decimal places.
 
 ```{r error=TRUE}
-w
-lambda
-mu
-tau
+#w
+#lambda
+#mu
+#tau
 
-paste('w =', w)
-paste('lambda =', lambda)
-paste('mu =', mu)
-paste('tau =', tau)
+#paste('w =', w)
+#paste('lambda =', lambda)
+#paste('mu =', mu)
+#paste('tau =', tau)
+
+cat(
+paste(
+'\n w =', w, 
+'\n lambda =', lambda, 
+'\n mu =', mu, 
+'\n tau =', tau, '\n'))
 ```
 
 #### Marking

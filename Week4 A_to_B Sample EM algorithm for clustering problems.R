@@ -1,4 +1,4 @@
-## Week 4 EX 1-to-2 : Sample code for density estimation problems
+## Week 4 EX 1-to-2 : Sample EM algorithm for clustering problems
 ## ------------------------------------------------------------------
 ## Using mixture models for clustering in the iris dataset
 ## Compare k-means clustering and a location and scale mixture model with K normals

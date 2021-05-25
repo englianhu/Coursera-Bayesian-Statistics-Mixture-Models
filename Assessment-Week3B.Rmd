@@ -42,17 +42,14 @@ pre code {
 }
 </style>
 
-```{r class.source = 'bg-success', class.output = 'bg-primary', message = FALSE, warning = FALSE}
-#if(!suppressPackageStartupMessages(require('BBmisc'))) {
-#  install.packages('BBmisc', dependencies = TRUE, INSTALL_opts = '--no-lock')
-#}
-suppressPackageStartupMessages(library('BBmisc'))
+```{r class.source='bg-success', class.output='bg-primary', message = FALSE, warning = FALSE}
+# install.packages("remotes")
+library('BBmisc', 'rmsfuns')
 #remotes::install_github("rstudio/sass")
-#lib('sass')
-suppressPackageStartupMessages(library('sass'))
+lib('sass')
 ```
 
-```{scss class.source = 'bg-success', class.output = 'bg-primary'}
+```{scss class.source='bg-success', class.output='bg-primary'}
 /* https://stackoverflow.com/a/66029010/3806250 */
 h1 { color: #002C54; }
 h2 { color: #2F496E; }
@@ -90,7 +87,7 @@ h5 { color: #92AAC7; }
   }
 ```
 
-```{r global_options, class.source = 'hover01', class.output = 'hover02'}
+```{r global_options, class.source='hover01', class.output='hover02'}
 ## https://stackoverflow.com/a/36846793/3806250
 options(width = 999)
 knitr::opts_chunk$set(class.source = 'hover01', class.output = 'hover02', class.error = 'hover03')
@@ -101,6 +98,12 @@ knitr::opts_chunk$set(class.source = 'hover01', class.output = 'hover02', class.
 ## Setup
 
 ```{r warning=FALSE, message=FALSE}
+if(!suppressPackageStartupMessages(require('BBmisc'))) {
+  install.packages('BBmisc', dependencies = TRUE, INSTALL_opts = '--no-lock')
+}
+suppressPackageStartupMessages(require('BBmisc'))
+# suppressPackageStartupMessages(require('rmsfuns'))
+
 pkgs <- c('devtools', 'knitr', 'kableExtra', 'tidyr', 
           'readr', 'lubridate', 'data.table', 'reprex', 
           'timetk', 'plyr', 'dplyr', 'stringr', 'magrittr', 
@@ -116,14 +119,13 @@ Sys.setenv(TZ = 'Asia/Tokyo')
 options(warn = -1, knitr.table.format = 'html')#, digits.secs = 6)
 
 ## https://stackoverflow.com/questions/39417003/long-vectors-not-supported-yet-abnor-in-rmd-but-not-in-r-script
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)#, 
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)#, 
                       #cache = TRUE, cache.lazy = FALSE)
 
 rm(pkgs)
 ```
 
 <br><br>
-
 
 # 受講生によるテスト：Markov chain Monte Carlo algorithms for Mixture Models
 
@@ -168,119 +170,121 @@ f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi
 \end{align}
 $$
 
-```{r}
+```{r error=TRUE}
 ## Load package
-if(!suppressPackageStartupMessages(require('rinvgamma'))) {
+#if(!suppressAll(require('rinvgamma'))) {
   ##install.packages('rinvgamma', dependencies = TRUE, INSTALL_opts = '--no-lock')
-  devtools::install_github('dkahle/invgamma', force=TRUE)
-}
+#  devtools::install_github('dkahle/invgamma', force=TRUE)
+#}
 
 ##function in 'rinvgamma' will be more accurate than 'MCMCpack'
-suppressPackageStartupMessages(require('rinvgamma'))
+suppressAll(require('rinvgamma'))
 #lib('MCMCpack')
 
-#dat = fread('data/fuses.csv') 
-#fuses = dat$V1
-fuses = read_csv('data/fuses.csv', col_names = FALSE)$X1
+#dat   <- fread('data/fuses.csv') 
+#fuses <- dat$V1
+fuses  <- read_csv('data/fuses.csv', col_names = FALSE)$X1
+x      <- fuses
 logfuses = log(fuses)
 
 ## Initialize the parameters
-KK         = 2                               # number of components
-n = length(fuses)                         # number of samples
-v = array(0, dim=c(n,KK))
-v[,1] = 0.5                    #Assign half weight to first component
-v[,2] = 1-v[,1]                #Assign all of the remaining weights to the second component
-mean1 = sum(v[,1]*fuses)/sum(v[, 1]) #mean of the first component
-lambda = 1.0/mean1            #parameter for the first component
-mu = sum(v[,2]*logfuses)/sum(v[,2])    #parameter (mean) of the second component
-sigmasquared = sum(v[,2]*((logfuses-mu)**2))/sum(v[,2]) #parameter (variance) for the second component
-sigma = sqrt(sigmasquared)
-w = mean(v[,1])
+KK     <- 2                      # number of components
+n      <- length(fuses)          # number of samples
+v      <- array(0, dim=c(n,KK))
+v[,1]  <- 0.5                    #Assign half weight to first component
+v[,2]  <- 1-v[,1]                #Assign all of the remaining weights to the second component
+mean1  <- sum(v[,1]*fuses)/sum(v[, 1]) #mean of the first component
+lambda <- 1.0/mean1            #parameter for the first component
+mu     <- sum(v[,2]*logfuses)/sum(v[,2])    #parameter (mean) of the second component
+sigmasquared <- sum(v[,2]*((logfuses-mu)**2))/sum(v[,2]) #parameter (variance) for the second component
+sigma <- sqrt(sigmasquared)
+w     <- mean(v[,1])
 #print(paste(lambda, mu, tausquared, tau, w))
 #print(paste(lambda, mu, sigmasquared, sigma, w))
 paste(lambda, mu, sigmasquared, sigma, w)
 
 # Priors
-aa  = rep(1,KK)  # Uniform prior on 
+aa    <- rep(1,KK)  # Uniform prior on 
 # conjugate prior for exponential:
-alpha = 2 #For Gamma distribution prior number of obs = alpha-1
-beta = 1 #Sum of observations = beta
+alpha <- 2 #For Gamma distribution prior number of obs = alpha-1
+beta  <- 1 #Sum of observations = beta
 # conjugate prior for the normal
-eta = mu          # Mean for the prior on mu
-tau = 5          # Standard deviation 5 on the prior for mu_l
-dd  = 2          # variance prior
-qq  = 1
+eta   <- mu          # Mean for the prior on mu
+tau   <- 5          # Standard deviation 5 on the prior for mu_l
+dd    <- 2          # variance prior
+qq    <- 1
 
 # Number of iterations of the sampler
-rrr   = 6000
-burn  = 1000
+rrr   <- 6000
+burn  <- 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n))
-w.out     = rep(0, rrr)
-lambda.out = rep(0,rrr)
-mu.out    = array(0, rrr)
-sigma.out = rep(0, rrr)
-logpost   = rep(0, rrr)
+cc.out     <- array(0, dim=c(rrr, n))
+w.out      <- rep(0, rrr)
+lambda.out <- rep(0,rrr)
+mu.out     <- array(0, rrr)
+sigma.out  <- rep(0, rrr)
+logpost    <- rep(0, rrr)
 
 # MCMC iterations
 for(s in 1:rrr){
+  
   # Sample the indicators
-  cc = rep(0,n)
+  cc <- rep(0,n)
   for(i in 1:n){
-    v = rep(0,KK)
-    v[1] = log(w) + dexp(fuses[i], lambda, log=TRUE)  #Compute the log of the weights
-    v[2] = log(1-w) + dnorm(logfuses[i], mu, sigma, log=TRUE)  #Compute the log of the weights
-    v = exp(v - max(v))/sum(exp(v - max(v)))
-    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+    v     <- rep(0,KK)
+    v[1]  <- log(w) + dexp(fuses[i], lambda, log=TRUE)  #Compute the log of the weights
+    v[2]  <- log(1-w) + dnorm(logfuses[i], mu, sigma, log=TRUE)  #Compute the log of the weights
+    v     <- exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] <- sample(1:KK, 1, replace=TRUE, prob=v)
   }
   
   # Sample the weights
-  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  w <- rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
   
   # Sample the lambda
-  nk    = sum(cc==1)
-  xsumk = sum(fuses[cc==1])
-  alpha.hat = alpha + nk
-  beta.hat = beta + xsumk
-  lambda = rgamma(1, shape = alpha.hat, rate = beta.hat)
+  nk        <- sum(cc==1)
+  xsumk     <- sum(fuses[cc==1])
+  alpha.hat <- alpha + nk
+  beta.hat  <- beta + xsumk
+  lambda    <- rgamma(1, shape = alpha.hat, rate = beta.hat)
   
   # Sample mu, the mean for norm
-  nk    = sum(cc==2)
-  xsumk = sum(logfuses[cc==2])
-  tau2.hat = 1/(nk/sigma^2 + 1/tau^2)
-  mu.hat  = tau2.hat*(xsumk/sigma^2 + eta/tau^2)
-  mu   = rnorm(1, mu.hat, sqrt(tau2.hat))
+  nk       <- sum(cc==2)
+  xsumk    <- sum(logfuses[cc==2])
+  tau2.hat <- 1/(nk/sigma^2 + 1/tau^2)
+  mu.hat   <- tau2.hat*(xsumk/sigma^2 + eta/tau^2)
+  mu       <- rnorm(1, mu.hat, sqrt(tau2.hat))
   
   # Sample the variances
-  dd.star = dd + nk/2
-  qq.star = qq
+  dd.star  <- dd + nk/2
+  qq.star  <- qq
   for(i in 1:n) {
     if (cc[i]==2) {
-      qq.star = qq.star + ((logfuses[i] - mu)^2)/2
+      qq.star <- qq.star + ((logfuses[i] - mu)^2)/2
     }
   }
-  sigma = sqrt(invgamma::rinvgamma(1, dd.star, qq.star))
+  sigma <- sqrt(invgamma::rinvgamma(1, dd.star, qq.star))
   
   # Store samples
-  cc.out[s,]    = cc
-  w.out[s]     = w
-  lambda.out[s] = lambda
-  mu.out[s]    = mu
-  sigma.out[s] = sigma
+  cc.out[s,]    <- cc
+  w.out[s]      <- w
+  lambda.out[s] <- lambda
+  mu.out[s]     <- mu
+  sigma.out[s]  <- sigma
   
   
   for(i in 1:n){
     if(cc[i]==1){
-      logpost[s] = logpost[s] + log(w) + dexp(fuses[i], lambda, log=TRUE)
+      logpost[s] <- logpost[s] + log(w) + dexp(fuses[i], lambda, log=TRUE)
     }else{
-      logpost[s] = logpost[s] + log(1-w) + dnorm(logfuses[i], mu, sigma, log=TRUE)
+      logpost[s] <- logpost[s] + log(1-w) + dnorm(logfuses[i], mu, sigma, log=TRUE)
     }
   }
-  logpost[s] = logpost[s] + dbeta(w, aa[1], aa[2],log = T)
-  logpost[s] = logpost[s] + dgamma(lambda, shape = alpha, rate = beta, log = T)
-  logpost[s] = logpost[s] + dnorm(mu, eta, tau, log = T)
-  logpost[s] = logpost[s] + log(invgamma::dinvgamma(sigma^2, dd, 1/qq))
+  logpost[s] <- logpost[s] + dbeta(w, aa[1], aa[2],log = T)
+  logpost[s] <- logpost[s] + dgamma(lambda, shape = alpha, rate = beta, log = T)
+  logpost[s] <- logpost[s] + dnorm(mu, eta, tau, log = T)
+  logpost[s] <- logpost[s] + log(invgamma::dinvgamma(sigma^2, dd, 1/qq))
   
   if(s/500==floor(s/500)){
     print(paste("s =",s, w, lambda, mu, sigma, logpost[s]))
@@ -292,10 +296,10 @@ par(mfrow=c(1,1))
 par(mar=c(4,4,1,1)+0.1)
 plot(logpost, type="l", xlab="Iterations", ylab="Log posterior")
 
-w_avg = sum(w.out[(burn+1):rrr])/(rrr-burn)
-lambda_avg = sum(lambda.out[(burn+1):rrr])/(rrr-burn)
-mu_avg = sum(mu.out[(burn+1):rrr])/(rrr-burn)
-sigma_avg = sum(sigma.out[(burn+1):rrr])/(rrr-burn)
+w_avg      <- sum(w.out[(burn+1):rrr])/(rrr-burn)
+lambda_avg <- sum(lambda.out[(burn+1):rrr])/(rrr-burn)
+mu_avg     <- sum(mu.out[(burn+1):rrr])/(rrr-burn)
+sigma_avg  <- sum(sigma.out[(burn+1):rrr])/(rrr-burn)
 ```
 
 ```{r results = 'asis'}
@@ -303,9 +307,9 @@ sigma_avg = sum(sigma.out[(burn+1):rrr])/(rrr-burn)
 dfm <- tibble(
   Category = c('weight', 'lambda', 'mean', 'sigma'), 
   Value = c(w_avg, lambda_avg, mu_avg, sigma_avg))
-dfm %>% 
+dfm |> 
   kbl(caption = 'Summary', escape = FALSE) %>% 
-  row_spec(0, background = 'DimGrey', color = 'gold', bold = TRUE) %>% 
+  row_spec(0, background = 'DimGrey', color = 'gold', bold = TRUE) |> 
   column_spec(1, background = 'CornflowerBlue') %>% 
   column_spec(2, background = 'DarkGrey') %>% 
   kable_styling(bootstrap_options = c('striped', 'hover', 'condensed', 'responsive')) %>% 
@@ -356,7 +360,7 @@ Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initia
 
 In summary, you should expect an initialization such as this one:
 
-```{r error = TRUE}
+```{r error=TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
@@ -376,7 +380,7 @@ $\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ w
 
 Hence, the code to sample the indicators might look something like this:
 
-```{r error = TRUE}
+```{r error=TRUE}
 # Full conditional for cc
 v = rep(0,2)
 for(i in 1:n){
@@ -563,11 +567,20 @@ for(s in 1:rrr){
 
 Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
 
-```
-mean(w.out[burn:rrr]) = 0.12
-mean(lambda.out[burn:rrr]) = 2.28
-mean(mu.out[burn:rrr]) = 0.01
-mean(tau.out[burn:rrr]) = 0.86
+```{r error=TRUE}
+#mean(w.out[burn:rrr]) = 0.12
+#mean(lambda.out[burn:rrr]) = 2.28
+#mean(mu.out[burn:rrr]) = 0.01
+#mean(tau.out[burn:rrr]) = 0.86
+
+cat(
+  paste(
+    'w.out =', mean(w.out[burn:rrr]), 
+    '\nlambda.out =', mean(lambda.out[burn:rrr]), 
+    '\nmu.out =', mean(mu.out[burn:rrr]), 
+    '\ntau.out =', mean(tau.out[burn:rrr])
+  )
+)
 ```
 
 #### Marking
@@ -586,7 +599,7 @@ Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initia
 
 In summary, you should expect an initialization such as this one:
 
-```{r error = TRUE}
+```{r error=TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
@@ -606,7 +619,7 @@ $\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ w
 
 Hence, the code to sample the indicators might look something like this:
 
-```{r error = TRUE}
+```{r error=TRUE}
 # Full conditional for cc
 v = rep(0,2)
 for(i in 1:n){
@@ -727,7 +740,7 @@ f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi
 \end{align}
 $$
 
-```{r}
+```{r error=TRUE}
 x  = as.matrix(read.csv("data/fuses.csv",header=FALSE))
 
 ## Initialize the parameters
@@ -814,11 +827,20 @@ for(s in 1:rrr){
 
 Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
 
-```
-round(mean(w.out),2): 0.1
-round(mean(lambda.out),2): 2.31
-round(mean(mu.out),2) : 0.79
-round(mean(sigma.out),2) : 0.38
+```{r error=TRUE}
+#round(mean(w.out),2): 0.1
+#round(mean(lambda.out),2): 2.31
+#round(mean(mu.out),2) : 0.79
+#round(mean(sigma.out),2) : 0.38
+
+cat(
+  paste(
+    'w.out =', mean(w.out), 
+    '\nlambda.out =', mean(lambda.out), 
+    '\nmu.out =', mean(mu.out), 
+    '\ntau.out =', mean(tau.out)
+  )
+)
 ```
 
 #### Marking
@@ -837,7 +859,7 @@ Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initia
 
 In summary, you should expect an initialization such as this one:
 
-```{r error = TRUE}
+```{r error=TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
@@ -857,7 +879,7 @@ $\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ w
 
 Hence, the code to sample the indicators might look something like this:
 
-```{r error = TRUE}
+```{r error=TRUE}
 # Full conditional for cc
 v = rep(0,2)
 for(i in 1:n){
@@ -978,7 +1000,7 @@ f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi
 \end{align}
 $$
 
-```{r}
+```{r error=TRUE}
 # MCMC iterations
 set.seed(1024)
 
@@ -1037,18 +1059,36 @@ for(s in 1:rrr){
   mu.out[s]     = mu
   tau.out[s]    = sigma
 }
-
-paste('mean cc.out =', mean(cc.out))
-paste('mean w.out =', mean(w.out))
-paste('mean lambda.out =', mean(lambda.out))
-paste('mean mu.out =', mean(mu.out))
-paste('mean tau.out =', mean(tau.out))
 ```
 
 Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
 
-```
-w:0.10; lambda:2.29; mu: 0.79; tau: 0.38
+```{r error=TRUE}
+#paste('mean cc.out =', mean(cc.out))
+#paste('mean w.out =', mean(w.out))
+#paste('mean lambda.out =', mean(lambda.out))
+#paste('mean mu.out =', mean(mu.out))
+#paste('mean tau.out =', mean(tau.out))
+
+cat(
+  paste(
+    'cc.out =', mean(cc.out), 
+    '\nw.out =', mean(w.out), 
+    '\nlambda.out =', mean(lambda.out), 
+    '\nmu.out =', mean(mu.out), 
+    '\ntau.out =', mean(tau.out)
+  )
+)
+
+#w:0.10; lambda:2.29; mu: 0.79; tau: 0.38
+cat(
+  paste(
+    'w =', w, 
+    '\nlambda =', lambda, 
+    '\nmu =', mu, 
+    '\ntau =', tau
+  )
+)
 ```
 
 #### Marking
@@ -1067,7 +1107,7 @@ Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initia
 
 In summary, you should expect an initialization such as this one:
 
-```{r error = TRUE}
+```{r error=TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
@@ -1087,7 +1127,7 @@ $\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ w
 
 Hence, the code to sample the indicators might look something like this:
 
-```{r error = TRUE}
+```{r error=TRUE}
 # Full conditional for cc
 v = rep(0,2)
 for(i in 1:n){
@@ -1208,13 +1248,112 @@ f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi
 \end{align}
 $$
 
-```{r}
+```{r error=TRUE}
+set.seed(81196)  # So that results are reproducible
 
+fuses <- read.csv(file = 'data/fuses.csv', header = FALSE)
+head(fuses)
+x   <- fuses$V1
+n   <- NROW(x)  
+hist(x, breaks = 50)
+
+aa  <- c(1,1) #Beta
+eta <- 1
+tau <- 1
+l   <- 1   #lambda prior
+dd  <- 2  #inverse Gamma
+qq  <- 1  #inverse Gamma
+
+
+w      <- .1  #Assign equal weight to each component to start with
+mu     <- mean(log(x))
+sigma  <- sd(log(x))
+lambda <- 1/mu  #Initial lambda
+
+# Number of iterations of the sampler
+rrr    <- 10000
+burn   <- 1000
+
+# Storing the samples
+cc.out     <- array(0, dim=c(rrr, n))
+w.out      <- rep(0, rrr)
+lambda.out <- rep(0, rrr)
+mu.out     <- rep(0, rrr)
+sigma.out  <- rep(0, rrr)
+logpost    <- rep(0, rrr)
+
+#s=1
+# MCMC iterations
+for(s in 1:rrr){
+  # Sample the indicators
+  cc <- rep(0,n)
+  for(i in 1:n){
+    v <- rep(0,2)
+    v[1] <- log(w) + dexp(x[i], lambda, log=TRUE) #Compute the log of the weights
+    v[2] <- log(1-w) + dlnorm(x[i], mu, sigma, log=TRUE)  #Compute the log of the weights
+    v <- exp(v - max(v)) / sum(exp(v - max(v)))
+    cc[i] <- sample(1:2, 1, replace=TRUE, prob=v)
+  }
+
+  # Sample the weights
+  w <- rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+
+  # Sample the means
+  lambda <- 1/ mean(x[cc==1])
+  
+  xsumk    <- sum(log(x[cc==2]))
+  nk       <- NROW(x[cc==2])
+  tau2.hat <- 1/(nk/sigma^2 + 1/tau^2)
+  mu.hat   <- tau2.hat*(xsumk/sigma^2 + eta/tau^2)
+  
+  mu <- log(rlnorm(1, mu.hat, tau2.hat))
+  
+  # Sample the variances
+  dd.star <- dd + n/2
+  qq.star <- qq + sum((log(x) - mu)^2)/2
+  sigma   <- sqrt(rinvgamma(1, dd.star, qq.star))
+
+  # Store samples
+  cc.out[s,]    <- cc
+  w.out[s]      <- w
+  lambda.out[s] <- lambda
+  mu.out[s]     <- mu
+  sigma.out[s]  <- sigma
+  
+  for(i in 1:n){
+    if(cc[i]==1){
+      logpost[s] <- logpost[s] + log(w) + dexp(x[i], lambda, log=TRUE)
+    }else{
+      logpost[s] <- logpost[s] + log(1-w) + dlnorm(x[i], mu, sigma, log=TRUE)
+    }
+  }
+  logpost[s] <- logpost[s] + dbeta(w, aa[1], aa[2],log = T)
+  logpost[s] <- logpost[s] + dexp(lambda.out[s], lambda, log = T)
+  logpost[s] <- logpost[s] + dnorm(mu.out[s], mu, sigma, log = T)
+  logpost[s] <- logpost[s] + log(dinvgamma(sigma.out[s], dd, 1/qq))
+  
+  if(s/500==floor(s/500)){
+    print(paste("s =",s))
+  }
+}
 ```
 
 Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
 
-```
+```{r error=TRUE}
+#E(w) = 0.06
+#E(lambda) = 9.61
+#E(mu) = 0.7
+#E(tau) =  0.86
+
+cat(
+  paste(
+    'w =', mean(w), 
+    '\nlambda =', mean(lambda), 
+    '\nmu =', mean(mu), 
+    '\ntau =', mean(tau)
+  )
+)
 ```
 
 #### Marking
@@ -1233,7 +1372,7 @@ Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initia
 
 In summary, you should expect an initialization such as this one:
 
-```{r error = TRUE}
+```{r error=TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
@@ -1253,7 +1392,7 @@ $\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ w
 
 Hence, the code to sample the indicators might look something like this:
 
-```{r error = TRUE}
+```{r error=TRUE}
 # Full conditional for cc
 v = rep(0,2)
 for(i in 1:n){
@@ -1377,13 +1516,97 @@ f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi
 \end{align}
 $$
 
-```{r}
+```{r error=TRUE}
+rm(list=ls())
+library(MCMCpack)
+Fuses <- read.csv(file = "data/fuses.csv")
 
+## Initialize the parameters
+# Number of iterations of the sampler
+rrr   = 6000
+burn  = 1000
+set.seed(81196)
+
+# Actual data
+x  = Fuses$X1.062163
+KK = 2
+
+# nnumber of observations in data
+n = nrow(Fuses)
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = rep(0, rrr)
+lambda.out    = array(0, dim=c(rrr, 1))
+mu.out = array(0, dim = c(rrr,1))
+tau.out = array(0, dim = c(rrr, 1))
+logpost   = rep(0, rrr)
+
+#Priors
+mu = rnorm(1,0,1)
+tausquared = rinvgamma(1,2,1)
+
+# Initial values
+w.hat = 1/2
+mu.hat = mean(log(x))
+lambda.hat = 1/mean(x)
+tausquared.hat = var(log(x))
+
+# MCMC iterations
+
+
+for(s in 1:rrr){
+  # Sample the indicators
+ 
+  for(i in 1:n){
+    v = rep(0,KK)
+    v[1] = log(w.hat) + dexp(x[i],lambda.hat,log = TRUE)
+    v[2] = log(1 - w.hat) +  dlnorm(x[i], meanlog = mu.hat, sdlog = sqrt(tausquared.hat), log = TRUE) 
+    
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w.hat = rbeta(1, 1 + sum(cc==1), 1 + sum(cc==2))  
+
+  lambda.hat = rgamma(1, sum(cc==1) + 1, sum(x[cc==1]) + 1)
+  
+  tau_star = 1/(1 + sum(cc==2)/tausquared.hat)
+  mu_star = tau_star * (sum(log(x[cc=2]))/tausquared.hat)
+  mu.hat = rnorm(1,mu_star, sqrt(tau_star))
+  
+  tausquared.hat = rinvgamma(1, 2 + 0.5*sum(cc==2),1 + 0.5*sum((log(x[cc==2])-mu.hat)^2))
+  
+  # Store samples
+  cc.out[s,]   = cc
+  w.out[s]     = w.hat
+  lambda.out[s,]   = lambda.hat
+  mu.out[s,] = mu.hat
+  tau.out[s,] = sqrt(tausquared.hat)
+  
+  if(s/500==floor(s/500)){
+    print(paste("s =",s))
+  }
+}
 ```
 
 Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
 
-```
+```{r error=TRUE}
+#mean(w.out[burn:rrr]) = 0.1
+#mean(lambda.out[burn:rrr]) = 2.39
+#mean(mu.out[burn:rrr]) = 0.79
+#mean(tau.out[burn:rrr]) = 0.38
+
+cat(
+  paste(
+    'w.out =', mean(w.out[burn:rrr]), 
+    '\nlambda.out =', mean(lambda.out[burn:rrr]), 
+    '\nmu.out =', mean(mu.out[burn:rrr]), 
+    '\ntau.out =', mean(tau.out[burn:rrr])
+  )
+)
 ```
 
 #### Marking
@@ -1402,7 +1625,7 @@ Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initia
 
 In summary, you should expect an initialization such as this one:
 
-```{r error = TRUE}
+```{r error=TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
@@ -1422,7 +1645,7 @@ $\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ w
 
 Hence, the code to sample the indicators might look something like this:
 
-```{r error = TRUE}
+```{r error=TRUE}
 # Full conditional for cc
 v = rep(0,2)
 for(i in 1:n){
@@ -1546,13 +1769,14 @@ f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi
 \end{align}
 $$
 
-```{r}
+```{r error=TRUE}
 
 ```
 
 Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
 
-```
+```{r error=TRUE}
+
 ```
 
 #### Marking
@@ -1571,7 +1795,7 @@ Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initia
 
 In summary, you should expect an initialization such as this one:
 
-```{r error = TRUE}
+```{r error=TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
@@ -1591,7 +1815,7 @@ $\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ w
 
 Hence, the code to sample the indicators might look something like this:
 
-```{r error = TRUE}
+```{r error=TRUE}
 # Full conditional for cc
 v = rep(0,2)
 for(i in 1:n){
@@ -1715,13 +1939,14 @@ f(x) = w \lambda \exp\left\{ -\lambda x \right\} + (1- \\w)  \frac{1}{\sqrt{2\pi
 \end{align}
 $$
 
-```{r}
+```{r error=TRUE}
 
 ```
 
 Provide you maximum likelihood estimates $E\left\{\omega \right\}$, $E\left\{\lambda \right\}$, $E\left\{\mu \right\}$ and $E\left\{\tau \right\}$ <ins>**rounded**</ins> to two decimal places.
 
-```
+```{r error=TRUE}
+
 ```
 
 #### Marking
@@ -1740,7 +1965,7 @@ Finally, in this case the indicators $c_1, \ldots, c_n$ could be randomly initia
 
 In summary, you should expect an initialization such as this one:
 
-```{r error = TRUE}
+```{r error=TRUE}
 w      = 0.1
 mu     = mean(log(x))
 tau    = sd(log(x))
@@ -1760,7 +1985,7 @@ $\Pr(c_i = 1 \mid \cdots) \propto w \lambda \exp\left\{ -\lambda x_i \right\}$ w
 
 Hence, the code to sample the indicators might look something like this:
 
-```{r error = TRUE}
+```{r error=TRUE}
 # Full conditional for cc
 v = rep(0,2)
 for(i in 1:n){

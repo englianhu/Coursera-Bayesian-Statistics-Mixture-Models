@@ -52,7 +52,7 @@
       
       1.4.2) 動画: 講座 [Sampling from a mixture model. Duration: 5分](https://www.youtube.com/watch?v=wF5QPkXjons)
       
-      1.4.3) 学習用教材: Sample code for simulating from a Mixture Model. Duration: 10分
+      1.4.3) 学習用教材: [Sample code for simulating from a Mixture Model. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week1%20Sample%20Code%20for%20Sim%20Mix%20Model.R)
       
       1.4.4) 受講生によるテストの実施: Simulating from a Mixture Model. Duration: 20分
       
@@ -80,17 +80,19 @@
       
       2.1.3) 動画: 講座 [EM example 1. Duration: 12 分](https://www.youtube.com/watch?v=59cmpfeg46E)
       
-      2.1.4) 学習用教材: [Sample code for EM example 1. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Sample-Code-for%20EM-EX1.R)
+      2.1.4) 学習用教材: [Sample code for EM example 1. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week2%20Sample%20Code%20for%20EM%20EX1.R)
       
       2.1.5) 動画: 講座 [EM example 2. Duration: 13分](https://www.youtube.com/watch?v=sBhIZ6O9cts)
       
-      2.1.6) ディスカッションのプロンプト: Mixtures of log-Gaussians. Duration: 10分
+      2.1.6) 学習用教材: [Sample code for EM example 2. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week2%20Sample%20Code%20for%20EM%20EX2.R)
       
-      2.1.7) 受講生によるテストの実施: [The EM algorithm for zero-inflated mixtures. Duration: 1時間](https://rpubs.com/englianhu/768524)
+      2.1.7) ディスカッションのプロンプト: Mixtures of log-Gaussians. Duration: 10分
       
-      2.1.8) 受講生によるテスト: [The EM algorithm for Mixture Models. Duration: 1 時間](https://rpubs.com/englianhu/768289)
+      2.1.8) 受講生によるテストの実施: [The EM algorithm for zero-inflated mixtures. Duration: 1時間](https://rpubs.com/englianhu/768524)
       
-      2.1.9) 他の受講生の課題を確認: [The EM algorithm for Mixture Models](https://rpubs.com/englianhu/768289)
+      2.1.9) 受講生によるテスト: [The EM algorithm for Mixture Models. Duration: 1 時間](https://rpubs.com/englianhu/768289)
+      
+      2.1.10) 他の受講生の課題を確認: [The EM algorithm for Mixture Models](https://rpubs.com/englianhu/768289)
       
 3) Week 3 : Bayesian estimation for Mixture Models
     
@@ -106,11 +108,11 @@
       
       3.1.5) 動画: 講座 [MCMC Example 1. Duration: 11分](https://www.youtube.com/watch?v=PC2HLuG9EnY)
       
-      3.1.6) 学習用教材: Sample code for MCMC example 1. Duration: 10分
+      3.1.6) 学習用教材: [Sample code for MCMC example 1. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week3%20Sample%20code%20for%20MCMC%20example%201.R)
       
-      3.1.7) 動画: 講座 MCMC Example 2. Duration: 11分
+      3.1.7) 動画: 講座 [MCMC Example 2. Duration: 11分](https://www.youtube.com/watch?v=C5eqhYhXSbg)
       
-      3.1.8) 学習用教材: Sample code for MCMC example 2. Duration: 10分
+      3.1.8) 学習用教材: [Sample code for MCMC example 2. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week3%20Sample%20code%20for%20MCMC%20example%202.R)
       
       3.1.9) 受講生によるテストの実施: [The MCMC algorithm for zero-inflated mixtures. Duration: 1 時間](https://rpubs.com/englianhu/773086)
       
@@ -126,7 +128,7 @@
       
       4.1.2) 動画: 講座 [Density Estimation Example. Duration: 10分](https://www.youtube.com/watch?v=oLRZJUTM83U)
       
-      4.1.3) 学習用教材: Sample code for density estimation problems. Duration: 10分
+      4.1.3) 学習用教材: [Sample code for density estimation problems. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week4A%20Sample%20code%20for%20density%20estimation%20problems.R)
       
       4.1.4) 受講生によるテスト: The EM algorithm and density estimation. Duration: 50分
       
@@ -140,7 +142,7 @@
       
       4.2.2) 動画: 講座 [Clustering example. Duration: 11分](https://www.youtube.com/watch?v=NPBHVeqhVZg)
       
-      4.2.3) 学習用教材: Sample EM algorithm for clustering problems. Duration: 10分
+      4.2.3) 学習用教材: [Sample EM algorithm for clustering problems. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week4%20A_to_B%20Sample%20EM%20algorithm%20for%20clustering%20problems.R)
       
     4.3) Classification
       
@@ -150,8 +152,8 @@
       
       4.3.3) 動画: 講座 [Classification example. Duration: 10分](https://www.youtube.com/watch?v=RLUK4v12q6E)
       
-      4.3.4) 学習用教材: Sample EM algorithm for classification problems. Duration: 10 分
-        
+      4.3.4) 学習用教材: [Sample EM algorithm for classification problems. Duration: 10 分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week4B%20Sample%20EM%20algorithm%20for%20classification%20problems.R)
+      
       4.3.5) 受講生によるテスト: Classification. Duration: 45分
       
       4.3.6) 他の受講生の課題を確認: Classification
