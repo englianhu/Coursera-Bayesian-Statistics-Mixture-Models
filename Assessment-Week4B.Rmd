@@ -131,7 +131,7 @@ rm(pkgs)
 
 **課題をすぐに提出してください**
 
-課題の提出期限は、6月14日 15:59 JSTですが、可能であれば1日か2日早く提出してください。 早い段階で提出すると、他の受講生のレビューを時間内に得る可能性が高くなります。
+課題の提出期限は、`6月14日 15:59 JST`ですが、可能であれば1日か2日早く提出してください。 早い段階で提出すると、他の受講生のレビューを時間内に得る可能性が高くなります。
 
 ## 説明
 
@@ -516,9 +516,9 @@ for(s in 1:rrr){
   mu.out[s,,]     = mu
   Sigma.out[s,,,] = Sigma
   for(i in 1:(n+m)){
-    logpost[s] = logpost[s] + log(w[cc[i]]) + mvtnorm::dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+    logpost[s]    = logpost[s] + log(w[cc[i]]) + mvtnorm::dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
   }
-  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  logpost[s]   = logpost[s] + ddirichlet(w, aa)
   for(k in 1:KK){
     logpost[s] = logpost[s] + mvtnorm::dmvnorm(mu[k,], dd, DD, log=TRUE)
     logpost[s] = logpost[s] + log(diwish(Sigma[k,,], nu, SS))

@@ -133,8 +133,6 @@ rm(pkgs)
 
 課題の提出期限は、`5月31日 15:59 JST`ですが、可能であれば1日か2日早く提出してください。 早い段階で提出すると、他の受講生のレビューを時間内に得る可能性が高くなります。
 
-<br><br>
-
 ## 説明
 
 The R dataset `faithful` contains data on waiting time between eruptions (the column named waiting) and the duration of the eruption (the column named eruptions) for the famous Old Faithful geyser in Yellowstone National Park, Wyoming, USA.  
