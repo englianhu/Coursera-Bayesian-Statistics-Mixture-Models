@@ -201,4 +201,18 @@
       5.2.12) 学習用教材: Sample code for estimating the number of components and the partition structure in Bayesian models. Duration: 10分
       
       5.2.13) 練習問題: Estimating the partition structure in Bayesian models 4 個の問題
-      
+
+
+- [Financial Aids (Rmarkdown)](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Financial%20Aids.md)
+
+**Coursera Verified Certificate:**
+
+![Coursera - Bayesian Statistics: Mixture Models]()
+
+- [Bayesian Statistics: Mixture Models]()
+- [University of California](https://www.universityofcalifornia.edu)
+- [Coursera Course Certificates](https://www.linkedin.com/company/coursera-verified)
+
+---
+
+<span style='color:RoyalBlue'>**<img src='figure/ucsc.png' width='24'> [University of California](https://www.universityofcalifornia.edu) copyright®** </span>

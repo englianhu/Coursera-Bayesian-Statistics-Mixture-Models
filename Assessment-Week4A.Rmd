@@ -266,7 +266,7 @@ nxx <- length(xx)
 density.EM = rep(0, nxx)
 for(s in 1:nxx){
   for(k in 1:KK){
-    density.EM[s] = density.EM[s] + w[k]*dnorm(Eruptions[s], mu[k], sigma[k])
+    density.EM[s] = density.EM[s] + w[k]*dnorm(xx[s], mu[k], sigma)
   }
 }
 
