@@ -164,13 +164,13 @@
     
       5.1.1) 動画: 講座 [Numerical stability. Duration: 14分](https://www.youtube.com/watch?v=roWRK-3X2ZQ)
       
-      5.1.2) 学習用教材: Sample code to illustrate numerical stability issues. Duration: 10分
+      5.1.2) 学習用教材: [Sample code to illustrate numerical stability issues. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week5A%20Sample%20code%20to%20illustrate%20numerical%20stability%20issues.R)
       
       5.1.3) 動画: 講座 [Computational issues associated with multimodality. Duration: 11分](https://www.youtube.com/watch?v=SwVc8c8SDmk)
       
-      5.1.4) 学習用教材: Sample code to illustrate multimodality issues 1. Duration: 10分
+      5.1.4) 学習用教材: [Sample code to illustrate multimodality issues 1. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week5B%20Sample%20code%20to%20illustrate%20multimodality%20issues%201.R)
       
-      5.1.5) 学習用教材: Sample code to illustrate multimodality issues 2. Duration: 10分
+      5.1.5) 学習用教材: [Sample code to illustrate multimodality issues 2. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week5B%20Sample%20code%20to%20illustrate%20multimodality%20issues%202.R)
       
       5.1.6) テスト: Computational considerations for Mixture Models 3 個の問題
         
