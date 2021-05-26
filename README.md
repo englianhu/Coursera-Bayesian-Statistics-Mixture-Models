@@ -172,17 +172,17 @@
       
       5.1.5) 学習用教材: [Sample code to illustrate multimodality issues 2. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week5B%20Sample%20code%20to%20illustrate%20multimodality%20issues%202.R)
       
-      5.1.6) テスト: Computational considerations for Mixture Models 3 個の問題
-        
+      5.1.6) テスト: [Computational considerations for Mixture Models 3 個の問題](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week%205%20Test%20-%20Computational%20considerations%20for%20Mixture%20Models.R)
+      
     5.2) Determining the number of components in a Mixture Model
       
       5.2.1) 動画: 講座 [Bayesian Information Criteria (BIC). Duration: 10分](https://www.youtube.com/watch?v=OVhkrGjWNx0)
       
-      5.2.2) 練習問題: Bayesian Information Criteria (BIC) 1 個の問題
+      5.2.2) 練習問題: [Bayesian Information Criteria (BIC) 1 個の問題](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week%205%20Test%20-%20Bayesian%20Information%20Criteria%20(BIC).R)
       
       5.2.3) 動画: 講座 [Bayesian Information Criteria Example. Duration: 10分](https://www.youtube.com/watch?v=DK1PkMvmRuc)
       
-      5.2.4) 学習用教材: Sample code: Bayesian Information Criteria. Duration: 10分
+      5.2.4) 学習用教材: [Sample code: Bayesian Information Criteria. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week5C%20-%20Sample%20code%20Bayesian%20Information%20Criteria.R)
       
       5.2.5) 受講生によるテスト: BIC for zero-inflated mixtures. Duration: 1 時間
       
