@@ -262,6 +262,19 @@ Provide code to generate the density estimate on a grid consisting of 150 points
 xx  <- seq(0,7,length.out=150)
 nxx <- length(xx)
 
+## Plot EM Density Estimate
+density.EM = rep(0, nxx)
+for(s in 1:nxx){
+  for(k in 1:KK){
+    density.EM[s] = density.EM[s] + w[k]*dnorm(Eruptions[s], mu[k], sigma[k])
+  }
+}
+
+#yy = density(x)
+#plot(Eruptions, density.EM, col="red", lwd=2, type="l")
+#plot(xx, rep(density.EM, 2), col="red", lwd=2, type="l")
+#points(x, rep(0,n))
+
 ## Compute the samples of the density over a dense grid
 density.mcmc <- array(0, dim=c(rrr-burn,length(xx)))
 for(s in 1:(rrr-burn)){
