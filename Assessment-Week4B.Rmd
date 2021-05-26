@@ -137,9 +137,9 @@ rm(pkgs)
 
 The data set banknote contains six measurements (length of bill, width of left edge, width of right edge, bottom margin width, top margin width, and length of diagonal, all in mm) made on 100 genuine and 100 counterfeit old-Swiss 1000-franc bank notes:
 
-[`banknoteclassification.Rdata`]()
+[`banknoteclassification.Rdata`](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/data/banknoteclassification.RData)
 
-To load the dataset in R, use the command load("banknoteclassification.Rdata"), but first make sure that your working directory is set to the directory containing the file.  You should see four objects:
+To load the dataset in R, use the command `load("banknoteclassification.Rdata")`, but first make sure that your working directory is set to the directory containing the file.  You should see four objects:
 
 - `banknote.training` contains the characteristics for 30 notes (15 genuine and 15 counterfeit) in the training set.
 - `banknote.training.labels` contains the labels ("genuine" or "counterfeit") for the 30 notes in the training set
@@ -161,6 +161,25 @@ Reviewers will check that the code has been properly adapted, and whether the cl
 
 ### Assignment
 
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+·
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
+
+
 ### Marking
 
 
@@ -172,8 +191,351 @@ Reviewers will check that the code has been properly adapted, and whether the cl
 
 #### Assignment
 
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+n = dim(banknote.training)[1]  # Size of the training set
+m = dim(banknote.test)[1]      # Size of the test set
+x = rbind(banknote.training, banknote.test)   # Create dataset of observations, first n belong to the training set, and the rest belong to the test set
+p       = dim(banknote.training)[2]              # Number of features
+KK      = 2
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+
+cc = rep(NA, n+m)
+cc[1:n] = as.numeric(banknote.training.labels)
+
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/2
+
+# Number of iteration of the sampler
+rrr = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, (n+m)))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      #Compute the log of the weights
+      v[k] = log(w[k]) + mvtnorm::dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    if (i>n) cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:(n+m)){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + mvtnorm::dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + mvtnorm::dmvnorm(mu[k,], dd, DD, log=TRUE)
+    logpost[s] = logpost[s] + log(diwish(Sigma[k,,], nu, SS))
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+0
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+3
+```
 
 #### Marking
+
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -181,8 +543,266 @@ Reviewers will check that the code has been properly adapted, and whether the cl
 
 #### Assignment
 
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
 
 #### Marking
+
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -190,9 +810,2135 @@ Reviewers will check that the code has been properly adapted, and whether the cl
 
 #### Assignment
 
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
 
 #### Marking
 
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 4th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
+
+#### Marking
+
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 5th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
+
+#### Marking
+
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 6th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
+
+#### Marking
+
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 7th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
+
+#### Marking
+
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 8th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
+
+#### Marking
+
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 9th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
+
+#### Marking
+
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 10th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
+
+```{r error=TRUE}
+
+```
+
+What is the classification error for the test set?
+
+```{r error=TRUE}
+
+```
+
+Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
+
+```{r error=TRUE}
+
+```
+
+#### Marking
+
+**Is the setup of the algorithm correct?**
+
+Recall that the semisupervised version of the algorithm uses all observations but treats the labels for he training set as known.  There are many ways to set this up, but one that requires minimal changes to the algorithm defines the $x$ object in the code as the combination of the observations in the training and test sets,  then defines $n$, $m$, $K$ and $p$ based on the dimensions of the original objects, and initialize the component indicators of the observations in the training set to their true (known) values:
+
+```{r error=TRUE}
+## All observations used for calculation
+x   = rbind(banknote.training,banknote.test)
+
+## Size of the training and test sets
+n   = dim(banknote.training)[1]
+m   = dim(unique(banknote.test))[1]
+
+## Number of components and dimensionality of the components
+KK  = length(unique(banknote.training.labels))
+p   = dim(banknote.training)[2]
+
+## Starting value for the indicators
+## Note that for the training set we use the true values, while for the
+## test set the values are initialized randomly
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+
+```
+
+However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for the indicators is identical to the one in the original code. The only difference is that the labels for the training set are considered known, and therefore not sampled. In practice, this means a simple change to the values over which the $for$ loop iterates:
+
+```{r error=TRUE}
+# Sample the indicators
+for(i in (n+1):(n+m)){
+  v = rep(0,KK)
+  for(k in 1:KK){
+    v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+  }
+  v = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+```
+
+Because the code never changes the values of the first $n$ entries of $cc$, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\mu_k$s correct?**
+
+Again, the sampler is identical to the one used before.  The only difficulty here is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals. In the case of the means that is easy (no change is required, as the sample size is not used explicitly).
+
+```{r error=TRUE}
+# Sample the means
+DD.st = matrix(0, nrow=p, ncol=p)
+for(k in 1:KK){
+  mk    = sum(cc==k)
+  xsumk = apply(x[cc==k,], 2, sum)
+  DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for the $\sum_k$s correct?**
+
+Again, the sampler is identical to the one used before. The only difficulty is that, because $n$ has a slightly different meaning here than in the original code (it is the size of the training set rather than the total sample size) you need to be careful to ensure the code uses all observations to compute the parameters of the full conditionals.  In this case, a change in the code **<u>is</u>** needed as the sample size is explicitly used in the code (see the upper limit of the for loop in line 3 below).
+
+```{r error=TRUE}
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+The classification is based on the probabilities that each observation is classified as "genuine" and "counterfeit". Those probabilities can be estimated using the frequencies for which each 
+```{r error=TRUE}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+A sample of the full code for this problem is provided below:
+
+```{r error=TRUE}
+#### Semisupervised classification for the banknote dataset
+rm(list=ls())
+library(mvtnorm)
+library(MCMCpack)
+
+## Load data
+load("banknoteclassification.Rdata")
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+    }
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk    = sum(cc==k)
+    xsumk = apply(x[cc==k,], 2, sum)
+    DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  for(i in 1:(n+m)){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] = logpost[s] + ddirichlet(w, aa)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+  }
+  
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
+
+
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set).
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+- 0点 No
+- 1点 Yes
+
+**Is the code used to classify observations in the test set correct?**
+
+This is a simple call to the `qda` function
+
+```{r error=TRUE}
+banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "genuine" class generated by the algorithm correct?**
+
+The value should be 0% (the algorithm perfectly classifies genuine banknotes in the test set). This is the same as the semisupervised Bayesian QDA algorithm you just implement
+
+- 0点 No
+- 1点 Yes
+
+**Is the classification error for the "counterfeit" class generated by the algorithm correct?**
+
+The value should also be 3.52% (3 errors out of 85 observations).  In this case, the function $qda$ underperforms compared with the semisupervised Bayesian QDA algorithm.
+
+- 0点 No
+- 1点 Yes
 
 <br><br>
 
