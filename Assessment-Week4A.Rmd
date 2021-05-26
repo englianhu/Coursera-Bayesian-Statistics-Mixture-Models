@@ -2251,20 +2251,122 @@ points(x, rep(0,n))
 Provide an MCMC algorithm to fit the two-component, location-and-scale mixture of Gaussians.
 
 ```{r error=TRUE}
+### Loading data and setting up global variables
 
+library(MASS)
+library(MCMCpack)
+library(invgamma)
+
+data(faithful)
+x <- faithful$waiting
+hist(x)
+
+n = dim(faithful)[1]
+
+## Priors set up using an "empirical Bayes" approach
+
+KK = 2
+aa  = 1
+eta = 1
+tau = sqrt(var(x))
+dd  = 2
+qq  = var(x)/KK
+
+## Initialize the parameters
+w     = rep(1,KK)/KK
+mu    = rnorm(KK, mean(x), sd(x))
+sigma = rinvgamma(KK, dd, qq)
+cc    = sample(1:KK, n, replace=T, prob=w)
+
+## Number of iterations of the sampler
+rrr   = 12000
+burn  = 2000
+
+## Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK))
+sigma.out = array(0, dim=c(rrr, KK))
+logpost   = rep(0, rrr)
+
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:n){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dnorm(x[i], mu[k], sigma[k], log=TRUE)  #Compute the log of the weights
+                  }
+      v = exp(v - max(v))/sum(exp(v - max(v)))
+                  
+      cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+                }
+  
+  # Sample the weights
+  w[1] = rbeta(1, sum(cc == 1),sum(cc == 2) )
+  w[2] = 1 - w[1] 
+  
+  # Sample the means
+  for(k in 1:KK){
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    tau2.hat = 1/(nk/sigma^2 + 1/tau^2)
+    mu.hat  = tau2.hat*(xsumk/sigma^2 + eta/tau^2)
+    mu[k]   = rnorm(1, mu.hat, sqrt(tau2.hat))
+  }
+
+  # Sample the variances
+  for(k in 1:KK){
+    nk    = sum(cc==k)
+    dd.star = dd + nk/2
+    qq.star = qq + sum((x[cc==k] - mu[k])^2)/2
+    sigma[k] = sqrt(1/rgamma(1, dd.star, qq.star))
+  }
+  # Store samples
+  cc.out[s,]   = cc
+  w.out[s,]    = w
+  mu.out[s,]   = mu
+  sigma.out[s,] = sigma
+  for(i in 1:n){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + dnorm(x[i], mu[cc[i]], sigma[cc[i]], log=TRUE)
+  }
+  
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dnorm(mu[k], eta, tau, log=TRUE)
+    logpost[s] = logpost[s] + dgamma(1/sigma[k]^2, dd, qq, log=TRUE) - 4*log(sigma[k])
+    logpost[s] = logpost[s] + dbeta(w[k], aa, aa, log = TRUE)
+               }
+  
+  if(s/500==floor(s/500)){
+    print(paste("s =",s))
+  }
+}
 ```
 
 Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
 
 ```{r error=TRUE}
+colscale = c("blue", "red")
+yy = density(x)
+density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
+density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Velocity", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col=colscale[1], lwd=2)
 
+lines(yy, col=colscale[2], lty=3, lwd=2)
+points(x, runif(n, min = 0, max = .005), col=colscale[cc])
+legend(90, 0.04, c("KDE","MCMC"), col=colscale[c(2,1)], lty=c(2,1), lwd=2, bty="n")
 ```
 
 Provide the a graph of the density estimate on the interval [0,7].
 
 ```{r error=TRUE}
 
+
 ```
+
+`copy and paste doesn't work here`
 
 #### Marking
 
