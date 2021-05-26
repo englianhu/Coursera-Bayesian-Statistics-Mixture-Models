@@ -491,57 +491,41 @@ library(mvtnorm)
 library(MCMCpack)
 
 ## Load data
-load(&quot;banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+#load(&quot;banknoteclassification.Rdata&quot;)
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -594,13 +578,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -618,10 +643,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -829,57 +856,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -932,13 +942,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -956,10 +1007,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1165,57 +1218,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -1268,13 +1304,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1292,10 +1369,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1343,7 +1422,6 @@ p   = dim(banknote.training)[2]
 ## Note that for the training set we use the true values, while for the
 ## test set the values are initialized randomly
 cc  = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;w&#39; not found</code></pre>
 <p>However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.</p>
 <ul>
 <li>0点 No</li>
@@ -1360,7 +1438,6 @@ for(i in (n+1):(n+m)){
   v = exp(v - max(v))/sum(exp(v - max(v)))
   cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;w&#39; not found</code></pre>
 <p>Because the code never changes the values of the first <span class="math inline">\(n\)</span> entries of <span class="math inline">\(cc\)</span>, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.</p>
 <ul>
 <li>0点 No</li>
@@ -1377,7 +1454,6 @@ for(k in 1:KK){
   dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
   mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1388,12 +1464,10 @@ for(k in 1:KK){
 xcensumk = array(0, dim=c(KK,p,p))
 for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
   xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
-}</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
-<pre class="r hover01"><code>for(k in 1:KK){
+}
+for(k in 1:KK){
   Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
 }</code></pre>
-<pre class="hover03"><code>## Error in solve(S): object &#39;SS&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1404,7 +1478,6 @@ for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the fi
 for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc.out&#39; not found</code></pre>
 <p>A sample of the full code for this problem is provided below:</p>
 <pre class="r hover01"><code>#### Semisupervised classification for the banknote dataset
 rm(list=ls())
@@ -1413,57 +1486,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -1516,13 +1572,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1540,10 +1637,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1591,7 +1690,6 @@ p   = dim(banknote.training)[2]
 ## Note that for the training set we use the true values, while for the
 ## test set the values are initialized randomly
 cc  = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;w&#39; not found</code></pre>
 <p>However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.</p>
 <ul>
 <li>0点 No</li>
@@ -1608,7 +1706,6 @@ for(i in (n+1):(n+m)){
   v = exp(v - max(v))/sum(exp(v - max(v)))
   cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;w&#39; not found</code></pre>
 <p>Because the code never changes the values of the first <span class="math inline">\(n\)</span> entries of <span class="math inline">\(cc\)</span>, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.</p>
 <ul>
 <li>0点 No</li>
@@ -1625,7 +1722,6 @@ for(k in 1:KK){
   dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
   mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1636,12 +1732,10 @@ for(k in 1:KK){
 xcensumk = array(0, dim=c(KK,p,p))
 for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
   xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
-}</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
-<pre class="r hover01"><code>for(k in 1:KK){
+}
+for(k in 1:KK){
   Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
 }</code></pre>
-<pre class="hover03"><code>## Error in solve(S): object &#39;SS&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1652,7 +1746,6 @@ for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the fi
 for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc.out&#39; not found</code></pre>
 <p>A sample of the full code for this problem is provided below:</p>
 <pre class="r hover01"><code>#### Semisupervised classification for the banknote dataset
 rm(list=ls())
@@ -1661,57 +1754,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -1764,13 +1840,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1788,10 +1905,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1839,7 +1958,6 @@ p   = dim(banknote.training)[2]
 ## Note that for the training set we use the true values, while for the
 ## test set the values are initialized randomly
 cc  = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;w&#39; not found</code></pre>
 <p>However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.</p>
 <ul>
 <li>0点 No</li>
@@ -1856,7 +1974,6 @@ for(i in (n+1):(n+m)){
   v = exp(v - max(v))/sum(exp(v - max(v)))
   cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;w&#39; not found</code></pre>
 <p>Because the code never changes the values of the first <span class="math inline">\(n\)</span> entries of <span class="math inline">\(cc\)</span>, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.</p>
 <ul>
 <li>0点 No</li>
@@ -1873,7 +1990,6 @@ for(k in 1:KK){
   dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
   mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1884,12 +2000,10 @@ for(k in 1:KK){
 xcensumk = array(0, dim=c(KK,p,p))
 for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
   xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
-}</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
-<pre class="r hover01"><code>for(k in 1:KK){
+}
+for(k in 1:KK){
   Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
 }</code></pre>
-<pre class="hover03"><code>## Error in solve(S): object &#39;SS&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1900,7 +2014,6 @@ for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the fi
 for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc.out&#39; not found</code></pre>
 <p>A sample of the full code for this problem is provided below:</p>
 <pre class="r hover01"><code>#### Semisupervised classification for the banknote dataset
 rm(list=ls())
@@ -1909,57 +2022,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -2012,13 +2108,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2036,10 +2173,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2087,7 +2226,6 @@ p   = dim(banknote.training)[2]
 ## Note that for the training set we use the true values, while for the
 ## test set the values are initialized randomly
 cc  = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;w&#39; not found</code></pre>
 <p>However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.</p>
 <ul>
 <li>0点 No</li>
@@ -2104,7 +2242,6 @@ for(i in (n+1):(n+m)){
   v = exp(v - max(v))/sum(exp(v - max(v)))
   cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;w&#39; not found</code></pre>
 <p>Because the code never changes the values of the first <span class="math inline">\(n\)</span> entries of <span class="math inline">\(cc\)</span>, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.</p>
 <ul>
 <li>0点 No</li>
@@ -2121,7 +2258,6 @@ for(k in 1:KK){
   dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
   mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2132,12 +2268,10 @@ for(k in 1:KK){
 xcensumk = array(0, dim=c(KK,p,p))
 for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
   xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
-}</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
-<pre class="r hover01"><code>for(k in 1:KK){
+}
+for(k in 1:KK){
   Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
 }</code></pre>
-<pre class="hover03"><code>## Error in solve(S): object &#39;SS&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2148,7 +2282,6 @@ for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the fi
 for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc.out&#39; not found</code></pre>
 <p>A sample of the full code for this problem is provided below:</p>
 <pre class="r hover01"><code>#### Semisupervised classification for the banknote dataset
 rm(list=ls())
@@ -2157,57 +2290,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -2260,13 +2376,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2284,10 +2441,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2335,7 +2494,6 @@ p   = dim(banknote.training)[2]
 ## Note that for the training set we use the true values, while for the
 ## test set the values are initialized randomly
 cc  = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;w&#39; not found</code></pre>
 <p>However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.</p>
 <ul>
 <li>0点 No</li>
@@ -2352,7 +2510,6 @@ for(i in (n+1):(n+m)){
   v = exp(v - max(v))/sum(exp(v - max(v)))
   cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;w&#39; not found</code></pre>
 <p>Because the code never changes the values of the first <span class="math inline">\(n\)</span> entries of <span class="math inline">\(cc\)</span>, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.</p>
 <ul>
 <li>0点 No</li>
@@ -2369,7 +2526,6 @@ for(k in 1:KK){
   dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
   mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2380,12 +2536,10 @@ for(k in 1:KK){
 xcensumk = array(0, dim=c(KK,p,p))
 for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
   xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
-}</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
-<pre class="r hover01"><code>for(k in 1:KK){
+}
+for(k in 1:KK){
   Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
 }</code></pre>
-<pre class="hover03"><code>## Error in solve(S): object &#39;SS&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2396,7 +2550,6 @@ for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the fi
 for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc.out&#39; not found</code></pre>
 <p>A sample of the full code for this problem is provided below:</p>
 <pre class="r hover01"><code>#### Semisupervised classification for the banknote dataset
 rm(list=ls())
@@ -2405,57 +2558,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -2508,13 +2644,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2532,10 +2709,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2583,7 +2762,6 @@ p   = dim(banknote.training)[2]
 ## Note that for the training set we use the true values, while for the
 ## test set the values are initialized randomly
 cc  = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;w&#39; not found</code></pre>
 <p>However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.</p>
 <ul>
 <li>0点 No</li>
@@ -2600,7 +2778,6 @@ for(i in (n+1):(n+m)){
   v = exp(v - max(v))/sum(exp(v - max(v)))
   cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;w&#39; not found</code></pre>
 <p>Because the code never changes the values of the first <span class="math inline">\(n\)</span> entries of <span class="math inline">\(cc\)</span>, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.</p>
 <ul>
 <li>0点 No</li>
@@ -2617,7 +2794,6 @@ for(k in 1:KK){
   dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
   mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2628,12 +2804,10 @@ for(k in 1:KK){
 xcensumk = array(0, dim=c(KK,p,p))
 for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
   xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
-}</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
-<pre class="r hover01"><code>for(k in 1:KK){
+}
+for(k in 1:KK){
   Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
 }</code></pre>
-<pre class="hover03"><code>## Error in solve(S): object &#39;SS&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2644,7 +2818,6 @@ for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the fi
 for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc.out&#39; not found</code></pre>
 <p>A sample of the full code for this problem is provided below:</p>
 <pre class="r hover01"><code>#### Semisupervised classification for the banknote dataset
 rm(list=ls())
@@ -2653,57 +2826,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -2756,13 +2912,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2780,10 +2977,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2831,7 +3030,6 @@ p   = dim(banknote.training)[2]
 ## Note that for the training set we use the true values, while for the
 ## test set the values are initialized randomly
 cc  = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;w&#39; not found</code></pre>
 <p>However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.</p>
 <ul>
 <li>0点 No</li>
@@ -2848,7 +3046,6 @@ for(i in (n+1):(n+m)){
   v = exp(v - max(v))/sum(exp(v - max(v)))
   cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;w&#39; not found</code></pre>
 <p>Because the code never changes the values of the first <span class="math inline">\(n\)</span> entries of <span class="math inline">\(cc\)</span>, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.</p>
 <ul>
 <li>0点 No</li>
@@ -2865,7 +3062,6 @@ for(k in 1:KK){
   dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
   mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2876,12 +3072,10 @@ for(k in 1:KK){
 xcensumk = array(0, dim=c(KK,p,p))
 for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
   xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
-}</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
-<pre class="r hover01"><code>for(k in 1:KK){
+}
+for(k in 1:KK){
   Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
 }</code></pre>
-<pre class="hover03"><code>## Error in solve(S): object &#39;SS&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -2892,7 +3086,6 @@ for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the fi
 for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc.out&#39; not found</code></pre>
 <p>A sample of the full code for this problem is provided below:</p>
 <pre class="r hover01"><code>#### Semisupervised classification for the banknote dataset
 rm(list=ls())
@@ -2901,57 +3094,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -3004,13 +3180,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -3028,10 +3245,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -3079,7 +3298,6 @@ p   = dim(banknote.training)[2]
 ## Note that for the training set we use the true values, while for the
 ## test set the values are initialized randomly
 cc  = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in sample.int(length(x), size, replace, prob): object &#39;w&#39; not found</code></pre>
 <p>However, be open minded in how you evaluate this item. The most important thing is that the setup is consistent with the rest of the implementation, and that it enables the use of both the training and test sets for the estimation of the means and variance of the components.</p>
 <ul>
 <li>0点 No</li>
@@ -3096,7 +3314,6 @@ for(i in (n+1):(n+m)){
   v = exp(v - max(v))/sum(exp(v - max(v)))
   cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;w&#39; not found</code></pre>
 <p>Because the code never changes the values of the first <span class="math inline">\(n\)</span> entries of <span class="math inline">\(cc\)</span>, it is important that the setup of the algorithm (see previous prompt in the rubric) initializes them to the true known values.</p>
 <ul>
 <li>0点 No</li>
@@ -3113,7 +3330,6 @@ for(k in 1:KK){
   dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
   mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -3124,12 +3340,10 @@ for(k in 1:KK){
 xcensumk = array(0, dim=c(KK,p,p))
 for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the first n
   xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
-}</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc&#39; not found</code></pre>
-<pre class="r hover01"><code>for(k in 1:KK){
+}
+for(k in 1:KK){
   Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
 }</code></pre>
-<pre class="hover03"><code>## Error in solve(S): object &#39;SS&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -3140,7 +3354,6 @@ for(i in 1:(n+m)){  ## Need to loop over all (n+m) observations, not just the fi
 for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;cc.out&#39; not found</code></pre>
 <p>A sample of the full code for this problem is provided below:</p>
 <pre class="r hover01"><code>#### Semisupervised classification for the banknote dataset
 rm(list=ls())
@@ -3149,57 +3362,40 @@ library(MCMCpack)
 
 ## Load data
 #load(&quot;banknoteclassification.Rdata&quot;)
-load(&quot;data/banknoteclassification.Rdata&quot;)</code></pre>
-<pre class="hover03"><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="r hover01"><code>x = rbind(banknote.training,banknote.test)</code></pre>
-<pre class="hover03"><code>## Error in rbind(banknote.training, banknote.test): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>## Generate data from a mixture with 3 components
-KK      = length(unique(banknote.training.labels))</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.training.labels): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code>p       = dim(banknote.training)[2]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>n       = dim(banknote.training)[1]</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>m       = dim(unique(banknote.test))[1]</code></pre>
-<pre class="hover03"><code>## Error in unique(banknote.test): object &#39;banknote.test&#39; not found</code></pre>
-<pre class="r hover01"><code>## Initialize the parameters
-w          = rep(1,KK)/KK  #Assign equal weight to each component to start with</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[1,,] = var(x)/KK  </code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma[2,,] = var(x)/KK</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;banknote.training.labels&#39; not found</code></pre>
-<pre class="r hover01"><code># Priors
-aa = rep(1, KK)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>dd = apply(x,2,mean)</code></pre>
-<pre class="hover03"><code>## Error in apply(x, 2, mean): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>DD = 10*var(x)</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>nu = p+1</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;p&#39; not found</code></pre>
-<pre class="r hover01"><code>SS = var(x)/3</code></pre>
-<pre class="hover03"><code>## Error in is.data.frame(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code># Number of iteration of the sampler
+load(&quot;data/banknoteclassification.RData&quot;)
+x = rbind(banknote.training,banknote.test)
+
+## Generate data from a mixture with 3 components
+KK      = length(unique(banknote.training.labels))
+p       = dim(banknote.training)[2]
+n       = dim(banknote.training)[1]
+m       = dim(unique(banknote.test))[1]
+
+## Initialize the parameters
+w          = rep(1,KK)/KK  #Assign equal weight to each component to start with
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))   #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0, dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK  
+Sigma[2,,] = var(x)/KK
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
 rrr  = 11000
 burn = 1000
 
 # Storing the samples
-cc.out    = array(0, dim=c(rrr, n+m))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, n + m)): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>w.out     = array(0, dim=c(rrr, KK))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>mu.out    = array(0, dim=c(rrr, KK, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>Sigma.out = array(0, dim=c(rrr, KK, p, p))</code></pre>
-<pre class="hover03"><code>## Error in array(0, dim = c(rrr, KK, p, p)): object &#39;KK&#39; not found</code></pre>
-<pre class="r hover01"><code>logpost   = rep(0, rrr)
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
 for(s in 1:rrr){
   # Sample the indicators
@@ -3252,13 +3448,54 @@ for(s in 1:rrr){
     print(paste(&quot;s = &quot;, s))
   }
 }</code></pre>
-<pre class="hover03"><code>## Error in n + 1: non-numeric argument to binary operator</code></pre>
-<pre class="r hover01"><code>probgenuine = rep(NA, m)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
-<pre class="r hover01"><code>for(i in 1:m){
+<pre class="hover02"><code>## [1] &quot;s =  250&quot;
+## [1] &quot;s =  500&quot;
+## [1] &quot;s =  750&quot;
+## [1] &quot;s =  1000&quot;
+## [1] &quot;s =  1250&quot;
+## [1] &quot;s =  1500&quot;
+## [1] &quot;s =  1750&quot;
+## [1] &quot;s =  2000&quot;
+## [1] &quot;s =  2250&quot;
+## [1] &quot;s =  2500&quot;
+## [1] &quot;s =  2750&quot;
+## [1] &quot;s =  3000&quot;
+## [1] &quot;s =  3250&quot;
+## [1] &quot;s =  3500&quot;
+## [1] &quot;s =  3750&quot;
+## [1] &quot;s =  4000&quot;
+## [1] &quot;s =  4250&quot;
+## [1] &quot;s =  4500&quot;
+## [1] &quot;s =  4750&quot;
+## [1] &quot;s =  5000&quot;
+## [1] &quot;s =  5250&quot;
+## [1] &quot;s =  5500&quot;
+## [1] &quot;s =  5750&quot;
+## [1] &quot;s =  6000&quot;
+## [1] &quot;s =  6250&quot;
+## [1] &quot;s =  6500&quot;
+## [1] &quot;s =  6750&quot;
+## [1] &quot;s =  7000&quot;
+## [1] &quot;s =  7250&quot;
+## [1] &quot;s =  7500&quot;
+## [1] &quot;s =  7750&quot;
+## [1] &quot;s =  8000&quot;
+## [1] &quot;s =  8250&quot;
+## [1] &quot;s =  8500&quot;
+## [1] &quot;s =  8750&quot;
+## [1] &quot;s =  9000&quot;
+## [1] &quot;s =  9250&quot;
+## [1] &quot;s =  9500&quot;
+## [1] &quot;s =  9750&quot;
+## [1] &quot;s =  10000&quot;
+## [1] &quot;s =  10250&quot;
+## [1] &quot;s =  10500&quot;
+## [1] &quot;s =  10750&quot;
+## [1] &quot;s =  11000&quot;</code></pre>
+<pre class="r hover01"><code>probgenuine = rep(NA, m)
+for(i in 1:m){
   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
 }</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;m&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -3276,10 +3513,12 @@ for(s in 1:rrr){
 </ul>
 <p><strong>Is the code used to classify observations in the test set correct?</strong></p>
 <p>This is a simple call to the <code>qda</code> function</p>
-<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)</code></pre>
-<pre class="hover03"><code>## Error in qda(x = banknote.training, grouping = banknote.training.labels): object &#39;banknote.training&#39; not found</code></pre>
-<pre class="r hover01"><code>predict(banknote.qda, banknote.test)$class</code></pre>
-<pre class="hover03"><code>## Error in predict(banknote.qda, banknote.test): object &#39;banknote.qda&#39; not found</code></pre>
+<pre class="r hover01"><code>banknote.qda = qda(x=banknote.training, grouping=banknote.training.labels)
+predict(banknote.qda, banknote.test)$class</code></pre>
+<pre class="hover02"><code>##   [1] genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine     genuine    
+##  [83] genuine     genuine     genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit genuine     counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## [165] counterfeit counterfeit counterfeit counterfeit counterfeit counterfeit
+## Levels: counterfeit genuine</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -3504,7 +3743,7 @@ date
 Current time
 </td>
 <td style="text-align:left;color: white !important;background-color: grey !important;font-weight: bold;color: yellow !important;background-color: #D7261E !important;">
-2021-05-26 19:19:37 JST🗾
+2021-05-26 22:31:00 JST🗾
 </td>
 </tr>
 </tbody>
