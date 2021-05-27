@@ -198,7 +198,7 @@
       
       5.2.11) 動画: 講座 [Example: Bayesian inference for the partition structure. Duration: 15分](https://www.youtube.com/watch?v=IxdRHGs1EKk)
       
-      5.2.12) 学習用教材: Sample code for estimating the number of components and the partition structure in Bayesian models. Duration: 10分
+      5.2.12) 学習用教材: [Sample code for estimating the number of components and the partition structure in Bayesian models. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week%205%20-%20Sample%20code%20for%20estimating%20the%20number%20of%20components%20and%20the%20partition%20structure%20in%20Bayesian%20models.R)
       
       5.2.13) 練習問題: Estimating the partition structure in Bayesian models 4 個の問題
 

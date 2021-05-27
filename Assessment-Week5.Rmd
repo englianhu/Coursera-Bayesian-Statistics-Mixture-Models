@@ -129,18 +129,27 @@ rm(pkgs)
 
 # 受講生によるテスト：BIC for zero-inflated mixtures
 
+**課題をすぐに提出してください**
 
-
+課題の提出期限は、`6月21日 15:59 JST`ですが、可能であれば1日か2日早く提出してください。 早い段階で提出すると、他の受講生のレビューを時間内に得る可能性が高くなります。
 
 ## 説明
 
+In week 2, you considered the problem faced by a biologist is interest in characterizing the number of eggs laid by a particular bird species. The data consisted of a sample $n=300$ nests on a site in Southern California, which were contained in the file `nestsize.csv`:
 
+[`nestsize.csv`](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/data/nestsize.csv)
+
+At the time we visually compared the empirical distribution of the data against a Poison distribution whose parameter has been set to its maximum likelihood estimator as a justification for using a mixture model of the form $f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$ where $\delta_0(x)$ represents the degenerate distribution placing all of its mass at zero.
+
+![](figure/zeroinflated2.png)
+
+You are asked to build on the EM algorithm you constructed in week 2 to compute the BIC associated with this model and contrast it against the BIC for the simpler Poisson model. 
 
 <br><br>
 
 ### Review criteria
 
-
+You will be asked to provide (1) code to compute the BIC for the zero-inflated mixture (which requires an EM algorithm),(2) code to compute the BIC for the Poisson model (which does not require an EM algorithm),(3) provide numerical results for the BIC for each of the two models, and (4) interpret the results in terms of the original problem.
 
 <br><br>
 
