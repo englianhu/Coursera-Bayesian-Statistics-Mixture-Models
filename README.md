@@ -184,7 +184,7 @@
       
       5.2.4) 学習用教材: [Sample code: Bayesian Information Criteria. Duration: 10分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week5C%20-%20Sample%20code%20Bayesian%20Information%20Criteria.R)
       
-      5.2.5) 受講生によるテスト: [BIC for zero-inflated mixtures. Duration: 1 時間](https://rpubs.com/englianhu/774865)
+      5.2.5) 受講生によるテスト: [BIC for zero-inflated mixtures. Duration: 1 時間](https://rpubs.com/englianhu/774879)
       
       5.2.6) 他の受講生の課題を確認: BIC for zero-inflated mixtures
       
