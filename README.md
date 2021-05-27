@@ -132,7 +132,7 @@
       
       4.1.4) 受講生によるテスト: The EM algorithm and density estimation. Duration: 50分
       
-      4.1.5) 受講生によるテスト: MCMC algorithms and density estimation. Duration: 50分
+      4.1.5) 受講生によるテスト: [MCMC algorithms and density estimation. Duration: 50分](https://rpubs.com/englianhu/772054)
       
       4.1.6) 他の受講生の課題を確認: MCMC algorithms and density estimation
         
@@ -154,7 +154,7 @@
       
       4.3.4) 学習用教材: [Sample EM algorithm for classification problems. Duration: 10 分](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week4B%20Sample%20EM%20algorithm%20for%20classification%20problems.R)
       
-      4.3.5) 受講生によるテスト: [Classification. Duration: 45分](https://rpubs.com/englianhu/772054)
+      4.3.5) 受講生によるテスト: [Classification. Duration: 45分](https://rpubs.com/englianhu/774725)
       
       4.3.6) 他の受講生の課題を確認: Classification
 
@@ -207,9 +207,9 @@
 
 **Coursera Verified Certificate:**
 
-![Coursera - Bayesian Statistics: Mixture Models]()
+`![Coursera - Bayesian Statistics: Mixture Models](figure/)`
 
-- [Bayesian Statistics: Mixture Models]()
+- `[Bayesian Statistics: Mixture Models]()`
 - [University of California](https://www.universityofcalifornia.edu)
 - [Coursera Course Certificates](https://www.linkedin.com/company/coursera-verified)
 
