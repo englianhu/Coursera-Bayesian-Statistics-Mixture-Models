@@ -386,9 +386,61 @@ rm(pkgs)</code></pre>
 <h2 number="2.2"><span class="header-section-number">2.2</span> 自分の提出物</h2>
 <div id="assignment" class="section level3" number="2.2.1">
 <h3 number="2.2.1"><span class="header-section-number">2.2.1</span> Assignment</h3>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking" class="section level3" number="2.2.2">
 <h3 number="2.2.2"><span class="header-section-number">2.2.2</span> Marking</h3>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br><br></p>
 </div>
 </div>
@@ -398,9 +450,61 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.1"><span class="header-section-number">2.3.1</span> 1st Peer</h3>
 <div id="assignment-1" class="section level4" number="2.3.1.1">
 <h4 number="2.3.1.1"><span class="header-section-number">2.3.1.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-1" class="section level4" number="2.3.1.2">
 <h4 number="2.3.1.2"><span class="header-section-number">2.3.1.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -408,9 +512,61 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.2"><span class="header-section-number">2.3.2</span> 2nd Peer</h3>
 <div id="assignment-2" class="section level4" number="2.3.2.1">
 <h4 number="2.3.2.1"><span class="header-section-number">2.3.2.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-2" class="section level4" number="2.3.2.2">
 <h4 number="2.3.2.2"><span class="header-section-number">2.3.2.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -418,9 +574,61 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.3"><span class="header-section-number">2.3.3</span> 3rd Peer</h3>
 <div id="assignment-3" class="section level4" number="2.3.3.1">
 <h4 number="2.3.3.1"><span class="header-section-number">2.3.3.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-3" class="section level4" number="2.3.3.2">
 <h4 number="2.3.3.2"><span class="header-section-number">2.3.3.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -428,9 +636,61 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.4"><span class="header-section-number">2.3.4</span> 4th Peer</h3>
 <div id="assignment-4" class="section level4" number="2.3.4.1">
 <h4 number="2.3.4.1"><span class="header-section-number">2.3.4.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-4" class="section level4" number="2.3.4.2">
 <h4 number="2.3.4.2"><span class="header-section-number">2.3.4.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -438,9 +698,61 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.5"><span class="header-section-number">2.3.5</span> 5th Peer</h3>
 <div id="assignment-5" class="section level4" number="2.3.5.1">
 <h4 number="2.3.5.1"><span class="header-section-number">2.3.5.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-5" class="section level4" number="2.3.5.2">
 <h4 number="2.3.5.2"><span class="header-section-number">2.3.5.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -448,18 +760,123 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.6"><span class="header-section-number">2.3.6</span> 6th Peer</h3>
 <div id="assignment-6" class="section level4" number="2.3.6.1">
 <h4 number="2.3.6.1"><span class="header-section-number">2.3.6.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-6" class="section level4" number="2.3.6.2">
 <h4 number="2.3.6.2"><span class="header-section-number">2.3.6.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><br></p>
 </div>
 </div>
 <div id="th-peer-3" class="section level3" number="2.3.7">
 <h3 number="2.3.7"><span class="header-section-number">2.3.7</span> 7th Peer</h3>
 <div id="assignment-7" class="section level4" number="2.3.7.1">
 <h4 number="2.3.7.1"><span class="header-section-number">2.3.7.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-7" class="section level4" number="2.3.7.2">
 <h4 number="2.3.7.2"><span class="header-section-number">2.3.7.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -467,18 +884,123 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.8"><span class="header-section-number">2.3.8</span> 8th Peer</h3>
 <div id="assignment-8" class="section level4" number="2.3.8.1">
 <h4 number="2.3.8.1"><span class="header-section-number">2.3.8.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-8" class="section level4" number="2.3.8.2">
 <h4 number="2.3.8.2"><span class="header-section-number">2.3.8.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><br></p>
 </div>
 </div>
 <div id="th-peer-5" class="section level3" number="2.3.9">
 <h3 number="2.3.9"><span class="header-section-number">2.3.9</span> 9th Peer</h3>
 <div id="assignment-9" class="section level4" number="2.3.9.1">
 <h4 number="2.3.9.1"><span class="header-section-number">2.3.9.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-9" class="section level4" number="2.3.9.2">
 <h4 number="2.3.9.2"><span class="header-section-number">2.3.9.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br></p>
 </div>
 </div>
@@ -486,9 +1008,61 @@ rm(pkgs)</code></pre>
 <h3 number="2.3.10"><span class="header-section-number">2.3.10</span> 10th Peer</h3>
 <div id="assignment-10" class="section level4" number="2.3.10.1">
 <h4 number="2.3.10.1"><span class="header-section-number">2.3.10.1</span> Assignment</h4>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>(Note that you can think about this model as a mixture with a single component).</p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Derive the formula for the BIC associated with the the Poisson model</p>
+<p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
+<p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
 </div>
 <div id="marking-10" class="section level4" number="2.3.10.2">
 <h4 number="2.3.10.2"><span class="header-section-number">2.3.10.2</span> Marking</h4>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>This model has only 1 parameter (the rate <span class="math inline">\(\lambda\)</span>).</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
+<p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
+<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>n = length(x)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?</strong></p>
+<p>The likelihood function in this case is</p>
+<p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
+<p>The following R code performs the evaluation:</p>
+<pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
+<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
+<pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
+<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
+<p>When grading, please remember that there are many ways to do the same thing in R</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
+<pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</strong></p>
+<p>Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model. This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
 <p><br><br></p>
 </div>
 </div>
@@ -697,7 +1271,7 @@ date
 Current time
 </td>
 <td style="text-align:left;color: white !important;background-color: grey !important;font-weight: bold;color: yellow !important;background-color: #D7261E !important;">
-2021-05-28 01:46:27 JST🗾
+2021-05-28 02:16:58 JST🗾
 </td>
 </tr>
 </tbody>

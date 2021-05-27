@@ -157,15 +157,95 @@ You will be asked to provide (1) code to compute the BIC for the zero-inflated m
 
 ### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 ### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
 
 <br><br>
 
@@ -175,15 +255,95 @@ You will be asked to provide (1) code to compute the BIC for the zero-inflated m
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -191,15 +351,95 @@ You will be asked to provide (1) code to compute the BIC for the zero-inflated m
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -207,15 +447,95 @@ You will be asked to provide (1) code to compute the BIC for the zero-inflated m
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -223,15 +543,95 @@ You will be asked to provide (1) code to compute the BIC for the zero-inflated m
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -239,15 +639,95 @@ You will be asked to provide (1) code to compute the BIC for the zero-inflated m
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -255,29 +735,191 @@ You will be asked to provide (1) code to compute the BIC for the zero-inflated m
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
+
+<br>
 
 ### 7th Peer
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -285,29 +927,191 @@ You will be asked to provide (1) code to compute the BIC for the zero-inflated m
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
+
+<br>
 
 ### 9th Peer
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
 
 <br>
 
@@ -315,15 +1119,95 @@ You will be asked to provide (1) code to compute the BIC for the zero-inflated m
 
 #### Assignment
 
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+(Note that you can think about this model as a mixture with a single component).
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Derive the formula for the BIC associated with the the Poisson model
+
+$$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
+
+Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
+
+```{r error=TRUE}
+
+```
+
+Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
+
 ```{r error=TRUE}
 
 ```
 
 #### Marking
 
-```{r error=TRUE}
+**Is the number of effective parameters correct?**
 
+This model has only 1 parameter (the rate $\lambda$).
+
+- 0点 No
+- 1点 Yes
+
+**Is the MLE computed correctly for the Poisson model?**
+
+The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case $\hat{\lambda}=\bar{x}$, the average of the observations, is the MLE.
+ 
+```{r error=TRUE}
+lambdahat = mean(x)
+n = length(x)
 ```
+
+- 0点 No
+- 1点 Yes
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the Poisson model?**
+
+The likelihood function in this case is 
+
+$$-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !$$
+
+The following R code performs the evaluation:
+
+```{r error=TRUE}
+twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))
+```
+
+Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,
+
+```{r error=TRUE}
+twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))
+```
+
+When grading, please remember that there are many ways to do the same thing in R
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the dataset nestsize.csv BIC correct? **
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+
+```{r error=TRUE}
+BIC2 = twicenegloglik + 2*log(n)
+```
+
+- 0点 No
+- 1点 Yes
+
+**Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?**
+
+Yes, the BIC for the mixture model is smaller than the BIC for the simpler Poisson model.  This supports our original observation based on graphical evidence that the mixture model is more appropriate for this data than the simpler Poisson model.
+
+- 0点 No
+- 1点 Yes
 
 <br><br>
 
