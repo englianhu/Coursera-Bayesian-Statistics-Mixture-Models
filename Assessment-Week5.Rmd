@@ -166,7 +166,17 @@ $$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+x <- read.csv(file = "data/nestsize.csv", header = FALSE)$V1
+n <- length(x)               # number of samples
 
+mle = mean(x)
+bic_base = 0
+for (i in 1:n) {
+  bic_base = bic_base-2*log(dpois(x[i],mle))
+}
+bic_base = bic_base+log(n)
+
+cat(paste('mle =', mle, '\nbic_base =', bic_base))
 ```
 
 Derive the formula for the BIC associated with the the Poisson model
@@ -176,13 +186,74 @@ $$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+x <- read.csv("data/nestsize.csv", header = F)
+n <- nrow(x)
+x <- as.matrix(x)
 
+## Run the actual EM algorithm ## Initialize the parameters
+w      <- 1/2  #Assign equal weight to each component to start with
+lambda <- mean(x)   #lambda set as sample mean
+s      <- 0
+
+sw      <- FALSE
+QQ      <- -Inf
+QQ.out  <- NULL
+epsilon <- 10^(-5)
+
+while(!sw){
+  ## E step
+  v <- array(0, dim = c(n,2))
+  
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] <- w
+      v[i,2] <- (1-w)*dpois(x[i], lambda)
+      v[i,]  <- v[i,]/sum(v[i,])
+      
+    }else{
+      v[i,1] <- 0
+      v[i,2] <- 1
+    }
+  }
+  ## M step
+  # parameter
+  w <- mean(v[,1])
+  lambda <- sum(x)/sum(v[,2])
+  
+  #convergence
+  QQn <- 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn <- QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+      
+    }else{
+      QQn <- QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+   if(abs(QQn-QQ)/abs(QQn)<epsilon){
+     sw <- TRUE
+   }
+  QQ <- QQn
+  QQ.out <- c(QQ.out, QQ)
+  s <- s + 1
+  print(paste(s, QQn,w,lambda))
+}
+
+bic_mix <- 0
+for(i in 1:n) {
+  if(x[i]==0){
+    bic_mix <- -2*log(w+(1-w)*dpois(x[i],lambda))+bic_mix
+  } else {
+    bic_mix <- -2*log((1-w)*dpois(x[i],lambda))+bic_mix
+  }
+}
+bic_mix <- bic_mix+2*log(n)
 ```
 
 Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
 
 ```{r error=TRUE}
-
+cat(paste('bic_mix =', bic_mix, '\nbic_base =', bic_base))
 ```
 
 ### Marking
@@ -229,9 +300,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -264,7 +437,18 @@ $$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+rm(list = ls())
+x <- read.csv(file = "data/nestsize.csv", header = FALSE)$V1
+n <- length(x)                 # number of samples
 
+mle = mean(x)
+bic_base = 0
+for (i in 1:n) {
+  bic_base = bic_base-2*log(dpois(x[i],mle))
+}
+bic_base = bic_base+log(n)
+
+cat(paste('mle =', mle, '\nbic_base =', bic_base))
 ```
 
 Derive the formula for the BIC associated with the the Poisson model
@@ -274,13 +458,76 @@ $$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+x = read.csv("data/nestsize.csv", header = F)
+n = nrow(x)
+x = as.matrix(x)
 
+## Run the actual EM algorithm ## Initialize the parameters
+w = 1/2  #Assign equal weight to each component to start with
+lambda = mean(x)   #lambda set as sample mean
+s  = 0
+
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+while(!sw){
+  ## E step
+  v = array(0, dim = c(n,2))
+  
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = w
+      v[i,2] = (1-w)*dpois(x[i], lambda)
+      v[i,]  = v[i,]/sum(v[i,])
+      
+    }else{
+      v[i,1] = 0
+         v[i,2] = 1
+    }
+  }
+  ## M step
+  # parameter
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+  
+  #convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+      
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+   if(abs(QQn-QQ)/abs(QQn)<epsilon){
+     sw=TRUE
+   }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn,w,lambda))
+}
+
+bic_mix = 0
+for(i in 1:n) {
+  if(x[i]==0){
+    bic_mix = -2*log(w+(1-w)*dpois(x[i],lambda))+bic_mix
+  } else {
+    bic_mix = -2*log((1-w)*dpois(x[i],lambda))+bic_mix
+  }
+}
+bic_mix = bic_mix+2*log(n)
 ```
 
 Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
 
 ```{r error=TRUE}
-
+# Yes the bic for mixture model is 1056.845 compared to bic of 1272.175 for the base model.
+# Despite the mixture model having more parameters the bic is much lower suggesting a better fit.
+cat(paste('bic_mix =', bic_mix, '\nbic_base =', bic_base))
 ```
 
 #### Marking
@@ -327,9 +574,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -360,7 +709,19 @@ $$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+rm(list = ls())
+num_eggs <- read.csv(file = "data/nestsize.csv", header = FALSE)$V1
+n <- length(x)                 # number of samples
 
+#For Poisson:
+lambda_p  = sum(num_eggs)/n
+QQp = 0
+for(i in 1:n){
+  QQp = QQp+ ((dpois(num_eggs[i], lambda=lambda_p, log=TRUE)))
+}
+
+BICPoisson = -2*QQp + log(n)
+print(paste("Poisson", BICPoisson))
 ```
 
 Derive the formula for the BIC associated with the the Poisson model
@@ -370,13 +731,76 @@ $$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+dat = read.csv(file = "data/nestsize.csv", header = FALSE)
+num_eggs = dat$V1
 
+## Run the actual EM algorithm
+## Initialize the parameters
+
+KK         = 2                               # number of components
+n = length(num_eggs)                         # number of samples
+v = array(0, dim=c(n,KK))
+v[,1] = 0.5*(num_eggs==0)                    #Assign half weight for nests with 0 eggs to first component
+v[,2] = 1-v[,1]                              #Assign all of the remaining nests to the second component
+w     = mean(v[,1])                          #weight of the first component
+lambda  = sum(num_eggs*v[,2])/sum(v[,2])     #parameter (mean) of the second component
+
+
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+##Checking convergence of the algorithm
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,KK))
+  v[,1] = (w/(w+(1-w)*exp(-lambda)))*(num_eggs==0)     #first component is non-zero only for the zero egg nestsc
+  v[,2] = 1-v[,1]                                      #second component gets rest of the weights
+  
+  ## M step
+  # Weight
+  w = mean(v[,1])
+  # lambda for the second component
+  lambda = sum(v[,2]*num_eggs)/sum(v[,2])
+  print(paste(s, w, lambda))
+  
+  ##Check convergence
+  QQn = log(w)*sum(v[,1]) #First component 
+  for(i in 1:n){
+    QQn = QQn + (v[i,2]*(log(1-w)+dpois(num_eggs[i], lambda=lambda, log=TRUE)))
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+  
+}
+
+QQ=0
+for(i in 1:n){
+  if (num_eggs[i]==0) {
+    QQ = QQ + log(w+(1-w)*dpois(num_eggs[i], lambda=lambda))
+  } else {
+    QQ = QQ + log((1-w)*dpois(num_eggs[i], lambda=lambda))
+  }
+}
+
+BICzeroInflated = -2*QQ + 2*log(n)   #2 parameters
+print(paste("Zero Inflated BIC=",BICzeroInflated))
 ```
 
 Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
 
 ```{r error=TRUE}
-
+#Poisson BIC= 1272.1748691699,   Zero Inflated BIC= 1056.84484814988.  Yes, the mixture model is better.
+cat(paste(
+  "Poisson =", BICPoisson, 
+  "\nZero Inflated BIC =",BICzeroInflated
+))
 ```
 
 #### Marking
@@ -423,9 +847,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -456,7 +982,22 @@ $$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+rm(list = ls())
+nestsize <- read.csv('data/nestsize.csv', header=FALSE)
+x  = nestsize$V1
+n = nrow(nestsize)
 
+BIC = -2*sum(dpois(x, mean(x), log = TRUE)) + 2*log(n)
+#BIC = 1272.713
+paste('BIC =', BIC)
+
+nestsize <- read.csv('data/nestsize.csv')
+x  = nestsize$X4
+n = nrow(nestsize)
+
+BIC = -2*sum(dpois(x, mean(x), log = TRUE)) + 2*log(n)
+#BIC = 1272.713
+paste('BIC =', BIC)
 ```
 
 Derive the formula for the BIC associated with the the Poisson model
@@ -466,13 +1007,54 @@ $$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+## Run the actual EM algorithm
+## Initialize the parameters
+set.seed(81196)
+x  = nestsize$X4
+w.hat = 1/2                         #Assign equal weight to each component to start with
+lambda.hat = mean(x)   #Random cluster centers randomly spread over the support of the data
+KK = 2
+n = nrow(nestsize)
 
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,KK))
+  v[,1] = w.hat*factor/(w.hat*factor+(1-w.hat)*dpois(x, lambda.hat))    
+  v[,2] = (1-w.hat)*dpois(x, lambda.hat)/(w.hat*factor+(1-w.hat)*dpois(x, lambda.hat)) 
+  
+  ## M step
+  # Weights
+  w.hat = sum(v[,1])/(sum(v[,1]) + sum(v[,2]))
+  lambda.hat = sum(v[,2] * x)/sum(v[,2])
+  
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    QQn = QQn + v[i,1]*log(w.hat) +  v[i,2]*(log(1-w.hat) + dpois(x[i], lambda.hat, log = TRUE))
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
 ```
 
 Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?
 
 ```{r error=TRUE}
-
+BIC = -2*log(w.hat*exp(QQn)) + 2*log(n)
+#BIC = 1116.189
+paste('BIC =', BIC)
+俄
+#Yes
 ```
 
 #### Marking
@@ -519,9 +1101,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -615,9 +1299,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -711,9 +1497,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -807,9 +1695,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -903,9 +1893,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -999,9 +2091,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -1095,9 +2289,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)
@@ -1191,9 +2487,111 @@ When grading, please remember that there are many ways to do the same thing in R
 - 0点 No
 - 1点 Yes
 
-**Is the numerical value for the dataset nestsize.csv BIC correct? **
+**Is the numerical value for the dataset `nestsize.csv`· BIC correct? **
 
-In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2).  This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
+The MLE in this case is $\hat{\lambda} = 1.843333$, which leads to a value of the BIC equal to $1272.2$.
+
+```{r error=TRUE}
+BIC1 = twicenegloglik + log(n)
+```
+
+```{r error=TRUE}
+
+```
+
+**Is the number of effective parameters correct?**
+
+In this case there are two parameters, $\omega$ and $\lambda$.
+
+- 0点 No
+- 1点 Yes
+
+**Is the EM algorithm for fitting the mixture correct?**
+
+You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.
+
+```{r error=TRUE}
+## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)<epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}
+```
+
+- 0点 No
+- 3点 Yes
+- 1点 Partially
+
+**Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.**
+
+In this case 
+
+$$-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}$$
+
+Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation.  For example
+
+```{r error=TRUE}
+## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}
+```
+
+However, remember that there are many ways to achieve the same thing in R.
+
+- 0点 No
+- 1点 Yes
+
+**Is the numerical value for the BIC correct?**
+
+In this case, the MLEs are (rounded to 2 decimal places) $\omega =0.40$ and $3.07$ (you had already obtained these values in week 2). This leads to a value of the BIC equal to $1056.85$ (rounded to two decimal places)..
 
 ```{r error=TRUE}
 BIC2 = twicenegloglik + 2*log(n)

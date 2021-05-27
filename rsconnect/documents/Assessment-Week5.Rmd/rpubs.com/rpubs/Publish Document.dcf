@@ -1,4 +1,4 @@
-name: Document
+name: Publish Document
 title:
 username:
 account: rpubs
@@ -6,6 +6,6 @@ server: rpubs.com
 hostUrl: rpubs.com
 appId: https://api.rpubs.com/api/v1/document/774879/1ac2435f592f4b32aa5edb2b7ae79505
 bundleId: https://api.rpubs.com/api/v1/document/774879/1ac2435f592f4b32aa5edb2b7ae79505
-url: http://rpubs.com/publish/claim/774879/d4d7b3fe799e4ddc87ad0d9b35969fcf
-when: 1622138325.04571
-lastSyncTime: 1622138325.04573
+url: http://rpubs.com/englianhu/774879
+when: 1622141897.45249
+lastSyncTime: 1622141897.45251

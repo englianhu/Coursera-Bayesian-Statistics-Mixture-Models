@@ -390,10 +390,95 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
 <p>(Note that you can think about this model as a mixture with a single component).</p>
 <p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<pre class="r hover01"><code>x &lt;- read.csv(file = &quot;data/nestsize.csv&quot;, header = FALSE)$V1
+n &lt;- length(x)               # number of samples
+
+mle = mean(x)
+bic_base = 0
+for (i in 1:n) {
+  bic_base = bic_base-2*log(dpois(x[i],mle))
+}
+bic_base = bic_base+log(n)
+
+cat(paste(&#39;mle =&#39;, mle, &#39;\nbic_base =&#39;, bic_base))</code></pre>
+<pre class="hover02"><code>## mle = 1.84333333333333 
+## bic_base = 1272.1748691699</code></pre>
 <p>Derive the formula for the BIC associated with the the Poisson model</p>
 <p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
 <p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<pre class="r hover01"><code>x &lt;- read.csv(&quot;data/nestsize.csv&quot;, header = F)
+n &lt;- nrow(x)
+x &lt;- as.matrix(x)
+
+## Run the actual EM algorithm ## Initialize the parameters
+w      &lt;- 1/2  #Assign equal weight to each component to start with
+lambda &lt;- mean(x)   #lambda set as sample mean
+s      &lt;- 0
+
+sw      &lt;- FALSE
+QQ      &lt;- -Inf
+QQ.out  &lt;- NULL
+epsilon &lt;- 10^(-5)
+
+while(!sw){
+  ## E step
+  v &lt;- array(0, dim = c(n,2))
+  
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] &lt;- w
+      v[i,2] &lt;- (1-w)*dpois(x[i], lambda)
+      v[i,]  &lt;- v[i,]/sum(v[i,])
+      
+    }else{
+      v[i,1] &lt;- 0
+      v[i,2] &lt;- 1
+    }
+  }
+  ## M step
+  # parameter
+  w &lt;- mean(v[,1])
+  lambda &lt;- sum(x)/sum(v[,2])
+  
+  #convergence
+  QQn &lt;- 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn &lt;- QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+      
+    }else{
+      QQn &lt;- QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+   if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+     sw &lt;- TRUE
+   }
+  QQ &lt;- QQn
+  QQ.out &lt;- c(QQ.out, QQ)
+  s &lt;- s + 1
+  print(paste(s, QQn,w,lambda))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -576.591134395629 0.368359448807043 2.91832645933181&quot;
+## [1] &quot;2 -560.13333821497 0.390492555379738 3.02429994843094&quot;
+## [1] &quot;3 -555.36650787464 0.396587326296866 3.05484689610648&quot;
+## [1] &quot;4 -554.153118451655 0.398118096298951 3.06261630728294&quot;
+## [1] &quot;5 -553.854920699012 0.398493040612906 3.06452536344982&quot;
+## [1] &quot;6 -553.78227912419 0.398584303453195 3.06499039502518&quot;
+## [1] &quot;7 -553.764621578937 0.398606483018032 3.06510343274719&quot;
+## [1] &quot;8 -553.760331674038 0.398611871289296 3.06513089522601&quot;</code></pre>
+<pre class="r hover01"><code>bic_mix &lt;- 0
+for(i in 1:n) {
+  if(x[i]==0){
+    bic_mix &lt;- -2*log(w+(1-w)*dpois(x[i],lambda))+bic_mix
+  } else {
+    bic_mix &lt;- -2*log((1-w)*dpois(x[i],lambda))+bic_mix
+  }
+}
+bic_mix &lt;- bic_mix+2*log(n)</code></pre>
 <p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
+<pre class="r hover01"><code>cat(paste(&#39;bic_mix =&#39;, bic_mix, &#39;\nbic_base =&#39;, bic_base))</code></pre>
+<pre class="hover02"><code>## bic_mix = 1056.84484815141 
+## bic_base = 1272.1748691699</code></pre>
 </div>
 <div id="marking" class="section level3" number="2.2.2">
 <h3 number="2.2.2"><span class="header-section-number">2.2.2</span> Marking</h3>
@@ -405,10 +490,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -418,19 +501,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -665.770652745491&quot;
+## [1] &quot;2 -627.28059416914&quot;
+## [1] &quot;3 -583.751999411541&quot;
+## [1] &quot;4 -562.533341454046&quot;
+## [1] &quot;5 -556.003801253986&quot;
+## [1] &quot;6 -554.31143569587&quot;
+## [1] &quot;7 -553.893589555972&quot;
+## [1] &quot;8 -553.791684738297&quot;
+## [1] &quot;9 -553.766907034284&quot;
+## [1] &quot;10 -553.760886876408&quot;
+## [1] &quot;11 -553.75942443985&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -454,10 +626,98 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
 <p>(Note that you can think about this model as a mixture with a single component).</p>
 <p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<pre class="r hover01"><code>rm(list = ls())
+x &lt;- read.csv(file = &quot;data/nestsize.csv&quot;, header = FALSE)$V1
+n &lt;- length(x)                 # number of samples
+
+mle = mean(x)
+bic_base = 0
+for (i in 1:n) {
+  bic_base = bic_base-2*log(dpois(x[i],mle))
+}
+bic_base = bic_base+log(n)
+
+cat(paste(&#39;mle =&#39;, mle, &#39;\nbic_base =&#39;, bic_base))</code></pre>
+<pre class="hover02"><code>## mle = 1.84333333333333 
+## bic_base = 1272.1748691699</code></pre>
 <p>Derive the formula for the BIC associated with the the Poisson model</p>
 <p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
 <p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<pre class="r hover01"><code>x = read.csv(&quot;data/nestsize.csv&quot;, header = F)
+n = nrow(x)
+x = as.matrix(x)
+
+## Run the actual EM algorithm ## Initialize the parameters
+w = 1/2  #Assign equal weight to each component to start with
+lambda = mean(x)   #lambda set as sample mean
+s  = 0
+
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+while(!sw){
+  ## E step
+  v = array(0, dim = c(n,2))
+  
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = w
+      v[i,2] = (1-w)*dpois(x[i], lambda)
+      v[i,]  = v[i,]/sum(v[i,])
+      
+    }else{
+      v[i,1] = 0
+         v[i,2] = 1
+    }
+  }
+  ## M step
+  # parameter
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+  
+  #convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+      
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+   if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+     sw=TRUE
+   }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn,w,lambda))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -576.591134395629 0.368359448807043 2.91832645933181&quot;
+## [1] &quot;2 -560.13333821497 0.390492555379738 3.02429994843094&quot;
+## [1] &quot;3 -555.36650787464 0.396587326296866 3.05484689610648&quot;
+## [1] &quot;4 -554.153118451655 0.398118096298951 3.06261630728294&quot;
+## [1] &quot;5 -553.854920699012 0.398493040612906 3.06452536344982&quot;
+## [1] &quot;6 -553.78227912419 0.398584303453195 3.06499039502518&quot;
+## [1] &quot;7 -553.764621578937 0.398606483018032 3.06510343274719&quot;
+## [1] &quot;8 -553.760331674038 0.398611871289296 3.06513089522601&quot;</code></pre>
+<pre class="r hover01"><code>bic_mix = 0
+for(i in 1:n) {
+  if(x[i]==0){
+    bic_mix = -2*log(w+(1-w)*dpois(x[i],lambda))+bic_mix
+  } else {
+    bic_mix = -2*log((1-w)*dpois(x[i],lambda))+bic_mix
+  }
+}
+bic_mix = bic_mix+2*log(n)</code></pre>
 <p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
+<pre class="r hover01"><code># Yes the bic for mixture model is 1056.845 compared to bic of 1272.175 for the base model.
+# Despite the mixture model having more parameters the bic is much lower suggesting a better fit.
+cat(paste(&#39;bic_mix =&#39;, bic_mix, &#39;\nbic_base =&#39;, bic_base))</code></pre>
+<pre class="hover02"><code>## bic_mix = 1056.84484815141 
+## bic_base = 1272.1748691699</code></pre>
 </div>
 <div id="marking-1" class="section level4" number="2.3.1.2">
 <h4 number="2.3.1.2"><span class="header-section-number">2.3.1.2</span> Marking</h4>
@@ -469,10 +729,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -482,19 +740,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -665.770652745491&quot;
+## [1] &quot;2 -627.28059416914&quot;
+## [1] &quot;3 -583.751999411541&quot;
+## [1] &quot;4 -562.533341454046&quot;
+## [1] &quot;5 -556.003801253986&quot;
+## [1] &quot;6 -554.31143569587&quot;
+## [1] &quot;7 -553.893589555972&quot;
+## [1] &quot;8 -553.791684738297&quot;
+## [1] &quot;9 -553.766907034284&quot;
+## [1] &quot;10 -553.760886876408&quot;
+## [1] &quot;11 -553.75942443985&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -516,10 +863,110 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
 <p>(Note that you can think about this model as a mixture with a single component).</p>
 <p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<pre class="r hover01"><code>rm(list = ls())
+num_eggs &lt;- read.csv(file = &quot;data/nestsize.csv&quot;, header = FALSE)$V1
+n &lt;- length(x)                 # number of samples</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>#For Poisson:
+lambda_p  = sum(num_eggs)/n</code></pre>
+<pre class="hover03"><code>## Error in sum(num_eggs)/n: non-numeric argument to binary operator</code></pre>
+<pre class="r hover01"><code>QQp = 0
+for(i in 1:n){
+  QQp = QQp+ ((dpois(num_eggs[i], lambda=lambda_p, log=TRUE)))
+}</code></pre>
+<pre class="hover03"><code>## Error in 1:n: NA/NaN argument</code></pre>
+<pre class="r hover01"><code>BICPoisson = -2*QQp + log(n)</code></pre>
+<pre class="hover03"><code>## Error in log(n): non-numeric argument to mathematical function</code></pre>
+<pre class="r hover01"><code>print(paste(&quot;Poisson&quot;, BICPoisson))</code></pre>
+<pre class="hover03"><code>## Error in paste(&quot;Poisson&quot;, BICPoisson): object &#39;BICPoisson&#39; not found</code></pre>
 <p>Derive the formula for the BIC associated with the the Poisson model</p>
 <p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
 <p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<pre class="r hover01"><code>dat = read.csv(file = &quot;data/nestsize.csv&quot;, header = FALSE)
+num_eggs = dat$V1
+
+## Run the actual EM algorithm
+## Initialize the parameters
+
+KK         = 2                               # number of components
+n = length(num_eggs)                         # number of samples
+v = array(0, dim=c(n,KK))
+v[,1] = 0.5*(num_eggs==0)                    #Assign half weight for nests with 0 eggs to first component
+v[,2] = 1-v[,1]                              #Assign all of the remaining nests to the second component
+w     = mean(v[,1])                          #weight of the first component
+lambda  = sum(num_eggs*v[,2])/sum(v[,2])     #parameter (mean) of the second component
+
+
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+##Checking convergence of the algorithm
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,KK))
+  v[,1] = (w/(w+(1-w)*exp(-lambda)))*(num_eggs==0)     #first component is non-zero only for the zero egg nestsc
+  v[,2] = 1-v[,1]                                      #second component gets rest of the weights
+  
+  ## M step
+  # Weight
+  w = mean(v[,1])
+  # lambda for the second component
+  lambda = sum(v[,2]*num_eggs)/sum(v[,2])
+  print(paste(s, w, lambda))
+  
+  ##Check convergence
+  QQn = log(w)*sum(v[,1]) #First component 
+  for(i in 1:n){
+    QQn = QQn + (v[i,2]*(log(1-w)+dpois(num_eggs[i], lambda=lambda, log=TRUE)))
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+  
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;0 0.315100320355003 2.6913917294994&quot;
+## [1] &quot;1 -610.870768261843&quot;
+## [1] &quot;1 0.371874558663767 2.93465797120389&quot;
+## [1] &quot;2 -574.065781405036&quot;
+## [1] &quot;2 0.391518963077006 3.02940144635373&quot;
+## [1] &quot;3 -559.337740076761&quot;
+## [1] &quot;3 0.396849411917633 3.05617431161587&quot;
+## [1] &quot;4 -555.159222811549&quot;
+## [1] &quot;4 0.398182559616356 3.06294435760827&quot;
+## [1] &quot;5 -554.101877806045&quot;
+## [1] &quot;5 0.398508747299135 3.06460538712117&quot;
+## [1] &quot;6 -553.842420453926&quot;
+## [1] &quot;6 0.398588121593604 3.06500985350962&quot;
+## [1] &quot;7 -553.779239532299&quot;
+## [1] &quot;7 0.398607410647733 3.06510816057561&quot;
+## [1] &quot;8 -553.763883046672&quot;
+## [1] &quot;8 0.398612096629121 3.06513204372942&quot;
+## [1] &quot;9 -553.760152266609&quot;</code></pre>
+<pre class="r hover01"><code>QQ=0
+for(i in 1:n){
+  if (num_eggs[i]==0) {
+    QQ = QQ + log(w+(1-w)*dpois(num_eggs[i], lambda=lambda))
+  } else {
+    QQ = QQ + log((1-w)*dpois(num_eggs[i], lambda=lambda))
+  }
+}
+
+BICzeroInflated = -2*QQ + 2*log(n)   #2 parameters
+print(paste(&quot;Zero Inflated BIC=&quot;,BICzeroInflated))</code></pre>
+<pre class="hover02"><code>## [1] &quot;Zero Inflated BIC= 1056.84484814988&quot;</code></pre>
 <p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
+<pre class="r hover01"><code>#Poisson BIC= 1272.1748691699,   Zero Inflated BIC= 1056.84484814988.  Yes, the mixture model is better.
+cat(paste(
+  &quot;Poisson =&quot;, BICPoisson, 
+  &quot;\nZero Inflated BIC =&quot;,BICzeroInflated
+))</code></pre>
+<pre class="hover03"><code>## Error in paste(&quot;Poisson =&quot;, BICPoisson, &quot;\nZero Inflated BIC =&quot;, BICzeroInflated): object &#39;BICPoisson&#39; not found</code></pre>
 </div>
 <div id="marking-2" class="section level4" number="2.3.2.2">
 <h4 number="2.3.2.2"><span class="header-section-number">2.3.2.2</span> Marking</h4>
@@ -544,7 +991,7 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;lambdahat&#39; not found</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
 <pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
@@ -553,10 +1000,93 @@ rm(pkgs)</code></pre>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data</code></pre>
+<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -578,10 +1108,74 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
 <p>(Note that you can think about this model as a mixture with a single component).</p>
 <p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<pre class="r hover01"><code>rm(list = ls())
+nestsize &lt;- read.csv(&#39;data/nestsize.csv&#39;, header=FALSE)
+x  = nestsize$V1
+n = nrow(nestsize)
+
+BIC = -2*sum(dpois(x, mean(x), log = TRUE)) + 2*log(n)
+#BIC = 1272.713
+paste(&#39;BIC =&#39;, BIC)</code></pre>
+<pre class="hover02"><code>## [1] &quot;BIC = 1277.87865164456&quot;</code></pre>
+<pre class="r hover01"><code>nestsize &lt;- read.csv(&#39;data/nestsize.csv&#39;)
+x  = nestsize$X4
+n = nrow(nestsize)
+
+BIC = -2*sum(dpois(x, mean(x), log = TRUE)) + 2*log(n)
+#BIC = 1272.713
+paste(&#39;BIC =&#39;, BIC)</code></pre>
+<pre class="hover02"><code>## [1] &quot;BIC = 1272.71335370079&quot;</code></pre>
 <p>Derive the formula for the BIC associated with the the Poisson model</p>
 <p><span class="math display">\[f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}\]</span></p>
 <p>Then, provide code to compute the BIC and use it to evaluate it for the dataset <code>nestsize.csv</code>:</p>
+<pre class="r hover01"><code>## Run the actual EM algorithm
+## Initialize the parameters
+set.seed(81196)
+x  = nestsize$X4
+w.hat = 1/2                         #Assign equal weight to each component to start with
+lambda.hat = mean(x)   #Random cluster centers randomly spread over the support of the data
+KK = 2
+n = nrow(nestsize)
+
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,KK))
+  v[,1] = w.hat*factor/(w.hat*factor+(1-w.hat)*dpois(x, lambda.hat))    
+  v[,2] = (1-w.hat)*dpois(x, lambda.hat)/(w.hat*factor+(1-w.hat)*dpois(x, lambda.hat)) 
+  
+  ## M step
+  # Weights
+  w.hat = sum(v[,1])/(sum(v[,1]) + sum(v[,2]))
+  lambda.hat = sum(v[,2] * x)/sum(v[,2])
+  
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    QQn = QQn + v[i,1]*log(w.hat) +  v[i,2]*(log(1-w.hat) + dpois(x[i], lambda.hat, log = TRUE))
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover03"><code>## Error in w.hat * factor: non-numeric argument to binary operator</code></pre>
 <p>Does the BIC provide evidence for the mixture model in the <code>nestsize.csv</code> dataset?</p>
+<pre class="r hover01"><code>BIC = -2*log(w.hat*exp(QQn)) + 2*log(n)</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;QQn&#39; not found</code></pre>
+<pre class="r hover01"><code>#BIC = 1116.189
+paste(&#39;BIC =&#39;, BIC)</code></pre>
+<pre class="hover02"><code>## [1] &quot;BIC = 1272.71335370079&quot;</code></pre>
+<pre class="r hover01"><code>俄</code></pre>
+<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;俄&#39; not found</code></pre>
+<pre class="r hover01"><code>#Yes</code></pre>
 </div>
 <div id="marking-3" class="section level4" number="2.3.3.2">
 <h4 number="2.3.3.2"><span class="header-section-number">2.3.3.2</span> Marking</h4>
@@ -593,10 +1187,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -606,19 +1198,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -663.532874569727&quot;
+## [1] &quot;2 -625.456990639752&quot;
+## [1] &quot;3 -581.884961223092&quot;
+## [1] &quot;4 -560.423572991847&quot;
+## [1] &quot;5 -553.774092953591&quot;
+## [1] &quot;6 -552.043417906285&quot;
+## [1] &quot;7 -551.614760706599&quot;
+## [1] &quot;8 -551.509920486443&quot;
+## [1] &quot;9 -551.484358356205&quot;
+## [1] &quot;10 -551.478130525885&quot;
+## [1] &quot;11 -551.476613488737&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -655,10 +1336,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -668,19 +1347,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -663.532874569727&quot;
+## [1] &quot;2 -625.456990639752&quot;
+## [1] &quot;3 -581.884961223092&quot;
+## [1] &quot;4 -560.423572991847&quot;
+## [1] &quot;5 -553.774092953591&quot;
+## [1] &quot;6 -552.043417906285&quot;
+## [1] &quot;7 -551.614760706599&quot;
+## [1] &quot;8 -551.509920486443&quot;
+## [1] &quot;9 -551.484358356205&quot;
+## [1] &quot;10 -551.478130525885&quot;
+## [1] &quot;11 -551.476613488737&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -717,10 +1485,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -730,19 +1496,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -663.532874569727&quot;
+## [1] &quot;2 -625.456990639752&quot;
+## [1] &quot;3 -581.884961223092&quot;
+## [1] &quot;4 -560.423572991847&quot;
+## [1] &quot;5 -553.774092953591&quot;
+## [1] &quot;6 -552.043417906285&quot;
+## [1] &quot;7 -551.614760706599&quot;
+## [1] &quot;8 -551.509920486443&quot;
+## [1] &quot;9 -551.484358356205&quot;
+## [1] &quot;10 -551.478130525885&quot;
+## [1] &quot;11 -551.476613488737&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -779,10 +1634,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -792,19 +1645,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -663.532874569727&quot;
+## [1] &quot;2 -625.456990639752&quot;
+## [1] &quot;3 -581.884961223092&quot;
+## [1] &quot;4 -560.423572991847&quot;
+## [1] &quot;5 -553.774092953591&quot;
+## [1] &quot;6 -552.043417906285&quot;
+## [1] &quot;7 -551.614760706599&quot;
+## [1] &quot;8 -551.509920486443&quot;
+## [1] &quot;9 -551.484358356205&quot;
+## [1] &quot;10 -551.478130525885&quot;
+## [1] &quot;11 -551.476613488737&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -841,10 +1783,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -854,19 +1794,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -663.532874569727&quot;
+## [1] &quot;2 -625.456990639752&quot;
+## [1] &quot;3 -581.884961223092&quot;
+## [1] &quot;4 -560.423572991847&quot;
+## [1] &quot;5 -553.774092953591&quot;
+## [1] &quot;6 -552.043417906285&quot;
+## [1] &quot;7 -551.614760706599&quot;
+## [1] &quot;8 -551.509920486443&quot;
+## [1] &quot;9 -551.484358356205&quot;
+## [1] &quot;10 -551.478130525885&quot;
+## [1] &quot;11 -551.476613488737&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -903,10 +1932,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -916,19 +1943,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -663.532874569727&quot;
+## [1] &quot;2 -625.456990639752&quot;
+## [1] &quot;3 -581.884961223092&quot;
+## [1] &quot;4 -560.423572991847&quot;
+## [1] &quot;5 -553.774092953591&quot;
+## [1] &quot;6 -552.043417906285&quot;
+## [1] &quot;7 -551.614760706599&quot;
+## [1] &quot;8 -551.509920486443&quot;
+## [1] &quot;9 -551.484358356205&quot;
+## [1] &quot;10 -551.478130525885&quot;
+## [1] &quot;11 -551.476613488737&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -965,10 +2081,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -978,19 +2092,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -663.532874569727&quot;
+## [1] &quot;2 -625.456990639752&quot;
+## [1] &quot;3 -581.884961223092&quot;
+## [1] &quot;4 -560.423572991847&quot;
+## [1] &quot;5 -553.774092953591&quot;
+## [1] &quot;6 -552.043417906285&quot;
+## [1] &quot;7 -551.614760706599&quot;
+## [1] &quot;8 -551.509920486443&quot;
+## [1] &quot;9 -551.484358356205&quot;
+## [1] &quot;10 -551.478130525885&quot;
+## [1] &quot;11 -551.476613488737&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1027,10 +2230,8 @@ rm(pkgs)</code></pre>
 </ul>
 <p><strong>Is the MLE computed correctly for the Poisson model?</strong></p>
 <p>The MLE for the Poisson model can be obtained analytically and does not require the use of any numerical optimization algorithm. In this case <span class="math inline">\(\hat{\lambda}=\bar{x}\)</span>, the average of the observations, is the MLE.</p>
-<pre class="r hover01"><code>lambdahat = mean(x)</code></pre>
-<pre class="hover03"><code>## Error in mean(x): object &#39;x&#39; not found</code></pre>
-<pre class="r hover01"><code>n = length(x)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;x&#39; not found</code></pre>
+<pre class="r hover01"><code>lambdahat = mean(x)
+n = length(x)</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1040,19 +2241,108 @@ rm(pkgs)</code></pre>
 <p><span class="math display">\[-2\log L(\lambda) = 2n \bar{x} - 2n\bar{x} \log \bar{x} + 2 \sum_{i=1}^{n} \log x_i !\]</span></p>
 <p>The following R code performs the evaluation:</p>
 <pre class="r hover01"><code>twicenegloglik = 2*n*lambdahat - 2*n*lambdahat*log(lambdahat) + 2*sum(lfactorial(x))</code></pre>
-<pre class="hover03"><code>## Error in 2 * n: non-numeric argument to binary operator</code></pre>
 <p>Alternatively, you can use the built in functions to evaluate the density of the Poisson distribution,</p>
 <pre class="r hover01"><code>twicenegloglik = -2*sum(dpois(x,lambdahat,log=T))</code></pre>
-<pre class="hover03"><code>## Error in dpois(x, lambdahat, log = T): object &#39;x&#39; not found</code></pre>
 <p>When grading, please remember that there are many ways to do the same thing in R</p>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
 </ul>
-<p><strong>Is the numerical value for the dataset nestsize.csv BIC correct? </strong></p>
+<p><strong>Is the numerical value for the dataset <code>nestsize.csv</code>· BIC correct? </strong></p>
+<p>The MLE in this case is <span class="math inline">\(\hat{\lambda} = 1.843333\)</span>, which leads to a value of the BIC equal to <span class="math inline">\(1272.2\)</span>.</p>
+<pre class="r hover01"><code>BIC1 = twicenegloglik + log(n)</code></pre>
+<p><strong>Is the number of effective parameters correct?</strong></p>
+<p>In this case there are two parameters, <span class="math inline">\(\omega\)</span> and <span class="math inline">\(\lambda\)</span>.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the EM algorithm for fitting the mixture correct?</strong></p>
+<p>You already derived the EM algorithm for this model in week 2 of the course. A draft version of the algorithm is provided below.</p>
+<pre class="r hover01"><code>## Setup controls for the algorithm
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out = NULL
+epsilon = 10^(-5)
+
+## Initiatlize parameters
+w      = 0.1          #Assign equal weight to each component to start with
+lambda = mean(x)      #Random cluster centers randomly spread over the support of the data
+
+## Repeat E and M steps until convergence
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  for(i in 1:n){
+    if(x[i]==0){
+      v[i,1] = log(w)    
+      v[i,2] = log(1-w) + dpois(x[i], lambda, log=TRUE)  
+      v[i,]  = exp(v[i,] - max(v[i,]))/sum(exp(v[i,] - max(v[i,]))) 
+    }else{
+      v[i,1] = 0
+      v[i,2] = 1
+    }
+  }
+  ## M step
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x)/sum(v[,2])
+
+  ##Check convergence
+  QQn = 0
+  for(i in 1:n){
+    if(x[i]==0){
+      QQn = QQn + v[i,1]*log(w) + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }else{
+      QQn = QQn + v[i,2]*(log(1-w) + dpois(x[i], lambda, log=TRUE))
+    }
+  }
+  if(abs(QQn-QQ)/abs(QQn)&lt;epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  print(paste(s, QQn))
+}</code></pre>
+<pre class="hover02"><code>## [1] &quot;1 -663.532874569727&quot;
+## [1] &quot;2 -625.456990639752&quot;
+## [1] &quot;3 -581.884961223092&quot;
+## [1] &quot;4 -560.423572991847&quot;
+## [1] &quot;5 -553.774092953591&quot;
+## [1] &quot;6 -552.043417906285&quot;
+## [1] &quot;7 -551.614760706599&quot;
+## [1] &quot;8 -551.509920486443&quot;
+## [1] &quot;9 -551.484358356205&quot;
+## [1] &quot;10 -551.478130525885&quot;
+## [1] &quot;11 -551.476613488737&quot;</code></pre>
+<ul>
+<li>0点 No</li>
+<li>3点 Yes</li>
+<li>1点 Partially</li>
+</ul>
+<p><strong>Is the negative log-likelihood evaluated at the MLE computed correctly for the mixture model.</strong></p>
+<p>In this case</p>
+<p><span class="math display">\[-2 L \left( \hat{w}, \hat{\lambda} \right) = -2 \sum_{i=1}^{n} \log \left\{ \hat{w}\delta_0(x_i) + (1-\hat{w}) \frac{e^{-\hat{\lambda}} \hat{\lambda}^{x_i}}{x_i!} \right\}\]</span></p>
+<p>Because the two components have different supports, it is preferable to consider two cases when computing the log-likelihood for each observation. For example</p>
+<pre class="r hover01"><code>## Compute twice the negatie log-likelihood for the model
+twicenegloglik = 0
+for(i in 1:n){
+  if(x[i]==0){
+    twicenegloglik = twicenegloglik - 2*log(w + (1-w)*dpois(x[i], lambda))
+  }else{
+    twicenegloglik = twicenegloglik - 2*( log(1-w) +  dpois(x[i], lambda, log=TRUE))
+  }
+}</code></pre>
+<p>However, remember that there are many ways to achieve the same thing in R.</p>
+<ul>
+<li>0点 No</li>
+<li>1点 Yes</li>
+</ul>
+<p><strong>Is the numerical value for the BIC correct?</strong></p>
 <p>In this case, the MLEs are (rounded to 2 decimal places) <span class="math inline">\(\omega =0.40\)</span> and <span class="math inline">\(3.07\)</span> (you had already obtained these values in week 2). This leads to a value of the BIC equal to <span class="math inline">\(1056.85\)</span> (rounded to two decimal places)..</p>
 <pre class="r hover01"><code>BIC2 = twicenegloglik + 2*log(n)</code></pre>
-<pre class="hover03"><code>## Error in eval(expr, envir, enclos): object &#39;twicenegloglik&#39; not found</code></pre>
 <ul>
 <li>0点 No</li>
 <li>1点 Yes</li>
@@ -1271,7 +2561,7 @@ date
 Current time
 </td>
 <td style="text-align:left;color: white !important;background-color: grey !important;font-weight: bold;color: yellow !important;background-color: #D7261E !important;">
-2021-05-28 02:16:58 JST🗾
+2021-05-28 03:58:01 JST🗾
 </td>
 </tr>
 </tbody>
