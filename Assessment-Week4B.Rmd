@@ -1,6 +1,6 @@
 ---
 title: "<img src='figure/coursera.jpg' width='37'> <img src='figure/ucsc.png' width='240'>"
-subtitle: "<span style='color:white; background-color:#4E79A7;'>Bayesian Statistics: Mixture Models</span> (Assessment Week4B with Codes)"
+subtitle: "<span style='color:white; background-color:#4E79A7;'>Bayesian Statistics: Mixture Models</span> (Assessment Week 4B with Codes)"
 author: "[®γσ, Lian Hu](https://englianhu.github.io/) <img src='figure/quantitative trader 1.jpg' width='12'> <img src='figure/ENG.jpg' width='24'> ®"
 date: "`r lubridate::today('Asia/Tokyo')`"
 output:
