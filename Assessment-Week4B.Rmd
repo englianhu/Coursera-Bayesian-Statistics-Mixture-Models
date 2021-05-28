@@ -1528,20 +1528,127 @@ The value should also be 3.52% (3 errors out of 85 observations).  In this case,
 Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminant model to  the banknote data.
 
 ```{r error=TRUE}
-load('data/banknoteclassification.RData')
+rm(list=ls())
 
+library(mvtnorm)
+library(ellipse)
+library(MCMCpack)
+
+#load("banknoteclassification.Rdata")
+load('data/banknoteclassification.RData')
+x  = rbind(banknote.training,banknote.test)
+KK = 2
+p  = 6
+n  = nrow(banknote.training)
+m  = nrow(banknote.test)
+
+## Initialize the parameters
+w          = rep(1,KK)/KK
+mu         = rmvnorm(KK, apply(x,2,mean), var(x))
+Sigma[1,,] = var(x)/KK
+Sigma[2,,] = var(x)/KK
+
+cc         = c(as.numeric(banknote.training.labels), sample(1:KK, m, replace=TRUE, prob=w))
+
+#We add the training labels and sample the unknown ones from the test set
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p+1
+SS = var(x)/3
+
+# Number of iteration of the sampler
+rrr  = 11000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, (n+m)))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators (only those from the test set)
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k]) + dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights
+      v = exp(v - max(v))/sum(exp(v - max(v)))
+      cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+    }
+    
+    # Sample the weights
+    w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+    
+    # Sample the means
+    DD.st = matrix(0, nrow=p, ncol=p)
+    for(k in 1:KK){
+      mk    = sum(cc==k)
+      xsumk = apply(x[cc==k,], 2, sum)
+      DD.st = solve(mk*solve(Sigma[k,,]) + solve(DD))
+      dd.st = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+      mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+    }
+    
+    # Sample the variances
+    xcensumk = array(0, dim=c(KK,p,p))
+    for(i in 1:(n+m)){
+      xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+    }
+    
+    # Store samples
+    cc.out[s,]      = cc
+    w.out[s,]       = w
+    mu.out[s,,]     = mu
+    Sigma.out[s,,,] = Sigma
+    
+    for(i in 1:n){
+      logpost[s] = logpost[s] + log(w[cc[i]]) + dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+    }
+    
+    logpost[s] = logpost[s] + ddirichlet(w, aa)
+    for(k in 1:KK){
+      logpost[s] = logpost[s] + dmvnorm(mu[k,], dd, DD)
+      logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+    }
+    
+    if(s/250==floor(s/250)){
+      print(paste("s = ", s))
+    }
+  }
 ```
 
 What is the classification error for the test set?
 
 ```{r error=TRUE}
+#Calculate the posterior probability of being classified with label "1".
+
+prob_label1 = rep(NA, m) for(i in 1:m){
+  prob_label1[i] = sum(cc.out[-seq(1,burn),n+i]==1)/(rrr-burn)
+}
+
+#R 3.6.1> prob_label1
+# The observations 1-84 have a posterior probability of being classified as label "1" of almost 0. Observations 85-170 have a probability of being classified with label "1" of almost 1.
+
+#Comparing these values with the true values, the algorithm correctly classifies all the observations.
 
 ```
 
 Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
 
 ```{r error=TRUE}
+modqda = qda(grouping=as.numeric(banknote.training.labels), x=banknote.training, method="mle")
 
+ccpredqda = predict(modqda,newdata=banknote.test)
+sum(!(ccpredqda$class == as.numeric(banknote.test.labels)))
+
+#3errors overall
+which(!(ccpredqda$class == as.numeric(banknote.test.labels))) as.numeric(banknote.test.labels)[which(!(ccpredqda$class == as.numeric(banknote.test.labels)))]
+
+#These 3errors belong to the label "1" (counterfeit). Therefore, 0/85 (0%) error in category genuine and 3/85 (3.53%) errors in category counterfeit.
 ```
 
 #### Marking
