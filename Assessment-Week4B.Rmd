@@ -300,7 +300,6 @@ sum(!ccpredqda$class[banknote.test.labels=="genuine"] == "genuine")
 sum(!ccpredqda$class[banknote.test.labels=="counterfeit"] == "counterfeit")
 ```
 
-
 ### Marking
 
 **Is the setup of the algorithm correct?**
