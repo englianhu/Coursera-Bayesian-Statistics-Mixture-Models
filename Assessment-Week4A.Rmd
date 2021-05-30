@@ -2608,12 +2608,1169 @@ points(x, rep(0,n))
 Provide an MCMC algorithm to fit the two-component, location-and-scale mixture of Gaussians.
 
 ```{r error=TRUE}
+rm(list=ls())
+library(MCMCpack)
 
+###### Setup data
+x  = faithful$eruptions
+n  = length(x)
+KK = 2
+
+
+###### MCMC algorithm to fit the location-and-scale mixture of 2 Gaussians
+
+## Priors set up 
+aa  = rep(1,KK)  
+eta = mean(x)    
+tau = sqrt(var(x))
+dd  = 2
+qq  = var(x)/2
+
+
+## Initialize
+w     = 0.5
+mu    = rnorm(KK, mean(x), sd(x))
+sigma = rep(sd(x)/2,KK)
+cc    = sample(1:KK, n, replace=T, prob=c(w,1-w))
+
+## Number of iterations of the sampler
+rrr   = 12000
+burn  = 2000
+
+## Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = rep(0, rrr)
+mu.out    = array(0, dim=c(rrr, KK))
+sigma.out = array(0, dim=c(rrr, KK))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:n){
+    v = rep(0,KK)
+    v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
+    v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  
+  # Sample the means
+  for(k in 1:KK){
+    # Sample the means
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+    mu.hat  = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+    mu[k]   = rnorm(1, mu.hat, sqrt(tau2.hat))
+    
+  }
+  
+  # Sample the variances
+  for(k in 1:KK){
+    dd.star = dd +sum(cc==k)/2
+    qq.star = qq + sum((x[cc==k] - mu[k])^2)/2
+    sigma[k] = sqrt(rinvgamma(1, dd.star, qq.star))
+  }
+  # Store samples
+  cc.out[s,]   = cc
+  w.out[s]    = w
+  mu.out[s,]   = mu
+  sigma.out[s,] = sigma
+  logpost[s] = 0
+  for(i in 1:n){
+    if(cc[i]==1){
+      logpost[s] = logpost[s] + log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)
+    }else{
+      logpost[s] = logpost[s] + log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)
+    }
+  }
+  logpost[s] = logpost[s] + dbeta(w, aa[1], aa[2])
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dnorm(mu[k], eta, tau, log = T)
+    
+  }
+  for (k in 1:KK){
+    logpost[s] = logpost[s] + dgamma(1/sigma[k]^2, dd, qq,log = T) - 4*log(sigma[k])
+  }
+
+  if(s/500==floor(s/500)){
+    print(paste("s =",s))
+  }
+}
+
+
+xx  = seq(0,7,length=150)
+
+## Compute the samples of the density over a dense grid
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+  density.mcmc[s,] = density.mcmc[s,] + w.out[s+burn]*dnorm(xx,mu.out[s+burn,1],sigma.out[s+burn,1]) + 
+    (1-w.out[s+burn])*dnorm(xx,mu.out[s+burn,2],sigma.out[s+burn,2])
+  
+}
+density.mcmc.m = apply(density.mcmc , 2, mean)
+
+colscale = c("black", "blue")
+yy = density(x)
+
+density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
+density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruption", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col="black", lwd=2)
+
+points(x,rep(0,n))
 ```
 
 Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
 
 ```{r error=TRUE}
+xx  = seq(0,7,length.out=150)
+
+## Compute the samples of the density over a dense grid
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+  density.mcmc[s,] = density.mcmc[s,] + w.out[s+burn]*dnorm(xx,mu.out[s+burn,1],sigma.out[s+burn,1]) + 
+    (1-w.out[s+burn])*dnorm(xx,mu.out[s+burn,2],sigma.out[s+burn,2])
+  
+}
+density.mcmc.m = apply(density.mcmc , 2, mean)
+
+colscale = c("black", "blue")
+yy = density(x)
+
+density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
+density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruption", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col="black", lwd=2)
+
+points(x,rep(0,n))
+```
+
+Provide the a graph of the density estimate on the interval [0,7].
+
+```{r error=TRUE}
+xx  = seq(0,7,length.out=150)
+
+## Compute the samples of the density over a dense grid
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+  density.mcmc[s,] = density.mcmc[s,] + w.out[s+burn]*dnorm(xx,mu.out[s+burn,1],sigma.out[s+burn,1]) + 
+    (1-w.out[s+burn])*dnorm(xx,mu.out[s+burn,2],sigma.out[s+burn,2])
+  
+}
+density.mcmc.m = apply(density.mcmc , 2, mean)
+
+colscale = c("black", "blue")
+yy = density(x)
+
+density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
+density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruption", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col="black", lwd=2)
+
+points(x,rep(0,n))
+```
+
+#### Marking
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for $c_i$ is given by,
+
+$$
+\Pr(c_i = 1|...) = \frac{\omega\frac{1}{\sqrt[]{2\pi\sigma_1}}exp\left\{-\frac{1}{2\sigma^2_1}(x_i-\mu_1)^2\right\}}{\omega\frac{1}{\sqrt[]{2\pi\sigma_1}}exp\left\{-\frac{1}{2\sigma^2_1}(x_i-\mu_1)^2\right\}+(1-\omega)\frac{1}{\sqrt[]{2\pi\sigma_2}}exp\left\{-\frac{1}{2\sigma^2_2}(x_i-\mu_2)^2\right\}}
+$$
+
+(This assumes that the mixture weights are parameterized as 
+
+```{r error=TRUE}
+for(i in 1:n){
+  v    = rep(0,2)
+  v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
+  v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
+  v    = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $\omega$ correct?**
+
+The full conditional is simply 
+
+$$
+\omega \mid \cdots \mbox{Beta} \left(\alpha_1 + \sum_{i=1}^{n} \mathbf{1}(c_i=1), \alpha_2 + \sum_{i=1}^{n} \mathbf{1}(c_i=2)\right)
+$$
+
+The following one line of code implements it:
+
+```{r error=TRUE}
+w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+```
+
+- 0点 No
+- 1点 Yes
+
+**Are the sampler for $\mu$ correct?**
+
+$$
+\mu_k \mid \cdots \mbox{Normal}\left( \left[ \frac{n_k}{\sigma_k^2} + \frac{1}{\tau^2} \right]^{-1}\left[ \frac{\sum_{i:c_i=k} x_i}{\sigma_k^2} + \frac{\eta}{\tau^2} \right], \left[ \frac{n_k}{\sigma_k^2} + \frac{1}{\tau^2} \right]^{-1}\right)
+$$
+
+The following code implements the sampler:
+
+```{r error=TRUE}
+# Sample the means
+for(k in 1:2){
+  nk       = sum(cc==k)
+  xsumk    = sum(x[cc==k])
+  tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+  mu.hat   = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+  mu[k]    = rnorm(1, mu.hat, sqrt(tau2.hat))
+}
+```
+
+Remember, however, that there are various ways in which the implementation could proceed.
+
+- 0点 No
+- 1点 Yes
+
+**Are the samplers for $\sigma_k$ correct?**
+
+The full conditional takes the form:
+
+$$
+1/\sigma^2_k \mid \cdots \mbox{Gamma}\left(d + \frac{n_k}{2} , q + \frac{1}{2} \sum_{i:c_k=k} (x_i - \mu_k)^2 \right)
+$$
+
+The following code implements the sampler:
+
+```{r error=TRUE}
+# Sample the variances
+for(k in 1:2){
+  nk    = sum(cc==k)
+  dd.star = dd + nk/2
+  qq.star = qq + sum((x[cc==k] - mu[k])^2)/2
+  sigma[k] = sqrt(1/rgamma(1, dd.star, qq.star))
+}
+```
+
+Remember, however, that there are various ways in which the implementation could proceed.
+
+- 0点 No
+- 1点 Yes
+
+**Does the code to generate the density estimate appear correct?**
+
+This is an example that, as before, assumes that the weights are parameterized as $\omega$ and $1- \omega$.
+
+```{r error=TRUE}
+## Plot Bayesian estimate with pointwise credible bands
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col="black", lwd=2)
+points(x, rep(0,n))
+```
+
+Note that this will generate not only a point estimate, but also pointwise credible intervals.
+
+- 0点 No
+- 1点 Yes
+
+**Does the graph appear to be correct?**
+
+The density estimate should look similar to the Figure below. Note that the variance of both components is clearly different.
+
+![](figure/graph_Week4A.png)
+
+The full code for the MCMC algorithm follows:
+
+```{r error=TRUE}
+x = faithful$eruptions
+n = length(x)
+plot(density(x))
+points(x,rep(0,n))
+
+## Priors set up using an "empirical Bayes" approach
+aa  = rep(1,2)  
+eta = mean(x)    
+tau = sqrt(var(x))
+dd  = 2
+qq  = var(x)/2
+
+## Initialize the parameters
+w     = 1/2
+mu    = rnorm(2, mean(x), sd(x))
+sigma = rep(sd(x)/2,2)
+cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+
+## Number of iterations of the sampler
+rrr   = 12000
+burn  = 2000
+
+## Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = rep(0, rrr)
+mu.out    = array(0, dim=c(rrr, 2))
+sigma.out = array(0, dim=c(rrr, 2))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:n){
+    v    = rep(0,2)
+    v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
+    v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  
+  # Sample the parameters of the components
+  for(k in 1:2){
+    # Sample the means
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+    mu.hat  = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+    mu[k]   = rnorm(1, mu.hat, sqrt(tau2.hat))
+    # Sample the variances
+    dd.star = dd + nk/2
+    qq.star = qq + sum((x[cc==k] - mu[k])^2)/2
+    sigma[k] = sqrt(1/rgamma(1, dd.star, qq.star))
+  }
+  
+  # Store samples
+  cc.out[s,]    = cc
+  w.out[s]     = w
+  mu.out[s,]    = mu
+  sigma.out[s,] = sigma
+  logpost[s] = 0
+  for(i in 1:n){
+    if(cc[i] == 1){
+      logpost[s] = logpost[s] + log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)
+    }else{
+      logpost[s] = logpost[s] + log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)
+    }
+  }
+  logpost[s] = logpost[s] + dbeta(w, aa[1], aa[2], log=TRUE)
+  for(k in 1:2){
+    logpost[s] = logpost[s] + dnorm(mu[k], eta, tau, log = T) + dgamma(1/sigma[k]^2, dd, qq)/sigma[k]^4
+  }
+  if(s/500==floor(s/500)){
+    print(paste("s =",s))
+  }
+}
+
+## Compute the samples of the density over a dense grid
+xx  = seq(0,7,length=150)
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+  density.mcmc[s,] = density.mcmc[s,] + w.out[s+burn]*dnorm(xx,mu.out[s+burn,1],sigma.out[s+burn,1]) + 
+                               (1-w.out[s+burn])*dnorm(xx,mu.out[s+burn,2],sigma.out[s+burn,2])
+}
+density.mcmc.m = apply(density.mcmc , 2, mean)
+
+## Plot Bayesian estimate with pointwise credible bands
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col="black", lwd=2)
+points(x, rep(0,n))
+```
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 8th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit the two-component, location-and-scale mixture of Gaussians.
+
+```{r error=TRUE}
+### Get a "Bayesian" kernel density estimator based on the same location-scale mixture of 2 normals
+
+## Priors set up using an "empirical Bayes" approach
+aa  = rep(1,KK)
+eta = mean(x)
+tau = sqrt(var(x))
+dd  = 2
+qq  = var(x)/KK
+
+## Initialize the parameters
+w     = 1/2
+mu    = rnorm(KK,mean(x), sd(x))
+sigma = rep(sd(x)/KK,KK)
+cc    = sample(1, n, replace=T, prob=w)
+
+## Number of iterations of the sampler
+rrr   = 12000
+burn  = 2000
+
+## Storing the samples
+cc.out    = array(0,dim=c(rrr, n))
+w.out     = array(0,dim=c(rrr, KK))
+mu.out    = array(0,dim=c(rrr, KK))
+sigma.out = array(0, dim=c(rrr, KK))
+logpost   = rep(0,rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:n){
+    v     = rep(0,KK)
+    v[1]  = log(w) +dnorm(x[i], mu[1], sigma[1], log=TRUE)
+    v[2]  = log(1-w) +dnorm(x[i], mu[2], sigma[2], log=TRUE)
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the means
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  
+  # Sample the means
+  for(k in 1:KK){
+    nk       = sum(cc==k)
+    xsumk    = sum(x[cc==k])
+    tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+    mu.hat   = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+    mu[k]    = rnorm(1, mu.hat, sqrt(tau2.hat))
+  }
+  
+  # Sample the variances
+  for(k in 1:KK){
+    nk       = sum(cc==k)
+    xsumk    = sum(x[cc==k])
+    tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+    mu.hat   = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+    mu[k]    = rnorm(1, mu.hat, sqrt(tau2.hat))
+  }
+  
+  # Sample the variances
+  cc.out[s,]    = cc
+  w.out[s,]     = w
+  mu.out[s,]    = mu
+  sigma.out[s,] = sigma
+}
+```
+
+Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
+
+```{r error=TRUE}
+xx  = seq(0,7,length.out=150)
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+  density.mcmc[s,] =density.mcmc[s,] + w.out[s+burn]*dnorm(xx,mu.out[s+burn,1],sigma.out[s+burn,1])+    
+(1-w.out[s+burn])*dnorm(xx,mu.out[s+burn,2],sigma.out[s+burn,2])
+}
+
+for(s in 1:(rrr-burn)){
+  density.mcmc[s,] =density.mcmc[s,] + w.out[s+burn]*dnorm(xx,mu.out[s+burn,1],sigma.out[s+burn,1])+    
+(1-w.out[s+burn])*dnorm(xx,mu.out[s+burn,2],sigma.out[s+burn,2])
+}
+
+density.mcmc.m = apply(density.mcmc , 2, mean)
+
+# Plot Bayesian estimate with pointwise credible bands along with kernel density estimate 
+colscale = c("black", "blue")
+yy       = density(x)
+density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
+density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+
+plot(xx, density.mcmc.m,
+type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Duration",ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq,rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col=colscale[1], lwd=2)
+lines(yy, col=colscale[2], lty=2, lwd=2)
+points(x, rep(0,n))
+```
+
+Provide the a graph of the density estimate on the interval [0,7].
+
+```{r error=TRUE}
+
+```
+
+#### Marking
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for $c_i$ is given by,
+
+$$
+\Pr(c_i = 1|...) = \frac{\omega\frac{1}{\sqrt[]{2\pi\sigma_1}}exp\left\{-\frac{1}{2\sigma^2_1}(x_i-\mu_1)^2\right\}}{\omega\frac{1}{\sqrt[]{2\pi\sigma_1}}exp\left\{-\frac{1}{2\sigma^2_1}(x_i-\mu_1)^2\right\}+(1-\omega)\frac{1}{\sqrt[]{2\pi\sigma_2}}exp\left\{-\frac{1}{2\sigma^2_2}(x_i-\mu_2)^2\right\}}
+$$
+
+(This assumes that the mixture weights are parameterized as 
+
+```{r error=TRUE}
+for(i in 1:n){
+  v    = rep(0,2)
+  v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
+  v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
+  v    = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $\omega$ correct?**
+
+The full conditional is simply 
+
+$$
+\omega \mid \cdots \mbox{Beta} \left(\alpha_1 + \sum_{i=1}^{n} \mathbf{1}(c_i=1), \alpha_2 + \sum_{i=1}^{n} \mathbf{1}(c_i=2)\right)
+$$
+
+The following one line of code implements it:
+
+```{r error=TRUE}
+w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+```
+
+- 0点 No
+- 1点 Yes
+
+**Are the sampler for $\mu$ correct?**
+
+$$
+\mu_k \mid \cdots \mbox{Normal}\left( \left[ \frac{n_k}{\sigma_k^2} + \frac{1}{\tau^2} \right]^{-1}\left[ \frac{\sum_{i:c_i=k} x_i}{\sigma_k^2} + \frac{\eta}{\tau^2} \right], \left[ \frac{n_k}{\sigma_k^2} + \frac{1}{\tau^2} \right]^{-1}\right)
+$$
+
+The following code implements the sampler:
+
+```{r error=TRUE}
+# Sample the means
+for(k in 1:2){
+  nk       = sum(cc==k)
+  xsumk    = sum(x[cc==k])
+  tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+  mu.hat   = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+  mu[k]    = rnorm(1, mu.hat, sqrt(tau2.hat))
+}
+```
+
+Remember, however, that there are various ways in which the implementation could proceed.
+
+- 0点 No
+- 1点 Yes
+
+**Are the samplers for $\sigma_k$ correct?**
+
+The full conditional takes the form:
+
+$$
+1/\sigma^2_k \mid \cdots \mbox{Gamma}\left(d + \frac{n_k}{2} , q + \frac{1}{2} \sum_{i:c_k=k} (x_i - \mu_k)^2 \right)
+$$
+
+The following code implements the sampler:
+
+```{r error=TRUE}
+# Sample the variances
+for(k in 1:2){
+  nk    = sum(cc==k)
+  dd.star = dd + nk/2
+  qq.star = qq + sum((x[cc==k] - mu[k])^2)/2
+  sigma[k] = sqrt(1/rgamma(1, dd.star, qq.star))
+}
+```
+
+Remember, however, that there are various ways in which the implementation could proceed.
+
+- 0点 No
+- 1点 Yes
+
+**Does the code to generate the density estimate appear correct?**
+
+This is an example that, as before, assumes that the weights are parameterized as $\omega$ and $1- \omega$.
+
+```{r error=TRUE}
+## Plot Bayesian estimate with pointwise credible bands
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col="black", lwd=2)
+points(x, rep(0,n))
+```
+
+Note that this will generate not only a point estimate, but also pointwise credible intervals.
+
+- 0点 No
+- 1点 Yes
+
+**Does the graph appear to be correct?**
+
+The density estimate should look similar to the Figure below. Note that the variance of both components is clearly different.
+
+![](figure/graph_Week4A.png)
+
+The full code for the MCMC algorithm follows:
+
+```{r error=TRUE}
+x = faithful$eruptions
+n = length(x)
+plot(density(x))
+points(x,rep(0,n))
+
+## Priors set up using an "empirical Bayes" approach
+aa  = rep(1,2)  
+eta = mean(x)    
+tau = sqrt(var(x))
+dd  = 2
+qq  = var(x)/2
+
+## Initialize the parameters
+w     = 1/2
+mu    = rnorm(2, mean(x), sd(x))
+sigma = rep(sd(x)/2,2)
+cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+
+## Number of iterations of the sampler
+rrr   = 12000
+burn  = 2000
+
+## Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = rep(0, rrr)
+mu.out    = array(0, dim=c(rrr, 2))
+sigma.out = array(0, dim=c(rrr, 2))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:n){
+    v    = rep(0,2)
+    v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
+    v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  
+  # Sample the parameters of the components
+  for(k in 1:2){
+    # Sample the means
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+    mu.hat  = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+    mu[k]   = rnorm(1, mu.hat, sqrt(tau2.hat))
+    # Sample the variances
+    dd.star = dd + nk/2
+    qq.star = qq + sum((x[cc==k] - mu[k])^2)/2
+    sigma[k] = sqrt(1/rgamma(1, dd.star, qq.star))
+  }
+  
+  # Store samples
+  cc.out[s,]    = cc
+  w.out[s]     = w
+  mu.out[s,]    = mu
+  sigma.out[s,] = sigma
+  logpost[s] = 0
+  for(i in 1:n){
+    if(cc[i] == 1){
+      logpost[s] = logpost[s] + log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)
+    }else{
+      logpost[s] = logpost[s] + log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)
+    }
+  }
+  logpost[s] = logpost[s] + dbeta(w, aa[1], aa[2], log=TRUE)
+  for(k in 1:2){
+    logpost[s] = logpost[s] + dnorm(mu[k], eta, tau, log = T) + dgamma(1/sigma[k]^2, dd, qq)/sigma[k]^4
+  }
+  if(s/500==floor(s/500)){
+    print(paste("s =",s))
+  }
+}
+
+## Compute the samples of the density over a dense grid
+xx  = seq(0,7,length=150)
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+  density.mcmc[s,] = density.mcmc[s,] + w.out[s+burn]*dnorm(xx,mu.out[s+burn,1],sigma.out[s+burn,1]) + 
+                               (1-w.out[s+burn])*dnorm(xx,mu.out[s+burn,2],sigma.out[s+burn,2])
+}
+density.mcmc.m = apply(density.mcmc , 2, mean)
+
+## Plot Bayesian estimate with pointwise credible bands
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col="black", lwd=2)
+points(x, rep(0,n))
+```
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 9th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit the two-component, location-and-scale mixture of Gaussians.
+
+```{r error=TRUE}
+library(MASS)
+library(MCMCpack)
+data(faithful)
+
+KK = 2          # Based on the description of the dataset
+x  = faithful$eruptions
+n  = length(x)
+set.seed(781209)
+
+### First, compute the "Maximum Likelihood" density estimate associated with a location mixture of 6 Gaussian distributions using the EM algorithm
+
+## Initialize the parameters
+w     = rep(1,KK)/KK
+mu    = rnorm(KK, mean(x), sd(x))
+sigma = rep(sd(x)/KK,KK)
+cc    = sample(1:KK, n, replace=T, prob=w)
+
+epsilon = 0.000001
+s       = 0
+sw      = FALSE
+KL      = -Inf
+KL.out  = NULL
+
+aa  = rep(1,KK)
+eta = mean(x)
+tau = sqrt(var(x))
+dd  = 2
+qq  = var(x)/KK
+
+## Number of iterations of the sampler
+rrr   = 12000
+burn  = 2000
+
+## Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK))
+sigma.out = array(0, dim=c(rrr, KK))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:n){
+    v     = rep(0,KK)
+    v[1]  = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
+    v[2]  = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  
+  # Sample the means
+  for(k in 1:KK){
+    nk       = sum(cc==k)
+    xsumk    = sum(x[cc==k])
+    tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+    mu.hat   = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+    mu[k]    = rnorm(1, mu.hat, sqrt(tau2.hat))
+  }
+  
+  # Sample the variances
+  for(k in 1:2){
+    nk       = sum(cc==k)
+    dd.star  = dd + nk/2
+    qq.star  = qq + sum((x[cc==k] - mu[k])^2)/2
+    sigma[k] = sqrt(1/rgamma(1, dd.star, qq.star))
+  }
+  
+  # Store samples
+  cc.out[s,]    = cc
+  w.out[s,]     = w
+  mu.out[s,]    = mu
+  sigma.out[s,] = sigma
+}
+```
+
+Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
+
+```{r error=TRUE}
+xx  = seq(0,7,length.out=150)
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+  density.mcmc[s,] = density.mcmc[s,] + w.out[s+burn]*dnorm(xx,mu.out[s+burn,1],sigma.out[s+burn,1]) +     (1-w.out[s+burn])*dnorm(xx,mu.out[s+burn,2],sigma.out[s+burn,2])
+}
+
+density.mcmc.m  = apply(density.mcmc, 2, mean)
+density.mcmc.lq = apply(density.mcmc, 2, quantile, 0.025)
+density.mcmc.uq = apply(density.mcmc, 2, quantile, 0.975)
+```
+
+Provide the a graph of the density estimate on the interval [0,7].
+
+```{r error=TRUE}
+
+```
+
+![](figure/week4.1.png)
+
+#### Marking
+
+**Is the sampler for $c$ correct?**
+
+The full conditional for $c_i$ is given by,
+
+$$
+\Pr(c_i = 1|...) = \frac{\omega\frac{1}{\sqrt[]{2\pi\sigma_1}}exp\left\{-\frac{1}{2\sigma^2_1}(x_i-\mu_1)^2\right\}}{\omega\frac{1}{\sqrt[]{2\pi\sigma_1}}exp\left\{-\frac{1}{2\sigma^2_1}(x_i-\mu_1)^2\right\}+(1-\omega)\frac{1}{\sqrt[]{2\pi\sigma_2}}exp\left\{-\frac{1}{2\sigma^2_2}(x_i-\mu_2)^2\right\}}
+$$
+
+(This assumes that the mixture weights are parameterized as 
+
+```{r error=TRUE}
+for(i in 1:n){
+  v    = rep(0,2)
+  v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
+  v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
+  v    = exp(v - max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+}
+```
+
+- 0点 No
+- 1点 Yes
+
+**Is the sampler for $\omega$ correct?**
+
+The full conditional is simply 
+
+$$
+\omega \mid \cdots \mbox{Beta} \left(\alpha_1 + \sum_{i=1}^{n} \mathbf{1}(c_i=1), \alpha_2 + \sum_{i=1}^{n} \mathbf{1}(c_i=2)\right)
+$$
+
+The following one line of code implements it:
+
+```{r error=TRUE}
+w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+```
+
+- 0点 No
+- 1点 Yes
+
+**Are the sampler for $\mu$ correct?**
+
+$$
+\mu_k \mid \cdots \mbox{Normal}\left( \left[ \frac{n_k}{\sigma_k^2} + \frac{1}{\tau^2} \right]^{-1}\left[ \frac{\sum_{i:c_i=k} x_i}{\sigma_k^2} + \frac{\eta}{\tau^2} \right], \left[ \frac{n_k}{\sigma_k^2} + \frac{1}{\tau^2} \right]^{-1}\right)
+$$
+
+The following code implements the sampler:
+
+```{r error=TRUE}
+# Sample the means
+for(k in 1:2){
+  nk       = sum(cc==k)
+  xsumk    = sum(x[cc==k])
+  tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+  mu.hat   = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+  mu[k]    = rnorm(1, mu.hat, sqrt(tau2.hat))
+}
+```
+
+Remember, however, that there are various ways in which the implementation could proceed.
+
+- 0点 No
+- 1点 Yes
+
+**Are the samplers for $\sigma_k$ correct?**
+
+The full conditional takes the form:
+
+$$
+1/\sigma^2_k \mid \cdots \mbox{Gamma}\left(d + \frac{n_k}{2} , q + \frac{1}{2} \sum_{i:c_k=k} (x_i - \mu_k)^2 \right)
+$$
+
+The following code implements the sampler:
+
+```{r error=TRUE}
+# Sample the variances
+for(k in 1:2){
+  nk    = sum(cc==k)
+  dd.star = dd + nk/2
+  qq.star = qq + sum((x[cc==k] - mu[k])^2)/2
+  sigma[k] = sqrt(1/rgamma(1, dd.star, qq.star))
+}
+```
+
+Remember, however, that there are various ways in which the implementation could proceed.
+
+- 0点 No
+- 1点 Yes
+
+**Does the code to generate the density estimate appear correct?**
+
+This is an example that, as before, assumes that the weights are parameterized as $\omega$ and $1- \omega$.
+
+```{r error=TRUE}
+## Plot Bayesian estimate with pointwise credible bands
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col="black", lwd=2)
+points(x, rep(0,n))
+```
+
+Note that this will generate not only a point estimate, but also pointwise credible intervals.
+
+- 0点 No
+- 1点 Yes
+
+**Does the graph appear to be correct?**
+
+The density estimate should look similar to the Figure below. Note that the variance of both components is clearly different.
+
+![](figure/graph_Week4A.png)
+
+The full code for the MCMC algorithm follows:
+
+```{r error=TRUE}
+x = faithful$eruptions
+n = length(x)
+plot(density(x))
+points(x,rep(0,n))
+
+## Priors set up using an "empirical Bayes" approach
+aa  = rep(1,2)  
+eta = mean(x)    
+tau = sqrt(var(x))
+dd  = 2
+qq  = var(x)/2
+
+## Initialize the parameters
+w     = 1/2
+mu    = rnorm(2, mean(x), sd(x))
+sigma = rep(sd(x)/2,2)
+cc    = sample(1:2, n, replace=T, prob=c(1/2,1/2))
+
+## Number of iterations of the sampler
+rrr   = 12000
+burn  = 2000
+
+## Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = rep(0, rrr)
+mu.out    = array(0, dim=c(rrr, 2))
+sigma.out = array(0, dim=c(rrr, 2))
+logpost   = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:n){
+    v    = rep(0,2)
+    v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
+    v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
+    v    = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:2, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, aa[1] + sum(cc==1), aa[2] + sum(cc==2))
+  
+  # Sample the parameters of the components
+  for(k in 1:2){
+    # Sample the means
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+    mu.hat  = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+    mu[k]   = rnorm(1, mu.hat, sqrt(tau2.hat))
+    # Sample the variances
+    dd.star = dd + nk/2
+    qq.star = qq + sum((x[cc==k] - mu[k])^2)/2
+    sigma[k] = sqrt(1/rgamma(1, dd.star, qq.star))
+  }
+  
+  # Store samples
+  cc.out[s,]    = cc
+  w.out[s]     = w
+  mu.out[s,]    = mu
+  sigma.out[s,] = sigma
+  logpost[s] = 0
+  for(i in 1:n){
+    if(cc[i] == 1){
+      logpost[s] = logpost[s] + log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)
+    }else{
+      logpost[s] = logpost[s] + log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)
+    }
+  }
+  logpost[s] = logpost[s] + dbeta(w, aa[1], aa[2], log=TRUE)
+  for(k in 1:2){
+    logpost[s] = logpost[s] + dnorm(mu[k], eta, tau, log = T) + dgamma(1/sigma[k]^2, dd, qq)/sigma[k]^4
+  }
+  if(s/500==floor(s/500)){
+    print(paste("s =",s))
+  }
+}
+
+## Compute the samples of the density over a dense grid
+xx  = seq(0,7,length=150)
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+  density.mcmc[s,] = density.mcmc[s,] + w.out[s+burn]*dnorm(xx,mu.out[s+burn,1],sigma.out[s+burn,1]) + 
+                               (1-w.out[s+burn])*dnorm(xx,mu.out[s+burn,2],sigma.out[s+burn,2])
+}
+density.mcmc.m = apply(density.mcmc , 2, mean)
+
+## Plot Bayesian estimate with pointwise credible bands
+density.mcmc.lq = replace_na(apply(density.mcmc, 2, quantile, 0.025, na.rm=TRUE), 0)
+density.mcmc.uq = replace_na(apply(density.mcmc, 2, quantile, 0.975, na.rm=TRUE), 0)
+plot(xx, density.mcmc.m, type="n",ylim=c(0,max(density.mcmc.uq)),xlab="Eruptions", ylab="Density")
+polygon(c(xx,rev(xx)), c(density.mcmc.lq, rev(density.mcmc.uq)), col="grey", border="grey")
+lines(xx, density.mcmc.m, col="black", lwd=2)
+points(x, rep(0,n))
+```
+
+- 0点 No
+- 1点 Yes
+
+<br>
+
+### 10th Peer
+
+#### Assignment
+
+Provide an MCMC algorithm to fit the two-component, location-and-scale mixture of Gaussians.
+
+```{r error=TRUE}
+### Get a "Bayesian" kernel density estimator based on the same location mixture of 2 normals
+data("faithful")
+x  = faithful$eruptions
+n  = length(x)
+set.seed(781209)
+
+## Priors set up using an "empirical Bayes" approach
+KK = 2          
+aa  = rep(1,KK)  
+eta = mean(x)    
+tau = sqrt(var(x))
+dd  = 2
+qq  = var(x)/KK
+## Initialize the parameters
+w     = rep(1,KK)/KK
+mu    = c(mean(x)-sd(x), mean(x)+sd(x))
+sigma = rep(sd(x)/4,2)
+cc    = sample(1:KK, n, replace=T, prob=w)
+
+## Number of iterations of the sampler
+rrr   = 12000
+burn  = 2000
+
+## Storing the samples
+cc.out    = array(0, dim=c(rrr, n))
+w.out     = rep(0, rrr)
+mu.out    = array(0, dim=c(rrr, KK))
+sigma.out = array(0, dim=c(rrr, KK))
+logpost   = rep(0, rrr)
+tau.out = rep(0, rrr)
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:n){
+    v = rep(0,KK)
+    v[1] = log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)  #Compute the log of the weights
+    v[2] = log(1-w) + dnorm(x[i], mu[2], sigma[2], log=TRUE)  #Compute the log of the weights
+    v = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  #w = as.vector(rdirichlet(1, aa + tabulate(cc, nbins=KK)))
+  #w = rbeta(1, 1+sum(cc==1), 1+sum(cc==2))
+  w = rbeta(2, 1 + sum(cc==1), 1 + sum(cc==2))
+  
+  # Sample the means
+  for(k in 1:KK){
+    nk    = sum(cc==k)
+    xsumk = sum(x[cc==k])
+    tau2.hat = 1/(nk/sigma[k]^2 + 1/tau^2)
+    mu.hat  = tau2.hat*(xsumk/sigma[k]^2 + eta/tau^2)
+    mu[k]   = rnorm(1, mu.hat, sqrt(tau2.hat))
+  }
+
+  # Sample the variances
+  for(k in 1:KK){
+    nk    = sum(cc==k)
+    dd.star = dd + nk/2
+    qq.star = qq + sum((x[cc==k] - mu[k])^2)/2
+    sigma[k] = sqrt(1/rgamma(1, dd.star, qq.star))
+  }
+
+  # Store samples
+  cc.out[s,]   = cc
+  w.out[s]    = w
+  mu.out[s,]   = mu
+  tau.out[s] = tau
+  sigma.out[s,] = sigma
+  logpost[s] = 0
+
+  for(i in 1:n){
+    if(cc[i]==1){
+      logpost[s] = logpost[s] + log(w) + dnorm(x[i], mu[1], sigma[1], log=TRUE)
+    }else{
+      logpost[s] = logpost[s] + log(1-w) + dnorm(x[i], mu[1], sigma[2], log=TRUE)
+    }
+  }
+  logpost[s] = logpost[s] + dbeta(w, aa[1], aa[2], log=T)
+  #logpost[s] = logpost[s] + log(ddirichlet(w, aa), log=T)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + dnorm(mu[k], eta, tau, log=TRUE)
+    logpost[s] = logpost[s] + dgamma(1/sigma[k]^2, dd, qq, log=TRUE) - 4*log(sigma[k])
+  }
+
+  
+  if(s/500==floor(s/500)){
+    print(paste("s =",s))
+  }
+}
+```
+
+Provide code to generate the density estimate on a grid consisting of 150 points in the interval [0,7].
+
+```{r error=TRUE}
+## Compute the samples of the density over a dense grid
+xx  = seq(0,7,length=150)
+density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
+for(s in 1:(rrr-burn)){
+  for(k in 1:KK){
+    if (k==1) {
+      density.mcmc[s,] = density.mcmc[s,] + 
+        w.out[s+burn]*dnorm(xx,mu.out[s+burn,k],sigma.out[s+burn,k])
+    } else {
+      density.mcmc[s,] = density.mcmc[s,] + 
+        1-w.out[s+burn]*dnorm(xx,mu.out[s+burn,k],sigma.out[s+burn,k])
+    }
+  }
+}
+density.mcmc.m = apply(density.mcmc , 2, mean)
 
 ```
 
