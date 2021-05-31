@@ -2403,19 +2403,121 @@ Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminan
 
 ```{r error=TRUE}
 load('data/banknoteclassification.RData')
+library(mvtnorm)
+library(MCMCpack)
 
+#load("banknoteclassification.Rdata")
+n = nrow(banknote.training)  # Size of the training set
+m = nrow(banknote.test)     # Size of the test set
+x = rbind(as.matrix(banknote.training), as.matrix(banknote.test))   # Create dataset of observations, first n belong to the training set, and the rest belong to the test set
+p       = dim(x)[2]              # Number of features
+KK      = 2
+
+## Initialize the parameters
+w       = c(mean(banknote.training.labels=="counterfeit"),mean(banknote.training.labels=="genuine"))
+mu      = rbind(apply(banknote.training[banknote.training.labels=="counterfeit",],2,mean),apply(banknote.training[banknote.training.labels=="genuine",],2,mean))
+Sigma   = array(0, dim=c(KK,p,p))   Sigma[1,,] = var(x[banknote.training.labels=="counterfeit",])   Sigma[2,,] = var(x[banknote.training.labels=="genuine",])
+cc      = array(0,n+m)
+cc[1:n] = as.integer(banknote.training.labels)
+cc[(n+1):(n+m)] = sample(1:2,m,replace=TRUE,prob = w)
+
+# Priors
+aa  = rep(1, KK)
+dd  = apply(x,2,mean)
+DD  = 10*var(x)
+nu  = p
+SS  = var(x)/2
+
+# Number of iteration of the sampler
+rrr = 1000
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n+m))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+
+logpost   = rep(0, rrr)  for(s in 1:rrr){
+  # Sample the indicators   c
+  c[1:n]  = as.integer(banknote.training.labels) # Training set
+  for(i in (n+1):(n+m)){
+    v = rep(0,KK)
+    
+    for(k in 1:KK){
+       v[k] = log(w[k]) + mvtnorm::dmvnorm(x[i,], mu[k,], Sigma[k,,], log=TRUE)  #Compute the log of the weights     }     v = exp(v - max(v))/sum(exp(v - max(v)))
+       cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+    }
+    
+    # Sample the weights
+    w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+    
+    # Sample the means
+    DD.st    = matrix(0, nrow=p, ncol=p)
+    for(k in 1:KK){
+      mk     = sum(cc==k)
+      xsumk  = apply(x[cc==k,], 2, sum)
+      DD.st  = solve(mk*solve(Sigma[k,,]) + solve(DD))
+      dd.st  = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+      mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+    }
+    
+    # Sample the variances
+    xcensumk = array(0, dim=c(KK,p,p))
+    for(i in 1:n){     xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+    }
+    
+    for(k in 1:KK){
+      Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+    }
+    
+    # Store samples
+    cc.out[s,]      = cc
+    w.out[s,]       = w
+    mu.out[s,,]     = mu
+    Sigma.out[s,,,] = Sigma
+    
+    for(i in 1:(n+m)){
+      logpost[s] = logpost[s] + log(w[cc[i]]) + mvtnorm::dmvnorm(x[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+    }
+    logpost[s]   = logpost[s] + ddirichlet(w, aa)
+    
+    for(k in 1:KK){
+      logpost[s] = logpost[s] + mvtnorm::dmvnorm(mu[k,], dd, DD)
+      logpost[s] = logpost[s] + diwish(Sigma[k,,], nu, SS)
+    }
+    
+    if(s/250==floor(s/250)){
+      print(paste("s = ", s))
+    }
+  }
+}
 ```
 
 What is the classification error for the test set?
 
 ```{r error=TRUE}
+# classification probability of test data
+prob_1 = apply(cc.out[,(n+1):(n+m)],2,function(x){mean(x==1)}) ## probability of test data being counterfeit
 
+prob_2 = 1-prob_1 ## probability of test data being genuine
+prob   = cbind(prob_1,prob_2)
+
+# classification of test data using mcmc probs
+pred   = ifelse(prob[,1]>prob[,2],1,2)
+n_err  = sum(!pred==as.integer(banknote.test.labels)) # number of errors= 1 error
+
+classification_err=n_err/length(pred)
+#number of errors=1, classification error mcmc= 0.005882353
 ```
 
 Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
 
 ```{r error=TRUE}
-
+#classification of test data using qda
+modqda    = qda(grouping=banknote.training.labels, x=banknote.training, method="mle")
+ccpredqda = predict(modqda,newdata=banknote.test)
+n_qdaerr  = sum(!(ccpredqda$class == banknote.test.labels)) # number of errors= 3 error qda_err=n_qdaerr/length(banknote.test.labels)
+#number of errors=3, classification error qda= 0.01764706
 ```
 
 #### Marking
@@ -2671,19 +2773,122 @@ Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminan
 
 ```{r error=TRUE}
 load('data/banknoteclassification.RData')
+library(MCMCpack)
+library(mvtnorm)
 
+set.seed(21196)
+x.train = banknote.training
+x.test = banknote.test
+n.train = nrow(x.train)
+n.test = nrow(x.test)
+
+KK = 2
+p = ncol(x.train)
+
+##### Initialize the parameters
+w          = 0.5 
+mu         = rmvnorm(KK, mean = apply(x.train,2,mean), sigma = diag(p))
+Sigma      = array(0, dim=c(KK,p,p))  
+Sigma[1,,] = diag(p) * apply(x.train, 2, var)
+Sigma[2,,] = diag(p) * apply(x.train, 2, var)
+cc         = sample(1:KK, n.train, replace=TRUE, prob=c(w, 1-w))
+
+##### The parameters of the priors shoult be set using empirical bayes
+# uniform distribution for the weights
+a = 0 
+b = 1
+
+# multivariate normal for the means
+dd = apply(x.train,2,mean)# prior for the mean of the multivariate normal
+DD = var(x.train)
+
+# inverse-wishart for the covariance matrix
+# this is the conjugate prior for the cov matrix of a multivariate normal
+nu = p #  scalar degrees of freedom 
+SS = var(x.train) # symmetric, positive-semidefinite k x k scale matrix
+
+# Storing the samples
+cc.out    = array(0, dim=c(rrr, n.train))
+w.out     = array(0, dim=c(rrr, KK))
+mu.out    = array(0, dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
+
+rrr = 500
+# burn = 1000
+
+for(s in 1:rrr){
+  # Sample the indicators
+  for(i in 1:n.train){
+    v     = rep(0,KK)
+    v[1]  = log(w) + mvtnorm::dmvnorm(x.train[i,], mu[1,], Sigma[1,,], log=TRUE)  #Compute the log of the weights
+    v[2]  = log(1-w) + mvtnorm::dmvnorm(x.train[i,], mu[2,], Sigma[2,,], log=TRUE)
+    
+    v     = exp(v - max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  
+  # Sample the weights
+  w = rbeta(1, 1+sum(cc==1), 1+n.train-sum(cc==1))
+  
+  # Sample the means
+  DD.st = matrix(0, nrow=p, ncol=p)
+
+    for(k in 1:KK){
+      mk     = sum(cc==k)
+      xsumk  = apply(x.train[cc==k,],2,sum)
+      DD.st  = solve(mk*solve(Sigma[k,,]) + solve(DD))
+      dd.st  = DD.st%*%(solve(Sigma[k,,]) %*% xsumk + solve(DD)%*%dd)
+      mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+    }
+  
+  # Sample the variances
+  xcensumk = array(0, dim=c(KK,p,p))
+  
+  for(i in 1:n.train){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x.train[i,] - mu[cc[i],]) %*% t(x.train[i,] - mu[cc[i],])
+  }
+  
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  
+  for(i in 1:n.train){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + mvtnorm::dmvnorm(x.train[i,], mu[cc[i],], Sigma[cc[i],,], log=TRUE)
+  }
+  
+  logpost[s] = logpost[s] + dunif(w, min = 0, max = 1)
+  
+  for(k in 1:KK){
+      logpost[s] = logpost[s] + mvtnorm::dmvnorm(mu[k,], dd, DD, log=TRUE)
+      logpost[s] = logpost[s] + log(diwish(Sigma[k,,], nu, SS))
+  }
+
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
 ```
 
 What is the classification error for the test set?
 
 ```{r error=TRUE}
-
+0
 ```
 
 Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
 
 ```{r error=TRUE}
-
+modqda       = qda(grouping=classes.train, x=x.train, method="mle")
+ccpredqda    = predict(modqda,newdata=x.test)
+pred.classes = as.integer(ccpredqda$class)
+sum(pred.classes - classes.test != 0)
 ```
 
 #### Marking
@@ -2939,19 +3144,134 @@ Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminan
 
 ```{r error=TRUE}
 load('data/banknoteclassification.RData')
+n  = dim(banknote.training)[1]  # Size of the training set
+m  = dim(banknote.test)[1]      # Size of the test set
+x  = rbind(as.matrix(banknote.training),as.matrix(banknote.test))   # Create dataset of observations
+p  = dim(x)[2]              # Number offeatures
+KK = 2
 
+training.label = as.numeric(banknote.training.labels)
+test.label     = as.numeric(banknote.test.labels)
+
+par(mfrow = c(1,1))
+par(mar   = c(2,2,2,2)+0.1)
+colscale  = c("black","red") # Black =counterfeit; Red = genuine
+
+## Initialize the parameters
+mu         =rmvnorm(KK, apply(x,2,mean), var(x))  #RandomCluster centers randomly spread over the support of the data
+Sigma      = array(0,dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p
+SS = var(x)/2
+
+# Number of iteration of the sampler
+rrr  = 10000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0,dim=c(rrr, n+m))
+w.out     = array(0,dim=c(rrr, KK))
+mu.out    = array(0,dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0,rrr)
+
+for(s in 1:rrr){
+  for(i in 1:m){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k])+ dmvnorm(x[n+i,], mu[k,], Sigma[k,,], log=TRUE)
+    }
+    v    = exp(v -max(v))/sum(exp(v - max(v)))
+    v[k] = log(w[k])+ dmvnorm(x[n+i,], mu[k,], Sigma[k,,], log=TRUE)
+  }
+  v     = exp(v -max(v))/sum(exp(v - max(v)))
+  cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+}
+
+# Sample the weights
+for(k in 1:KK){
+  mk     = sum(cc==k)
+  xsumk  = apply(x[cc==k,], 2, sum)
+  DD.st  = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st  = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+
+# Sample the variances
+xcensumk = array(0,dim=c(KK,p,p))
+for(i in 1:n+m){
+  mk     = sum(cc==k)
+  xsumk  = apply(x[cc==k,], 2, sum)
+  DD.st  = solve(mk*solve(Sigma[k,,]) + solve(DD))
+  dd.st  = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+  mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+}
+
+# Sample the variances
+xcensumk = array(0, dim=c(KK,p,p))
+for(i in 1:n+m){
+  xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+}
+
+for(k in 1:KK){
+  Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+}
+
+# Store samples
+cc.out[s,]      = cc
+w.out[s,]       = w
+mu.out[s,,]     = mu
+Sigma.out[s,,,] = Sigma
+
+for(i in 1:n+m){
+  logpost[s] = logpost[s] + log(w[cc[i]]) + mvtnorm::dmvnorm(x[i,], mu[cc[i],],Sigma[cc[i],,], log=TRUE)
+}
+
+logpost[s] = logpost[s] + log(w[cc[i]]) + mvtnorm::dmvnorm(x[i,], mu[cc[i],],Sigma[cc[i],,], log=TRUE)
+
+for(k in 1:KK){
+  logpost[s] = logpost[s] + mvtnorm::dmvnorm(mu[k,], dd, DD)
+  for(k in 1:KK){
+    logpost[s] = logpost[s] + mvtnorm::dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s]+ diwish(Sigma[k,,], nu, SS)
+  }
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
 ```
 
 What is the classification error for the test set?
 
 ```{r error=TRUE}
+## True labels
+as.numeric(banknote.test.labels)
+probcounterf = rep(NA, m)
 
+for(i in 1:m){
+  probcaounterf[i] =sum(cc.out[-seq(1,burn),n+i]==1)/(rrr-burn)
+}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+  probgenuine[i] =sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+#Ther classification was completely correct!
 ```
 
 Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
 
 ```{r error=TRUE}
-
+# Using the qda and lda functions in R
+# qda
+modqda    = qda(grouping=as.numeric(banknote.training.labels),x=banknote.training, method="mle")
+ccpredqda = predict(modqda,newdata=banknote.test)
+sum(!(ccpredqda$class == as.numeric(banknote.test.labels)))
+#answer = 3
 ```
 
 #### Marking
@@ -3207,19 +3527,125 @@ Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminan
 
 ```{r error=TRUE}
 load('data/banknoteclassification.RData')
+n = dim(banknote.training)[1]  # Size of the training set
+m = dim(banknote.test)[1]      # Size of the test set
+x = rbind(as.matrix(banknote.training),as.matrix(banknote.test))   # Create dataset of observations
 
+p  = dim(x)[2]              # Number offeatures
+KK = 2
+training.label = as.numeric(banknote.training.labels)
+test.label     = as.numeric(banknote.test.labels)
+par(mfrow=c(1,1))
+par(mar=c(2,2,2,2)+0.1)
+colscale = c("black","red") # Black =counterfeit; Red = genuine
+pairs(banknote.training, col=colscale[banknote.training.labels],pch=as.numeric(banknote.training.labels))
+
+## Initialize the parameters
+w  = rep(1,KK)/KK  #Assign equal weight toeach component to start with
+mu = rmvnorm(KK, apply(x,2,mean), var(x))  #RandomCluster centers randomly spread over the support of the data
+Sigma = array(0,dim=c(KK,p,p))  #Initial variances are assumed to be the same
+Sigma[1,,] = var(x)/KK
+Sigma[1,,] = var(x)/KK
+cc         = c(training.label, sample(1:KK, m, replace=TRUE, prob=w))
+
+# Priors
+aa = rep(1, KK)
+dd = apply(x,2,mean)
+DD = 10*var(x)
+nu = p
+SS = var(x)/2
+
+# Number of iteration of the sampler
+rrr  = 10000
+burn = 1000
+
+# Storing the samples
+cc.out    = array(0,dim=c(rrr, n+m))
+w.out     = array(0,dim=c(rrr, KK))
+mu.out    = array(0,dim=c(rrr, KK, p))
+Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0,rrr)
+
+for(s in 1:rrr){
+  for(i in 1:m){
+    v = rep(0,KK)
+    for(k in 1:KK){
+      v[k] = log(w[k])+ dmvnorm(x[n+i,], mu[k,], Sigma[k,,], log=TRUE)
+    }
+    v     = exp(v -max(v))/sum(exp(v - max(v)))
+    cc[i] = sample(1:KK, 1, replace=TRUE, prob=v)
+  }
+  # Sample the weights
+  w = as.vector(rdirichlet(1, aa + tabulate(cc)))
+  
+  # Sample the means
+  DD.st = matrix(0,nrow=p, ncol=p)
+  for(k in 1:KK){
+    mk     = sum(cc==k)
+    xsumk  = apply(x[cc==k,], 2, sum)
+    DD.st  = solve(mk*solve(Sigma[k,,]) + solve(DD))
+    dd.st  = DD.st%*%(solve(Sigma[k,,])%*%xsumk + solve(DD)%*%dd)
+    mu[k,] = as.vector(rmvnorm(1,dd.st,DD.st))
+  }
+  
+  # Sample the variances
+  xcensumk = array(0,dim=c(KK,p,p))
+  for(i in 1:n+m){
+    xcensumk[cc[i],,] = xcensumk[cc[i],,] + (x[i,] - mu[cc[i],])%*%t(x[i,] - mu[cc[i],])
+  }
+  for(k in 1:KK){
+    Sigma[k,,] = riwish(nu + sum(cc==k), SS + xcensumk[k,,])
+  }
+  
+  # Store samples
+  cc.out[s,]      = cc
+  w.out[s,]       = w
+  mu.out[s,,]     = mu
+  Sigma.out[s,,,] = Sigma
+  
+  for(i in 1:n+m){
+    logpost[s] = logpost[s] + log(w[cc[i]]) + mvtnorm::dmvnorm(x[i,], mu[cc[i],],Sigma[cc[i],,], log=TRUE)
+  }
+  logpost[s] =logpost[s] + ddirichlet(w, aa)
+  
+  for(k in 1:KK){
+    logpost[s] =logpost[s] + mvtnorm::dmvnorm(mu[k,], dd, DD)
+    logpost[s] = logpost[s]+ diwish(Sigma[k,,], nu, SS)
+  }
+  if(s/250==floor(s/250)){
+    print(paste("s = ", s))
+  }
+}
 ```
 
 What is the classification error for the test set?
 
 ```{r error=TRUE}
+## True labels
+as.numeric(banknote.test.labels)
+probcounterf = rep(NA, m)
+probcounterf = rep(NA, m)
 
+for(i in 1:m){
+  probcaounterf[i] = sum(cc.out[-seq(1,burn),n+i]==1)/(rrr-burn)
+}
+probgenuine = rep(NA, m)
+for(i in 1:m){
+   probgenuine[i] = sum(cc.out[-seq(1,burn),n+i]==2)/(rrr-burn)
+}
+#
+#Ther classification was completely correct!
 ```
 
 Is the R function `qda` (which implements classical quadratic discriminant analysis) is used to classify the observations in the test set, what is the classification error?
 
 ```{r error=TRUE}
-
+# Using the qda and lda functions in R
+# qda
+modqda = qda(grouping=as.numeric(banknote.training.labels),x=banknote.training, method="mle")
+ccpredqda = predict(modqda,newdata=banknote.test)
+sum(!(ccpredqda$class == as.numeric(banknote.test.labels)))
+#answer = 3
 ```
 
 #### Marking
