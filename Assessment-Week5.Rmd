@@ -166,6 +166,8 @@ $$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+suppressAll(lib('EDISON', 'extraDistr', 'MCMCpack', 'invgamma'))
+
 x <- read.csv(file = "data/nestsize.csv", header = FALSE)$V1
 n <- length(x)               # number of samples
 
@@ -711,6 +713,7 @@ Then, provide code to compute the BIC and use it to evaluate it for the dataset 
 ```{r error=TRUE}
 rm(list = ls())
 num_eggs <- read.csv(file = "data/nestsize.csv", header = FALSE)$V1
+x <- num_eggs
 n <- length(x)                 # number of samples
 
 #For Poisson:
@@ -1010,26 +1013,26 @@ Then, provide code to compute the BIC and use it to evaluate it for the dataset 
 ## Run the actual EM algorithm
 ## Initialize the parameters
 set.seed(81196)
-x  = nestsize$X4
+x     = nestsize$X4
 w.hat = 1/2                         #Assign equal weight to each component to start with
 lambda.hat = mean(x)   #Random cluster centers randomly spread over the support of the data
 KK = 2
-n = nrow(nestsize)
+n  = nrow(nestsize)
 
-s  = 0
-sw = FALSE
-QQ = -Inf
-QQ.out = NULL
+s       = 0
+sw      = FALSE
+QQ      = -Inf
+QQ.out  = NULL
 epsilon = 10^(-5)
 while(!sw){
   ## E step
-  v = array(0, dim=c(n,KK))
+  v     = array(0, dim=c(n,KK))
   v[,1] = w.hat*factor/(w.hat*factor+(1-w.hat)*dpois(x, lambda.hat))    
   v[,2] = (1-w.hat)*dpois(x, lambda.hat)/(w.hat*factor+(1-w.hat)*dpois(x, lambda.hat)) 
   
   ## M step
   # Weights
-  w.hat = sum(v[,1])/(sum(v[,1]) + sum(v[,2]))
+  w.hat      = sum(v[,1])/(sum(v[,1]) + sum(v[,2]))
   lambda.hat = sum(v[,2] * x)/sum(v[,2])
   
   ##Check convergence
@@ -1040,9 +1043,9 @@ while(!sw){
   if(abs(QQn-QQ)/abs(QQn)<epsilon){
     sw=TRUE
   }
-  QQ = QQn
+  QQ     = QQn
   QQ.out = c(QQ.out, QQ)
-  s = s + 1
+  s      = s + 1
   print(paste(s, QQn))
 }
 ```
@@ -1053,7 +1056,7 @@ Does the BIC provide evidence for the mixture model in the `nestsize.csv` datase
 BIC = -2*log(w.hat*exp(QQn)) + 2*log(n)
 #BIC = 1116.189
 paste('BIC =', BIC)
-俄
+
 #Yes
 ```
 
@@ -1236,7 +1239,65 @@ $$f(x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \in \{0,1,2,\ldots\}$$
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
+x <- read.csv(file = "data/nestsize.csv", header = FALSE)$V1
+n <- length(x)               # number of samples
+#x = dat$V1
+#n = length(x)
 
+# Poisson model
+lambda_pois = mean(x)
+BIC_poiss   = -2 * sum(dpois(x, lambda_pois, log=TRUE)) + log(n)
+# Results in BIC_poiss = 1272.175
+
+## Initialize the parameters
+w      = sum(x == 0) / length(x)
+lambda = mean(x[x > 0])
+s  = 0
+sw = FALSE
+QQ = -Inf
+QQ.out  = NULL
+epsilon = 10^(-5)
+
+while(!sw){
+  ## E step
+  v = array(0, dim=c(n,2))
+  v[x == 0, 1] = w
+  v[x == 0, 2] = (1 - w) * exp(-lambda)
+  v[x > 0, 2] = 1
+  v = v / rowSums(v)
+  
+  ## M step
+  
+  # Weights
+  w = mean(v[,1])
+  lambda = sum(x) / sum(v[,2])
+  
+  ##Check convergence
+  QQn = sum(v[,1] * log(w) + v[,2] * (log(1 - w) + dpois(x, lambda, log=TRUE)))
+  
+  if(abs(QQn-QQ)/abs(QQn) < epsilon){
+    sw=TRUE
+  }
+  QQ = QQn
+  QQ.out = c(QQ.out, QQ)
+  s = s + 1
+  
+  print(paste(s, QQn))
+}
+log_likelihood = 0
+
+for(i in 1:n){
+  if(x[i]==0){
+    log_likelihood = log_likelihood + log(w + (1-w)*dpois(x[i], lambda))
+  
+  } else {
+  
+    log_likelihood = log_likelihood + log(1-w) +  dpois(x[i], lambda, log=TRUE)
+  }
+}
+BIC = -2 * log_likelihood + 2 * log(n)
+#Results in BIC = 1056.845
+BIC
 ```
 
 Derive the formula for the BIC associated with the the Poisson model
@@ -1246,7 +1307,7 @@ $$f(x) = w \delta_0(x) + (1-w) \frac{e^{-\lambda} \lambda^x}{x!} \quad \quad x \
 Then, provide code to compute the BIC and use it to evaluate it for the dataset `nestsize.csv`:
 
 ```{r error=TRUE}
-
+#Yes, as BIC for mixture model (1056.845) is smaller than BIC for Poisson model (1272.175)
 ```
 
 Does the BIC provide evidence for the mixture model in the `nestsize.csv` dataset?

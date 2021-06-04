@@ -166,6 +166,7 @@ Provide an MCMC algorithm to fit a semisupervised Bayesian quadratic discriminan
 ```{r error=TRUE}
 ## load packages
 # lib('mvtnorm', 'dae', 'Rfast', 'splus2R')
+suppressAll(lib('EDISON', 'extraDistr', 'MCMCpack', 'invgamma'))
 lib('mvtnorm')
 
 ## load data
@@ -1733,6 +1734,7 @@ for(s in 1:rrr){
       print(paste("s = ", s))
     }
   }
+}
 ```
 
 What is the classification error for the test set?
@@ -2416,7 +2418,9 @@ KK      = 2
 ## Initialize the parameters
 w       = c(mean(banknote.training.labels=="counterfeit"),mean(banknote.training.labels=="genuine"))
 mu      = rbind(apply(banknote.training[banknote.training.labels=="counterfeit",],2,mean),apply(banknote.training[banknote.training.labels=="genuine",],2,mean))
-Sigma   = array(0, dim=c(KK,p,p))   Sigma[1,,] = var(x[banknote.training.labels=="counterfeit",])   Sigma[2,,] = var(x[banknote.training.labels=="genuine",])
+Sigma   = array(0, dim=c(KK,p,p))
+Sigma[1,,] = var(x[banknote.training.labels=="counterfeit",])
+Sigma[2,,] = var(x[banknote.training.labels=="genuine",])
 cc      = array(0,n+m)
 cc[1:n] = as.integer(banknote.training.labels)
 cc[(n+1):(n+m)] = sample(1:2,m,replace=TRUE,prob = w)
@@ -2436,8 +2440,9 @@ cc.out    = array(0, dim=c(rrr, n+m))
 w.out     = array(0, dim=c(rrr, KK))
 mu.out    = array(0, dim=c(rrr, KK, p))
 Sigma.out = array(0, dim=c(rrr, KK, p, p))
+logpost   = rep(0, rrr)
 
-logpost   = rep(0, rrr)  for(s in 1:rrr){
+for(s in 1:rrr){
   # Sample the indicators   c
   c[1:n]  = as.integer(banknote.training.labels) # Training set
   for(i in (n+1):(n+m)){

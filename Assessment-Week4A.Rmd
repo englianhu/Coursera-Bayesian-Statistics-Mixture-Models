@@ -3757,7 +3757,7 @@ Provide code to generate the density estimate on a grid consisting of 150 points
 
 ```{r error=TRUE}
 ## Compute the samples of the density over a dense grid
-xx  = seq(0,7,length=150)
+xx  = seq(0,7,length.out=150)
 density.mcmc = array(0, dim=c(rrr-burn,length(xx)))
 for(s in 1:(rrr-burn)){
   for(k in 1:KK){
@@ -3771,7 +3771,6 @@ for(s in 1:(rrr-burn)){
   }
 }
 density.mcmc.m = apply(density.mcmc , 2, mean)
-
 ```
 
 Provide the a graph of the density estimate on the interval [0,7].
