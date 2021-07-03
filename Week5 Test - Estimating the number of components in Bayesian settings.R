@@ -66,8 +66,15 @@ alpha*log((n+alpha-1)/alpha)
 
 If you have $n=200$ observations and a priori expect the mixture will have about 2 occupied components $(i.e., E(K^{*}) \approx 2E(K)≈2$ a priori), what value of \alphaα should you use for the prior $(w1,…,wK)∼Dir(αK,…,αK)$.  Use the approximation $E(K^{*}) \approx \alpha \log\left( \frac{n+\alpha-1}{\alpha} \right)E(K)≈αlog((n+α−1)/2) to provide an answer, which should be rounded to two decimal places. (1点)
 
-```r
+0.31
+正解
 
+The following code, which is taken almost literally from the video, computes the answer.
+
+```r
+ff = function(alpha)  alpha*log((200+alpha-1)/alpha) - 2
+alph = uniroot(ff, c(0.01, 20))
+alph$root  
 ```
 
 # [A Short Course on Bayesian Nonparametrics Lecture 2 - Introduction to Dirichlet process mixture models]()

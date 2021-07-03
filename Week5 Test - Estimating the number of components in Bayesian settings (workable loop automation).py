@@ -54,7 +54,8 @@ for n in list(numpy.arange(0, 10000, 0.01)):
   
   elem   = driver.find_element_by_xpath(
     '//*[@id="text-input-giU7KiAoEeqFkg4D2xLqww-input"]')
-  elem.send_keys(str(numpy.round(n, 2)))
+  elem.send_keys(str(0.31))
+  #elem.send_keys(str(numpy.round(n, 2)))
   
   wait   = WebDriverWait(driver, 1)
   #elem   = driver.find_element_by_xpath(
