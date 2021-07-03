@@ -207,7 +207,7 @@
 
 **Coursera Verified Certificate:**
 
-![Coursera - Bayesian Statistics: Mixture Models](https://raw.githubusercontent.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/531edc47f5e68076ce0054e880a18091169fd410/Coursera%20-%20Bayesian%20Statistics%20Mixture%20Models.pdf)
+![Coursera - Bayesian Statistics: Mixture Models](https://raw.githubusercontent.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/531edc47f5e68076ce0054e880a18091169fd410/Coursera%20-%20Bayesian%20Statistics%20Mixture%20Models.png)
 
 - [Bayesian Statistics: Mixture Models](https://www.coursera.org/account/accomplishments/certificate/Y6WGT58PAUAG)
 - [University of California](https://www.universityofcalifornia.edu)
