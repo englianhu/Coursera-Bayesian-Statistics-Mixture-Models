@@ -30,6 +30,8 @@ Rerun the algorithm contained in "Sample code for estimating the number of compo
 
 ```
 
+Note that the two answers are not terribly far off from each other.
+
 4. 質問 4
 
 Under the new prior $(w1,…,wK)∼Dir(0.2K,…,0.2K)$‵, what is the number of components in the optimal partitions according to Binder's loss function with $\gamma_1 = \gamma_2$?

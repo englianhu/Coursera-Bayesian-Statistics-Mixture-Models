@@ -190,7 +190,7 @@
       
       5.2.7) 動画: 講座 [Estimating the number of components in Bayesian settings. Duration: 9 分](https://www.youtube.com/watch?v=S_xLIcD2P_E)
       
-      5.2.8) テスト: Estimating the number of components in Bayesian settings 4 個の問題
+      5.2.8) テスト: [Estimating the number of components in Bayesian settings 4 個の問題]()
       
       5.2.9) 動画: 講座 [Estimating the full partition structure in Bayesian settings. Duration: 18分](https://www.youtube.com/watch?v=j_xoQBi9xVA)
       

@@ -7,24 +7,20 @@
 
 Let K^{*} be the prior expected number of occupied components in a mixture model with $K$ components where the weights are given a Dirichlet prior (w1,…,wK)∼Dir(2K,…,2K).  If you have $n=400$ observations, what is the expected number of occupied components, E(K^{*}) according to the exact formula we discussed in the lecture? Round your answer to one decimal place. (1点)
 
+11.1
+正解
+
+The following code computes the expected number of occupied components using the exact formula:
+
 ```r
-library(MCMCpack)
+n      = 400
+alpha  = 2
 
-x   <- exp(rnorm(400))
-n   <- length(x)
-KK  <- 2
-aa  <- rep(1,KK)
-#w  <- 1/2
-#mu <- mean(x)
-
-## Initialize the parameters
-w     <- rep(1, KK)/KK
-mu    <- rnorm(KK, mean(x), sd(x))
-sigma <- sd(x)/KK
-cc    <- sample(1:KK, n, replace=TRUE, prob=w)
-
-w <- as.vector(rdirichlet(1, aa + tabulate(cc, nbins=KK)))
-round(mean(w), 1)
+EKstar = 0
+for(i in 1:n){
+  EKstar = EKstar + alpha/(alpha + i -1)
+}
+print(EKstar)
 ```
 
 
@@ -32,24 +28,20 @@ round(mean(w), 1)
 
 Consider the same setup as the previous question, what is the expected number of occupied components, E(K^{*}) according to the exact formula we discussed in the lecture if $n=100$ instead? Round your answer to one decimal place. (1点)
 
+8.4
+正解
+
+The following code carries out the caluclation
+
 ```r
-library(MCMCpack)
+n      = 100
+alpha  = 2
 
-x   <- exp(rnorm(100))
-n   <- length(x)
-KK  <- 2
-aa  <- rep(1,KK)
-#w  <- 1/2
-#mu <- mean(x)
-
-## Initialize the parameters
-w     <- rep(1, KK)/KK
-mu    <- rnorm(KK, mean(x), sd(x))
-sigma <- sd(x)/KK
-cc    <- sample(1:KK, n, replace=TRUE, prob=w)
-
-w <- as.vector(rdirichlet(1, aa + tabulate(cc, nbins=KK)))
-round(mean(w), 1)
+EKstar = 0
+for(i in 1:n){
+  EKstar = EKstar + alpha/(alpha + i -1)
+}
+print(EKstar)
 ```
 
 
@@ -57,8 +49,16 @@ round(mean(w), 1)
 
 What would be the answer to the previous question if you used the approximate formula instead of the exact formula? Remember to round your answer to one decimal place. (1点)
 
-```r
 
+7.8
+正解
+
+The following code will perform the calculation using the approximate formula
+
+```r
+n      = 100
+alpha  = 2
+alpha*log((n+alpha-1)/alpha)
 ```
 
 

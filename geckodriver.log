@@ -338,3 +338,388 @@ console.warn: SearchSettings: "get: No settings file exists, new profile?" (new 
 console.log: WebExtensions: reset-default-search: starting.
 console.log: WebExtensions: reset-default-search: No addons in our list are installed.
 1625318028073	Marionette	INFO	Stopped listening on port 44795
+1625321019155	geckodriver	INFO	Listening on 127.0.0.1:35439
+1625321020162	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofilePEsQA4"
+1625321021081	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at /tmp/rust_mozprofilePEsQA4/search.json.mozlz4", (void 0)))
+1625321024161	Marionette	INFO	Listening on port 43861
+1625321024188	Marionette	WARN	TLS certificate errors will be ignored for this session
+console.log: WebExtensions: reset-default-search: starting.
+console.log: WebExtensions: reset-default-search: No addons in our list are installed.
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+1625322412887	geckodriver	INFO	Listening on 127.0.0.1:33919
+1625322412890	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile1mUxhD"
+1625322413813	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at /tmp/rust_mozprofile1mUxhD/search.json.mozlz4", (void 0)))
+1625322416878	Marionette	INFO	Listening on port 43895
+1625322416922	Marionette	WARN	TLS certificate errors will be ignored for this session
+console.log: WebExtensions: reset-default-search: starting.
+console.log: WebExtensions: reset-default-search: No addons in our list are installed.
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:50:36.120: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:50:36.120: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:50:36.120: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-WARNING **: 23:50:36.121: ../gobject/gsignal.c:3598: signal name 'load_complete' is invalid for instance '0x7f270bfe99b0' of type 'MaiAtkType139'
+
+(firefox:72683): GLib-GObject-WARNING **: 23:50:36.121: ../gobject/gsignal.c:3598: signal name 'load_complete' is invalid for instance '0x7f270bfe98f0' of type 'MaiAtkType13b'
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:50:36.139: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:50:36.139: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:50:36.276: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:50:39.927: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-WARNING **: 23:50:44.944: ../gobject/gsignal.c:3598: signal name 'load_complete' is invalid for instance '0x7f270df56a70' of type 'MaiAtkType139'
+
+(firefox:72683): GLib-GObject-WARNING **: 23:50:44.944: ../gobject/gsignal.c:3598: signal name 'load_complete' is invalid for instance '0x7f270df56ad0' of type 'MaiAtkType139'
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:50:45.214: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:50:46.286: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-CRITICAL **: 23:51:00.741: g_type_add_interface_static: assertion 'g_type_parent (interface_type) == G_TYPE_INTERFACE' failed
+
+(firefox:72683): GLib-GObject-WARNING **: 23:51:03.265: ../gobject/gsignal.c:3598: signal name 'load_complete' is invalid for instance '0x7f26e2d28d10' of type 'MaiAtkType139'
+
+(firefox:72683): GLib-GObject-WARNING **: 23:51:03.265: ../gobject/gsignal.c:3598: signal name 'load_complete' is invalid for instance '0x7f26e2d28e30' of type 'MaiAtkType13b'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+console.error: (new TypeError("parent is null", "resource://devtools/client/inspector/shared/style-change-tracker.js", 67))
+TypeError: parent is null: canMutationImpactCurrentStyles@resource://devtools/client/inspector/shared/style-change-tracker.js:67:24
+onMutations@resource://devtools/client/inspector/shared/style-change-tracker.js:84:41
+_emit@resource://devtools/shared/event-emitter.js:226:34
+emit@resource://devtools/shared/event-emitter.js:172:18
+emit@resource://devtools/shared/event-emitter.js:324:18
+getMutations@resource://devtools/client/fronts/walker.js:358:10
+
+console.error: (new TypeError("container.node.targetFront is null", "resource://devtools/client/inspector/markup/markup.js", 2310))
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+console.error: (new TypeError("parent is null", "resource://devtools/client/inspector/shared/style-change-tracker.js", 67))
+TypeError: parent is null: canMutationImpactCurrentStyles@resource://devtools/client/inspector/shared/style-change-tracker.js:67:24
+onMutations@resource://devtools/client/inspector/shared/style-change-tracker.js:84:41
+_emit@resource://devtools/shared/event-emitter.js:226:34
+emit@resource://devtools/shared/event-emitter.js:172:18
+emit@resource://devtools/shared/event-emitter.js:324:18
+getMutations@resource://devtools/client/fronts/walker.js:358:10
+
+console.error: "Error while calling actor 'pagestyle's method 'getLayout'" "node is null"
+console.error: (new TypeError("node is null", "resource://devtools/server/actors/page-style.js", 1001))
+console.error: (new TypeError("container.node.targetFront is null", "resource://devtools/client/inspector/markup/markup.js", 2310))
+console.error: (new Error("Protocol error (TypeError): node is null from: server0.conn3.child4/pagestyle25 (resource://devtools/server/actors/page-style.js:1001:5)", "resource://devtools/shared/protocol/Front.js", 365))
+console.warn: "Inspector destroyed while executing onReflow callback"
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: uncaught exception: undefined
+console.error: "Error while calling actor 'pagestyle's method 'getLayout'" "node is null"
+console.error: (new TypeError("node is null", "resource://devtools/server/actors/page-style.js", 1001))
+console.error: (new Error("Protocol error (TypeError): node is null from: server0.conn5.child4/pagestyle25 (resource://devtools/server/actors/page-style.js:1001:5)", "resource://devtools/shared/protocol/Front.js", 365))
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: r is undefined
+[Child 72786, MediaDecoderStateMachine #1] WARNING: Decoder=7fdd5c0ad400 Decode error: NS_ERROR_DOM_MEDIA_DEMUXER_ERR (0x806e000c): file /build/firefox-euTJhZ/firefox-89.0.2+build1/dom/media/MediaDecoderStateMachine.cpp:3490
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://www.coursera.org/learn/mixture-models/exam/9IYM3/estimating-the-number-of-components-in-bayesian-settings/attempt, line 263: ChunkLoadError: Loading chunk 201 failed.
+(error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/201.1fade35b058c573a0391.js)
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
+JavaScript error: https://d3njjcbhbojbot.cloudfront.net/webapps/r2-builds/ondemand/ja.app.907fe407e47909d59146.js, line 64: Error: Network error: NetworkError when attempting to fetch resource.
