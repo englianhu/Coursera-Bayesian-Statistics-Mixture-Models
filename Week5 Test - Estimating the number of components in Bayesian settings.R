@@ -2,6 +2,7 @@
 
 合計点数 4
 
+
 1. 質問 1
 
 Let K^{*} be the prior expected number of occupied components in a mixture model with $K$ components where the weights are given a Dirichlet prior (w1,…,wK)∼Dir(2K,…,2K).  If you have $n=400$ observations, what is the expected number of occupied components, E(K^{*}) according to the exact formula we discussed in the lecture? Round your answer to one decimal place. (1点)
@@ -25,6 +26,7 @@ cc    <- sample(1:KK, n, replace=TRUE, prob=w)
 w <- as.vector(rdirichlet(1, aa + tabulate(cc, nbins=KK)))
 round(mean(w), 1)
 ```
+
 
 2. 質問 2
 
@@ -50,6 +52,7 @@ w <- as.vector(rdirichlet(1, aa + tabulate(cc, nbins=KK)))
 round(mean(w), 1)
 ```
 
+
 3. 質問 3
 
 What would be the answer to the previous question if you used the approximate formula instead of the exact formula? Remember to round your answer to one decimal place. (1点)
@@ -57,6 +60,7 @@ What would be the answer to the previous question if you used the approximate fo
 ```r
 
 ```
+
 
 4. 質問 4
 

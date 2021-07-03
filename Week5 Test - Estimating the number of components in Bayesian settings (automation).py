@@ -17,17 +17,20 @@ driver = webdriver.Firefox(executable_path=r'/home/englianhu/Documents/geckodriv
 #driver = webdriver.chrome(executable_path=r'/home/englianhu/Documents/chromedriver')
 driver.get(lnk2)
 #assert 'Python' in driver.title
-wait   = WebDriverWait(driver, 5)
+#wait   = WebDriverWait(driver, 5)
+time.sleep(2)
 elem   = driver.find_element_by_xpath('//*[@id="email"]')
 elem.send_keys('englianhu@gmail.com')
 
-wait   = WebDriverWait(driver, 1)
+#wait   = WebDriverWait(driver, 1)
+time.sleep(2)
 elem   = driver.find_element_by_xpath('//*[@id="password"]')
 elem.send_keys('STr@d343v@')
 #elem.clear()
 elem.send_keys(Keys.RETURN)
 
-wait   = WebDriverWait(driver, 5)
+#wait   = WebDriverWait(driver, 5)
+time.sleep(2)
 elem   = driver.find_element_by_xpath('/html/body/div[6]/div/div[3]/div[1]/button')
 elem.send_keys(Keys.RETURN)
 
