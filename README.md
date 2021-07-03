@@ -190,7 +190,7 @@
       
       5.2.7) 動画: 講座 [Estimating the number of components in Bayesian settings. Duration: 9 分](https://www.youtube.com/watch?v=S_xLIcD2P_E)
       
-      5.2.8) テスト: [Estimating the number of components in Bayesian settings 4 個の問題]()
+      5.2.8) テスト: [Estimating the number of components in Bayesian settings 4 個の問題](https://github.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/blob/main/Week5%20Test%20-%20Estimating%20the%20number%20of%20components%20in%20Bayesian%20settings.R)
       
       5.2.9) 動画: 講座 [Estimating the full partition structure in Bayesian settings. Duration: 18分](https://www.youtube.com/watch?v=j_xoQBi9xVA)
       
@@ -207,9 +207,9 @@
 
 **Coursera Verified Certificate:**
 
-`![Coursera - Bayesian Statistics: Mixture Models](figure/)`
+![Coursera - Bayesian Statistics: Mixture Models](https://raw.githubusercontent.com/englianhu/Coursera-Bayesian-Statistics-Mixture-Models/531edc47f5e68076ce0054e880a18091169fd410/Coursera%20-%20Bayesian%20Statistics%20Mixture%20Models.pdf)
 
-- `[Bayesian Statistics: Mixture Models]()`
+- [Bayesian Statistics: Mixture Models](https://www.coursera.org/account/accomplishments/certificate/Y6WGT58PAUAG)
 - [University of California](https://www.universityofcalifornia.edu)
 - [Coursera Course Certificates](https://www.linkedin.com/company/coursera-verified)
 

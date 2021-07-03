@@ -34,27 +34,27 @@ time.sleep(2)
 elem   = driver.find_element_by_xpath('/html/body/div[6]/div/div[3]/div[1]/button')
 elem.send_keys(Keys.RETURN)
 
-
-for n in list(numpy.round(numpy.arange(11.2, 10000, 0.1), 1)):
+for n in list(numpy.arange(0, 10000, 0.01)):
+#for n in list(numpy.round(numpy.arange(11.2, 10000, 0.1), 1)):
   ## assessment question
   elem   = driver.find_element_by_xpath(
     '//*[@id="text-input-ZTDYZx9hEeqF4xJzBvIAyQ-input"]')
   elem.send_keys(str(11.1))
-  #elem.send_keys(str(n))
+  #elem.send_keys(str(numpy.round(n, 1)))
   
   elem   = driver.find_element_by_xpath(
     '//*[@id="text-input-UlGqjR-lEeqKlBLH7WtknQ-input"]')
   elem.send_keys(str(8.4))
-  #elem.send_keys(str(n))
+  #elem.send_keys(str(numpy.round(n, 1)))
   
   elem   = driver.find_element_by_xpath(
     '//*[@id="text-input-WhtVnCApEeqqhA61a6gg2w-input"]')
   elem.send_keys(str(7.8))
-  #elem.send_keys(str(n))
+  #elem.send_keys(str(numpy.round(n, 1)))
   
   elem   = driver.find_element_by_xpath(
     '//*[@id="text-input-giU7KiAoEeqFkg4D2xLqww-input"]')
-  elem.send_keys(str(n))
+  elem.send_keys(str(numpy.round(n, 2)))
   
   wait   = WebDriverWait(driver, 1)
   #elem   = driver.find_element_by_xpath(
