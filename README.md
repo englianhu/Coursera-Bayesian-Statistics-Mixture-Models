@@ -1,7 +1,5 @@
 <img src='figure/coursera.jpg' width='82'> <img src='figure/ucsc.png' width='240'>
 
----
-
 # Coursera : Bayesian Statistics Mixture Models
 
 [Bayesian Statistics: Mixture Models](https://www.coursera.org/learn/mixture-models?)
@@ -11,40 +9,29 @@
     
     1.1) Introduction
       
-      1.1.1) 動画: 講座 [Welcome to Bayesian Statistics: Mixture Models. Duration: 3 分](https://www.youtube.com/watch?v=y0FVyJmp6Bo)
+        1.1.1) 動画: 講座 [Welcome to Bayesian Statistics: Mixture Models. Duration: 3 分](https://www.youtube.com/watch?v=y0FVyJmp6Bo)
 
     1.2) The R Environment for Statistical Computing
 
-      1.2.1) 動画: 講座 [Installing and using R. Duration: 5分](https://www.youtube.com/watch?v=hExgteZk6M8)
+        1.2.1) 動画: 講座 [Installing and using R. Duration: 5分](https://www.youtube.com/watch?v=hExgteZk6M8)
       
-      1.2.2) 学習用教材: An Introduction to R. Duration: 45分
+        1.2.2) 学習用教材: An Introduction to R. Duration: 45分
       
     1.3) Definition of mixture models
 
-      1.3.1) 動画: 講座 [Basic definitions. Duration: 25分](https://www.youtube.com/watch?v=3QjL0lswNdc)
-      
-      1.3.2) 練習問題: Basic definitions 3 個の問題
-
-      1.3.3) 動画: 講座 [Mixtures of Gaussians. Duration: 10分](https://www.youtube.com/watch?v=t5X-q8MSlsw)
-      
-      1.3.4) 学習用教材: Example of a bimodal mixture of Gaussians. Duration: 3分
-      
-      1.3.5) 学習用教材: Example of a unimodal and skewed mixture of Gaussians. Duration: 3分
-      
-      1.3.6) 学習用教材: Example of a unimodal, symmetric and heavy tailed mixture of Gaussians. Duration: 3分
-      
-      1.3.7) 練習問題: Mixtures of Gaussians 2 個の問題
-      
-      1.3.8) ディスカッションのプロンプト: When are mixture models helpful? Duration: 15分
-      
-      1.3.9) 動画: 講座 [Zero-inflated mixtures. Duration: 11分](https://www.youtube.com/watch?v=sAv0XkbbaNU)
-      
-      1.3.10) 学習用教材: Example of a zero-inflated negative binomial distribution. Duration: 3 分
-      
-      1.3.11) 学習用教材: Example of a zero-inflated log Gaussian distribution. Duration: 3分
-      1.3.12) 練習問題: Zero-inflated distributions 2 個の問題
-      
-      1.3.13) テスト: [Definition of Mixture Models 5 個の問題](https://rpubs.com/englianhu/Bayesian-Statistics-Mixture-Models-Assessment1)
+        1.3.1) 動画: 講座 [Basic definitions. Duration: 25分](https://www.youtube.com/watch?v=3QjL0lswNdc)
+        1.3.2) 練習問題: Basic definitions 3 個の問題
+        1.3.3) 動画: 講座 [Mixtures of Gaussians. Duration: 10分](https://www.youtube.com/watch?v=t5X-q8MSlsw)
+        1.3.4) 学習用教材: Example of a bimodal mixture of Gaussians. Duration: 3分
+        1.3.5) 学習用教材: Example of a unimodal and skewed mixture of Gaussians. Duration: 3分
+        1.3.6) 学習用教材: Example of a unimodal, symmetric and heavy tailed mixture of Gaussians. Duration: 3分
+        1.3.7) 練習問題: Mixtures of Gaussians 2 個の問題
+        1.3.8) ディスカッションのプロンプト: When are mixture models helpful? Duration: 15分
+        1.3.9) 動画: 講座 [Zero-inflated mixtures. Duration: 11分](https://www.youtube.com/watch?v=sAv0XkbbaNU)
+        1.3.10) 学習用教材: Example of a zero-inflated negative binomial distribution. Duration: 3 分
+        1.3.11) 学習用教材: Example of a zero-inflated log Gaussian distribution. Duration: 3分
+        1.3.12) 練習問題: Zero-inflated distributions 2 個の問題
+        1.3.13) テスト: [Definition of Mixture Models 5 個の問題](https://rpubs.com/englianhu/Bayesian-Statistics-Mixture-Models-Assessment1)
       
     1.4) Likelihood function for mixture models
       
